@@ -1,6 +1,8 @@
 # FlagPilot — Plano de Engenharia de Software
 
-**Versão:** 1.0 · **Data:** 24/10/2026 · **Estado:** especificação para implementação
+**Versão:** 1.1 · **Data:** 24/10/2026 · **Estado:** especificação para implementação incremental
+
+**Revisão 1.1:** incorpora as direções do [plano aprovado](IMPLEMENTATION_PLAN.md) e das [ADRs](adr/README.md). Somente a fundação está em desenvolvimento; endpoints planejados não representam funcionalidades disponíveis. Licença, publicação e alterações externas continuam pendentes.
 
 ## 1. Visão e limites
 
@@ -20,10 +22,12 @@ Plataforma self-hosted de **feature flags** para projetos e ambientes separados,
 | Papel | Permissões |
 |---|---|
 | Owner | Gerenciar organização, membros, projetos e credenciais |
-| Admin | Gerenciar flags e ambientes do projeto |
-| Editor | Criar e alterar flags autorizadas |
+| Admin | Gerenciar projetos, ambientes, flags e tokens em toda a organização |
+| Editor | Criar e alterar flags nos projetos da organização |
 | Viewer | Consultar flags, histórico e métricas |
 | SDK Client | Avaliar flags somente no ambiente autorizado |
+
+No MVP, papéis são organizacionais e herdados por todos os projetos; somente Owner gerencia membros. Não há grants por projeto/flag. Bootstrap e recuperação administrativa serão CLI controlada, sem signup público ou senha padrão; último Owner protegido transacionalmente.
 
 Casos principais: criar projeto; cadastrar ambiente `development`, `staging`, `production`; criar flag; ativar/desativar por ambiente; configurar rollout percentual; consultar flag no frontend/backend; auditar alterações; revogar token; restaurar serviço após falha.
 
@@ -50,8 +54,8 @@ Casos principais: criar projeto; cadastrar ambiente `development`, `staging`, `p
 ### Regras essenciais
 - Identificadores de flag usam `[a-z][a-z0-9_.-]{1,79}`.
 - Flag desativada retorna `false` independentemente do rollout.
-- Rollout 0% retorna `false`; 100% retorna `true`; sem `bucketingKey` retorna fallback configurado (por padrão `false`) quando o rollout for parcial.
-- Bucket: `SHA-256(projectId + ':' + environmentId + ':' + flagKey + ':' + salt + ':' + bucketingKey)`; interpretar os primeiros 8 bytes como inteiro unsigned big-endian e comparar com limiar percentual em 10.000 faixas. Fixar implementação e vetores de teste entre Go e JS.
+- Rollout 0% retorna `false`; 100% retorna `true`; sem `bucketingKey`, o servidor retorna `false`/`MISSING_CONTEXT` quando o rollout for parcial; o SDK aplica `defaultValue` configurado na chamada nessa razão. Flag ausente/arquivada retorna `false`/`NOT_FOUND`; o SDK também pode aplicar seu default nesse caso, sem sobrepor um `DISABLED` válido.
+- Bucket: `SHA-256(projectId + ':' + environmentId + ':' + flagKey + ':' + salt + ':' + bucketingKey)`; interpretar os primeiros 8 bytes como uint64 big-endian, calcular `bucket = n % 10000` e retornar `bucket < rollout_bps` para rollout parcial habilitado. UTF-8, UUIDs canônicos, salt hexadecimal estável e sem normalização Unicode implícita; JS usa BigInt. Apenas bucketingKey pode conter o delimitador `:`. Fixar implementação e vetores de teste entre Go e JS.
 - Configurações têm `revision` monotônica por ambiente; atualização exige `If-Match`/revisão para evitar escrita perdida.
 - Flags não substituem autorização, verificação de assinatura, controle de acesso nem validação no servidor.
 
@@ -144,7 +148,7 @@ CREATE TABLE flag_configs (
 
 ## 7. Contrato HTTP / OpenAPI
 
-Base: `/api/v1`. JSON UTF-8. Erros padronizados `application/problem+json` (RFC 9457): `type`, `title`, `status`, `detail`, `instance`, `requestId`. Paginação cursor para coleções; limites máximos. `401` sem credenciais; `403` sem permissão; `404` para recurso fora do escopo; `409` conflito; `422` validação; `429` limite. Autenticação admin por sessão segura cookie HttpOnly/SameSite e CSRF; SDK por `Authorization: Bearer <evaluation-token>` somente em ambientes confiáveis. **Não embutir token secreto em navegador público**: para frontend, disponibilizar endpoint público de avaliação apenas para flags não sensíveis com chave publicável e escopo restrito, ou usar proxy backend/BFF.
+Base: `/api/v1`. JSON UTF-8. Erros padronizados `application/problem+json` (RFC 9457): `type`, `title`, `status`, `detail`, `instance`, `requestId`. Paginação cursor para coleções; limites máximos. `401` sem credenciais; `403` sem permissão; `404` para recurso fora do escopo; `409` conflito; `422` validação; `429` limite. Autenticação admin por sessão segura cookie HttpOnly/SameSite e CSRF; SDK por `Authorization: Bearer <evaluation-token>` somente em ambientes confiáveis. **Não embutir token secreto em navegador público**: o MVP usa BFF da aplicação consumidora, com escopo e allowlist próprios. Endpoint público/chave publicável fica adiado. Ausência de If-Match obrigatório retorna 428; precondição falsa retorna 412; conflito de domínio continua 409.
 
 | Método | Endpoint | Acesso | Objetivo |
 |---|---|---|---|
@@ -271,7 +275,7 @@ const enabled = await flags.isEnabled('new_admin_dashboard', {
 });
 ```
 
-Contrato: `isEnabled(key, options): Promise<boolean>`, `evaluate(key, options): Promise<EvaluationResult>`, `close(): void`; cache por `environment/token fingerprint + flag + bucketingKey`, nunca pelo nome da flag isoladamente. Timeout via `AbortController`, retries limitados somente para falhas transitórias, jitter, sem retry de `401/403/422`; fallback **fail-closed** por padrão. Não persistir tokens em localStorage; não logar `bucketingKey`; não armazenar contexto sensível. Browser público usa BFF ou chave publicável dedicada com endpoint que exponha apenas configurações não sensíveis. Versionamento SemVer, ESM/CJS conforme estratégia de build e declarações TypeScript.
+Contrato: `isEnabled(key, options): Promise<boolean>`, `evaluate(key, options): Promise<EvaluationResult>`, `close(): void`; cache por `environment/token fingerprint + flag + bucketingKey`, nunca pelo nome da flag isoladamente. Timeout via `AbortController`, retries limitados somente para falhas transitórias, jitter, sem retry de `401/403/422`; fallback **fail-closed** por padrão. Não persistir tokens em localStorage; não logar `bucketingKey`; não armazenar contexto sensível. Browser público usa BFF no MVP; chave publicável/endpoint público fica para decisão posterior. Erros locais do SDK usam razões próprias e revision null; não inventar revisão remota. Versionamento SemVer, ESM/CJS conforme estratégia de build e declarações TypeScript.
 
 **Testes SDK:** respostas válidas, 404, 401, timeout, offline, cache expirado, abort, concorrência, fallback, separação de ambientes e vetores de bucketing Go/JS.
 
@@ -284,7 +288,7 @@ Contrato: `isEnabled(key, options): Promise<boolean>`, `evaluate(key, options): 
 | CSRF | Cookie SameSite + token CSRF em mutações | Rejeitar requisição sem token |
 | XSS | React escaping, CSP, validação, sem HTML arbitrário | Payloads de injeção |
 | Abuso API | Rate limiting por credencial/IP e limites de payload | 429 sob carga |
-| Replay/concorrência | Revisão/If-Match e idempotência onde aplicável | Atualização concorrente gera 409 |
+| Replay/concorrência | Revisão/If-Match e idempotência onde aplicável | If-Match desatualizado gera 412; conflito de domínio gera 409 |
 | Exposição de contexto | Contexto mínimo, sem persistência, TLS | Logs sem identificadores |
 | Falha da API | SDK timeout e fallback seguro | Serviço indisponível |
 | Escalada por flags | Autorização independente da flag | Flag ligada não concede permissão |
@@ -383,7 +387,7 @@ Estimativa total: **34–51 dias úteis** de esforço, variando conforme dedica�
 
 ## 13. CI/CD GitHub Actions
 
-**PR:** format/lint Go + TS; unitários; integração PostgreSQL; Spectral OpenAPI; testes de segurança/secret scan; build. **Main:** gerar SBOM, construir imagens multi-stage, escanear dependências/imagens, publicar em registry com digest. **Deploy:** homologação automática após CI e aprovação de produção manual; credenciais de deploy por OIDC quando suportado, senão secrets com escopo mínimo. Evitar deploy automático de PR não confiável. Releases com tags SemVer e changelog.
+**PR:** format/lint Go + TS; unitários; integração PostgreSQL; Spectral OpenAPI; testes de segurança/secret scan; build. **Main:** gerar SBOM, construir imagens multi-stage, escanear dependências/imagens, publicar em registry com digest. **Deploy futuro (não autorizado nesta fase):** homologação automática somente após autorização de configuração externa e aprovação de produção manual; credenciais de deploy por OIDC quando suportado, senão secrets com escopo mínimo. Evitar deploy automático de PR não confiável. Releases com tags SemVer e changelog.
 
 ## 14. UX/UI e telas
 

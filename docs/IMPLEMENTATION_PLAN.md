@@ -1,6 +1,8 @@
 # FlagPilot — Plano de implementação
 
-Data: 24/10/2026. Estado: **proposta aguardando aprovação; implementação não iniciada**.
+Data: 24/10/2026. Estado: **plano aprovado em 24/10/2026; fundação em execução**.
+
+Registro: Franklin autorizou a continuação após apresentação deste plano. Os limites e propostas abaixo descrevem o planejamento original; acompanhar o estado real em [FOUNDATION_STATUS.md](FOUNDATION_STATUS.md). A aprovação permite a fundação 0/1A/1B; não autoriza deploy ou alterações externas.
 
 Especificação principal: [FlagPilot_Plano_Engenharia_Software.md](FlagPilot_Plano_Engenharia_Software.md), versão 1.0, lida integralmente (seções 1–17). Este plano detalha sua execução e explicita pontos que ela deixa em aberto. Não altera seus requisitos silenciosamente. O prompt exemplificado na seção 17 não autoriza implementação nesta etapa: prevalece a solicitação atual de planejar e aguardar aprovação.
 
