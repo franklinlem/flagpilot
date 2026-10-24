@@ -1,6 +1,6 @@
 # ADR-002 — Identidade administrativa
 
-Data: 24/10/2026. Estado: Aceita como direção; implementação no incremento 2.
+Data: 24/10/2026. Estado: Aceita; identidade entregue no incremento 2A.
 
 ## Contexto
 
@@ -16,4 +16,4 @@ JWT não foi escolhido por exigir revogação adicional; signup e email transaci
 
 ## Consequências
 
-Apenas schema de identidade existe agora. CLI bootstrap terá auditoria desde sua primeira entrega; duração absoluta inicial 12 h, a confirmar nos testes/UX de identidade.
+Bootstrap/recuperação CLI e login/logout/me estão implementados com auditoria desde a primeira entrega. Duração absoluta inicial 12 h, configurável entre 1h e 168h. CSRF via HMAC da sessão, sem SESSION_SECRET/CSRF_SECRET redundantes; email/senha nunca entram nos logs HTTP. Argon2id 19 MiB/2 iterações/p=1; no máximo duas verificações simultâneas por processo. Prompt oculto com restauração do terminal em SIGINT no Linux. Ver runbook de identidade para limites e operação.

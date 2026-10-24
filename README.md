@@ -1,6 +1,6 @@
 # FlagPilot
 
-Plataforma self-hosted de feature flags em desenvolvimento. Esta entrega é a fundação: Go/Chi, PostgreSQL e migrations, React/Vite, pacote SDK vazio e CI. **Login, organizações pela API, flags, avaliação e cliente SDK ainda não estão implementados.**
+Plataforma self-hosted de feature flags em desenvolvimento. Incremento atual: identidade administrativa sobre a fundação Go/Chi, PostgreSQL/migrations e React/Vite. **Login/logout, conta, organizações do próprio usuário e bootstrap auditável já funcionam.** Gestão de membros/projetos/flags, avaliação e cliente SDK virão nos próximos incrementos.
 
 ## Requisitos e versões
 
@@ -19,7 +19,7 @@ make dev-api                    # terminal 1
 make dev-web                    # terminal 2
 ```
 
-Painel: http://127.0.0.1:5173. API: http://127.0.0.1:8080. `make setup` cria `.env` com permissão 0600 e senhas aleatórias, sem sobrescrever arquivo existente. O template `.env.example` não tem senha funcional. Não use esses segredos fora do desenvolvimento.
+Painel: http://127.0.0.1:5173. Após subir a stack, execute `make bootstrap` para criar o primeiro administrador com senha oculta. Sem Go no host, use `docker compose --env-file .env -f deploy/compose.dev.yml exec api /admin bootstrap`. Não há conta/senha padrão. API: http://127.0.0.1:8080. `make setup` cria `.env` com permissão 0600 e senhas aleatórias, sem sobrescrever arquivo existente. O template `.env.example` não tem senha funcional. Não use esses segredos fora do desenvolvimento.
 
 No VS Code, `.vscode/extensions.json` recomenda Go/ESLint; tasks executam os comandos Make e a configuração de debug lê `.env`. Se Go não estiver no PATH do editor, configure a extensão para o Go em `.tools/go` ou abra o VS Code com esse diretório no PATH. O debugger Delve é instalado pela extensão quando solicitado.
 
@@ -46,9 +46,9 @@ curl -i http://127.0.0.1:8080/api/v1/health/live
 curl -i http://127.0.0.1:8080/api/v1/health/ready
 ```
 
-Live verifica o processo. Ready verifica conectividade, schema versão 1 e estado não-dirty; banco vazio, indisponível ou schema incompatível retorna 503 sem detalhes internos. A API continua viva enquanto o banco está indisponível. Nunca executa migrations sozinha.
+Live verifica o processo. Ready verifica conectividade, schema versão 2 e estado não-dirty; banco vazio, indisponível ou schema incompatível retorna 503 sem detalhes internos. A API continua viva enquanto o banco está indisponível. Nunca executa migrations sozinha.
 
-[OpenAPI 3.1](api/openapi.yaml) descreve o contrato inicial completo. `x-implementation: available` identifica somente os dois health checks; os demais endpoints retornam 404 até seus incrementos. Métricas ainda não implementadas. Nginx de runtime bloqueia readiness e `/metrics` na borda; o painel básico consulta liveness, sem expor a saúde interna do banco.
+[OpenAPI 3.1](api/openapi.yaml) descreve o contrato inicial completo. `x-implementation: available` identifica health e login/logout/me; os demais endpoints retornam 404 até seus incrementos. Métricas ainda não implementadas. Nginx de runtime bloqueia readiness e `/metrics` na borda; o painel consulta a sessão em `/me`, sem expor a saúde interna do banco.
 
 ## Verificar
 
@@ -59,6 +59,9 @@ make test                       # testes unitários Go com race e Vitest
 make test-integration           # PostgreSQL descartável via Testcontainers
 make build                      # API, web, SDK ESM/CJS e import/require
 python3 scripts/smoke.py         # stack isolada, SIGINT e falha real do banco
+python3 scripts/check-admin-terminal.py # senha oculta/SIGINT, sem DB
+PLAYWRIGHT_BROWSERS_PATH="$PWD/.tools/playwright" npx playwright install chromium
+python3 scripts/auth-e2e.py      # login real em stack/conta descartáveis
 ```
 
 `make ci` agrega lint/testes/integração/build. Docker é obrigatório para integração: indisponibilidade falha o teste, sem skip silencioso. Smoke usa project name e volume próprios e remove somente esses recursos ao terminar; não remove dados de desenvolvimento. A CI também verifica código gerado, scans de segredos/vulnerabilidades e build das imagens. Não publica imagens nem executa deploy.
@@ -84,6 +87,8 @@ Testes de integração usam somente credenciais sintéticas em banco efêmero. N
 - [Modelo de ameaças inicial](docs/threat-model/initial.md)
 - [Migrations e recuperação de falha](docs/runbooks/migrations.md)
 - [Operação de desenvolvimento](deploy/README.md)
-- [Evidências desta fundação](docs/FOUNDATION_STATUS.md)
+- [Evidências da fundação](docs/FOUNDATION_STATUS.md)
+- [Estado da autenticação](docs/AUTH_STATUS.md)
+- [Bootstrap e recuperação](docs/runbooks/identity.md)
 
-Próximo incremento: identidade (bootstrap CLI, senhas Argon2id, sessões, CSRF e login), com auditoria antecipada antes das mutações administrativas. Nenhum DNS, VPS, Coolify ou servidor externo foi alterado. Licença Apache-2.0 e publicação do pacote/remoto continuam pendentes; não há licença atribuída automaticamente.
+Próximo incremento: organizações/membros e RBAC com isolamento e proteção do último Owner. Bootstrap, login e recuperação já são auditados. Nenhum DNS, VPS, Coolify ou servidor externo foi alterado. Licença Apache-2.0 e publicação do pacote/remoto continuam pendentes; não há licença atribuída automaticamente.

@@ -12,6 +12,8 @@ jobs:
   foundation:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.tools/playwright
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -38,7 +40,9 @@ jobs:
           make generate
           git diff --exit-code -- apps/api/internal/storage/postgres/sqlc apps/web/src/api/schema.d.ts
       - name: Lint, tipos, testes unitários e integração PostgreSQL
-        run: make ci
+        run: |
+          make ci
+          python3 scripts/check-admin-terminal.py
       - name: Vulnerabilidades Go e npm
         run: |
           cd apps/api
@@ -47,5 +51,7 @@ jobs:
           npm audit --audit-level=high
       - name: Smoke dos containers sem publicação
         run: python3 scripts/smoke.py
-      - name: Build do frontend estático sem publicação
-        run: docker build -f apps/web/Dockerfile --target runtime -t flagpilot-web:ci .
+      - name: Browser Chromium e fluxo real de autenticação
+        run: |
+          npx playwright install --with-deps chromium
+          python3 scripts/auth-e2e.py

@@ -18,7 +18,7 @@ type requestIDKey struct{}
 
 func RequestID(ctx context.Context) string { id, _ := ctx.Value(requestIDKey{}).(string); return id }
 
-func New(logger *slog.Logger, db Readiness) http.Handler {
+func New(logger *slog.Logger, db Readiness, options ...Option) http.Handler {
 	r := chi.NewRouter()
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -57,6 +57,9 @@ func New(logger *slog.Logger, db Readiness) http.Handler {
 		}
 		jsonResponse(w, 200, map[string]string{"status": "ok"})
 	})
+	for _, option := range options {
+		option(r)
+	}
 	r.NotFound(func(w http.ResponseWriter, req *http.Request) { problem(w, req, 404, "Recurso não encontrado") })
 	r.MethodNotAllowed(func(w http.ResponseWriter, req *http.Request) { problem(w, req, 405, "Método não permitido") })
 	return r

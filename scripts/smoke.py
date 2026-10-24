@@ -47,6 +47,12 @@ def main():
             except urllib.error.HTTPError as error:
                 assert error.code == 503
             print('Smoke aprovado: live/ready, SIGINT, reinício e indisponibilidade do banco.')
+        except subprocess.CalledProcessError:
+            logs = subprocess.run(base + ['logs', '--no-color', '--tail', '50', 'db', 'migrate', 'api'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True).stdout
+            for line in envfile.read_text().splitlines():
+                if 'PASSWORD=' in line: logs = logs.replace(line.split('=', 1)[1], '[REDACTED]')
+            print(logs)
+            raise
         finally:
             subprocess.run(base + ['down','--volumes','--remove-orphans'],check=True)
 

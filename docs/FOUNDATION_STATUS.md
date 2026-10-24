@@ -1,5 +1,7 @@
 # Fundação — estado e evidências
 
+Registro histórico da fundação. Para o estado atual, veja [AUTH_STATUS.md](AUTH_STATUS.md).
+
 Data: 24/10/2026. Incrementos 0, 1A e 1B entregues e validados **localmente no Debian**. CI do GitHub configurada, ainda não executada no GitHub: não há remoto associado/publicação nesta entrega.
 
 ## Entregas

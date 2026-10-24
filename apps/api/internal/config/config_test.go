@@ -17,7 +17,10 @@ func TestConfigValidationAndRedaction(t *testing.T) {
 		{"invalid secret url", map[string]string{"DATABASE_URL": "postgres://user:supersecret@%broken"}, false},
 		{"unknown environment", map[string]string{"APP_ENV": "prod", "DATABASE_URL": "postgres://user:secret@localhost/db"}, false},
 		{"production insecure", map[string]string{"APP_ENV": "production", "DATABASE_URL": "postgres://user:secret@localhost/db?sslmode=disable"}, false},
-		{"production TLS", map[string]string{"APP_ENV": "production", "DATABASE_URL": "postgres://user:secret@localhost/db?sslmode=verify-full"}, true},
+		{"production TLS", map[string]string{"APP_ENV": "production", "DATABASE_URL": "postgres://user:secret@localhost/db?sslmode=verify-full", "PUBLIC_BASE_URL": "https://flags.example.invalid"}, true},
+		{"remote insecure origin", map[string]string{"DATABASE_URL": "postgres://user:secret@localhost/db", "PUBLIC_BASE_URL": "http://example.invalid"}, false},
+		{"wildcard origin", map[string]string{"DATABASE_URL": "postgres://user:secret@localhost/db", "ALLOWED_ORIGINS": "*"}, false},
+		{"invalid session ttl", map[string]string{"DATABASE_URL": "postgres://user:secret@localhost/db", "SESSION_TTL": "0s"}, false},
 		{"negative timeout", map[string]string{"DATABASE_URL": "postgres://user:secret@localhost/db", "DB_TIMEOUT": "-1s"}, false},
 		{"excessive timeout", map[string]string{"DATABASE_URL": "postgres://user:secret@localhost/db", "DB_TIMEOUT": "2m"}, false},
 	} {

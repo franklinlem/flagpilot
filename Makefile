@@ -40,3 +40,12 @@ generate:
 	cd apps/api && sqlc generate
 	npm run generate:api
 ci: lint test test-integration build
+
+.PHONY: admin bootstrap reset-password
+admin:
+	mkdir -p .tools/bin
+	cd apps/api && go build -o "$(ROOT)/.tools/bin/flagpilot-admin" ./cmd/admin
+bootstrap: admin
+	python3 scripts/run-local.py .tools/bin/flagpilot-admin bootstrap $(ARGS)
+reset-password: admin
+	python3 scripts/run-local.py .tools/bin/flagpilot-admin reset-password $(ARGS)

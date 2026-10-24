@@ -55,7 +55,7 @@ export interface paths {
         put?: never;
         /**
          * Iniciar sessão administrativa
-         * @description Contrato planejado; endpoint ainda não implementado. Validar Origin/Fetch Metadata e exigir application/json contra login CSRF. Cookie HttpOnly, SameSite e Secure em HTTPS.
+         * @description Disponível desde o incremento 2A. Validar Origin/Fetch Metadata e exigir application/json contra login CSRF. Cookie HttpOnly, SameSite e Secure em HTTPS. Exige Origin exata permitida e application/json, rejeita Sec-Fetch-Site cross-site. Rotaciona cookie e revoga sessão anterior. Limites: 10 tentativas por IP/conta a cada 15min e 120/min global, duas verificações Argon2 concorrentes por réplica. Sem confiança em X-Forwarded-For.
          */
         post: operations["login"];
         delete?: never;
@@ -75,7 +75,7 @@ export interface paths {
         put?: never;
         /**
          * Revogar sessão
-         * @description Contrato planejado; endpoint ainda não implementado.
+         * @description Disponível desde o incremento 2A.
          */
         post: operations["logout"];
         delete?: never;
@@ -93,7 +93,7 @@ export interface paths {
         };
         /**
          * Consultar perfil, permissões e CSRF
-         * @description Contrato planejado; endpoint ainda não implementado.
+         * @description Disponível desde o incremento 2A.
          */
         get: operations["me"];
         put?: never;
@@ -476,6 +476,7 @@ export interface components {
         LoginRequest: {
             /** Format: email */
             email: string;
+            /** @description Até 256 bytes UTF-8; senhas de bootstrap/recuperação têm mínimo de 12 caracteres. */
             password: string;
         };
         User: {
@@ -488,9 +489,10 @@ export interface components {
         };
         /** @enum {string} */
         Role: "Owner" | "Admin" | "Editor" | "Viewer";
+        /** @description Sessão administrativa atual. CSRF derivado da sessão, mantido apenas em memória e enviado no header X-CSRF-Token em mutações. */
         Me: {
             user: components["schemas"]["User"];
-            memberships: components["schemas"]["Membership"][];
+            memberships: components["schemas"]["ProfileMembership"][];
             csrfToken: string;
         };
         Membership: {
@@ -499,6 +501,8 @@ export interface components {
             /** Format: uuid */
             userId: string;
             role: components["schemas"]["Role"];
+            /** @description Nome da organização no perfil autenticado; opcional em outros endpoints planejados. */
+            organizationName?: string;
         };
         MemberRequest: {
             /** Format: uuid */
@@ -696,6 +700,15 @@ export interface components {
             items: components["schemas"]["Membership"][];
             nextCursor: string | null;
         };
+        ProfileMembership: {
+            /** Format: uuid */
+            organizationId: string;
+            /** Format: uuid */
+            userId: string;
+            role: components["schemas"]["Role"];
+            /** @description Nome da organização no perfil autenticado; opcional em outros endpoints planejados. */
+            organizationName: string;
+        };
     };
     responses: {
         /** @description Erro padronizado, sem segredos ou detalhes internos */
@@ -703,6 +716,8 @@ export interface components {
             headers: {
                 /** @description Identificador opaco da requisição */
                 "X-Request-ID"?: string;
+                /** @description Segundos sugeridos em respostas 429. */
+                "Retry-After"?: number;
                 [name: string]: unknown;
             };
             content: {
@@ -788,10 +803,15 @@ export interface operations {
                 };
             };
             400: components["responses"]["Problem"];
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
             409: components["responses"]["Problem"];
+            413: components["responses"]["Problem"];
+            415: components["responses"]["Problem"];
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     logout: {
@@ -821,6 +841,7 @@ export interface operations {
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     me: {
@@ -848,6 +869,7 @@ export interface operations {
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     listOrganizations: {

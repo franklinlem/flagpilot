@@ -16,4 +16,4 @@ Grants por projeto/flag e RLS podem ser avaliados depois; não simular permissõ
 
 ## Consequências
 
-Cada consulta valida escopo; metadata da flag terá versão própria. Revisão ambiental e auditoria mudam na mesma transação. Versões históricas restauráveis ficam fora do núcleo. Ainda não há RBAC em execução.
+Cada consulta valida escopo; metadata da flag terá versão própria. Revisão ambiental e auditoria mudam na mesma transação. Versões históricas restauráveis ficam fora do núcleo. Identidade e consulta das próprias associações estão implementadas; RBAC sobre recursos e invariantes de gestão de membros serão entregues em 2B.

@@ -2,9 +2,9 @@ openapi: 3.1.0
 info:
   title: FlagPilot API
   version: 0.0.0
-  description: Contrato incremental. Somente live/ready estão implementados; x-implementation
-    identifica os demais. Bootstrap e recuperação administrativa serão CLI, sem endpoint
-    público. Sem hard delete de domínio no MVP.
+  description: Contrato incremental. Health e autenticação administrativa estão implementados;
+    x-implementation identifica os demais. Bootstrap e recuperação administrativa
+    serão CLI, sem endpoint público. Sem hard delete de domínio no MVP.
   contact:
     name: FlagPilot
     url: https://github.com/franklinlem/flagpilot
@@ -68,12 +68,15 @@ paths:
     post:
       operationId: login
       summary: Iniciar sessão administrativa
-      description: Contrato planejado; endpoint ainda não implementado. Validar Origin/Fetch
-        Metadata e exigir application/json contra login CSRF. Cookie HttpOnly, SameSite
-        e Secure em HTTPS.
+      description: 'Disponível desde o incremento 2A. Validar Origin/Fetch Metadata
+        e exigir application/json contra login CSRF. Cookie HttpOnly, SameSite e Secure
+        em HTTPS. Exige Origin exata permitida e application/json, rejeita Sec-Fetch-Site
+        cross-site. Rotaciona cookie e revoga sessão anterior. Limites: 10 tentativas
+        por IP/conta a cada 15min e 120/min global, duas verificações Argon2 concorrentes
+        por réplica. Sem confiança em X-Forwarded-For.'
       tags:
       - Autenticação
-      x-implementation: planned
+      x-implementation: available
       security: []
       responses:
         '200':
@@ -98,6 +101,16 @@ paths:
           $ref: '#/components/responses/Problem'
         '409':
           $ref: '#/components/responses/Problem'
+        '503':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '413':
+          $ref: '#/components/responses/Problem'
+        '415':
+          $ref: '#/components/responses/Problem'
       requestBody:
         required: true
         content:
@@ -108,10 +121,10 @@ paths:
     post:
       operationId: logout
       summary: Revogar sessão
-      description: Contrato planejado; endpoint ainda não implementado.
+      description: Disponível desde o incremento 2A.
       tags:
       - Autenticação
-      x-implementation: planned
+      x-implementation: available
       security:
       - sessionCookie: []
       responses:
@@ -133,16 +146,18 @@ paths:
           $ref: '#/components/responses/Problem'
         '409':
           $ref: '#/components/responses/Problem'
+        '503':
+          $ref: '#/components/responses/Problem'
       parameters:
       - $ref: '#/components/parameters/CSRF'
   /me:
     get:
       operationId: me
       summary: Consultar perfil, permissões e CSRF
-      description: Contrato planejado; endpoint ainda não implementado.
+      description: Disponível desde o incremento 2A.
       tags:
       - Autenticação
-      x-implementation: planned
+      x-implementation: available
       security:
       - sessionCookie: []
       responses:
@@ -165,6 +180,8 @@ paths:
         '403':
           $ref: '#/components/responses/Problem'
         '404':
+          $ref: '#/components/responses/Problem'
+        '503':
           $ref: '#/components/responses/Problem'
   /organizations:
     get:
@@ -1316,6 +1333,11 @@ components:
         X-Request-ID:
           schema: *id002
           description: Identificador opaco da requisição
+        Retry-After:
+          schema:
+            type: integer
+            minimum: 1
+          description: Segundos sugeridos em respostas 429.
       content:
         application/problem+json:
           schema:
@@ -1375,7 +1397,9 @@ components:
         password:
           type: string
           minLength: 1
-          maxLength: 1024
+          maxLength: 256
+          description: Até 256 bytes UTF-8; senhas de bootstrap/recuperação têm mínimo
+            de 12 caracteres.
       required:
       - email
       - password
@@ -1410,12 +1434,14 @@ components:
         memberships:
           type: array
           items:
-            $ref: '#/components/schemas/Membership'
+            $ref: '#/components/schemas/ProfileMembership'
         csrfToken: *id002
       required:
       - user
       - memberships
       - csrfToken
+      description: Sessão administrativa atual. CSRF derivado da sessão, mantido apenas
+        em memória e enviado no header X-CSRF-Token em mutações.
     Membership:
       type: object
       additionalProperties: false
@@ -1424,6 +1450,10 @@ components:
         userId: *id001
         role:
           $ref: '#/components/schemas/Role'
+        organizationName:
+          type: string
+          description: Nome da organização no perfil autenticado; opcional em outros
+            endpoints planejados.
       required:
       - organizationId
       - userId
@@ -1869,3 +1899,22 @@ components:
       required:
       - items
       - nextCursor
+    ProfileMembership:
+      type: object
+      additionalProperties: false
+      properties:
+        organizationId: &id008
+          type: string
+          format: uuid
+        userId: *id008
+        role:
+          $ref: '#/components/schemas/Role'
+        organizationName:
+          type: string
+          description: Nome da organização no perfil autenticado; opcional em outros
+            endpoints planejados.
+      required:
+      - organizationId
+      - userId
+      - role
+      - organizationName

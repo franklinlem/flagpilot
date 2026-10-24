@@ -11,7 +11,7 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./postgres/init-runtime.sh:/docker-entrypoint-initdb.d/10-runtime.sh:ro
     healthcheck:
-      test: [CMD-SHELL, 'pg_isready -U flagpilot_migrator -d flagpilot']
+      test: [CMD-SHELL, 'pg_isready -h 127.0.0.1 -U flagpilot_migrator -d flagpilot']
       interval: 2s
       timeout: 2s
       retries: 30
@@ -31,6 +31,7 @@ services:
       dockerfile: apps/api/Dockerfile
     environment:
       APP_ENV: test
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://127.0.0.1:5173}
       HTTP_ADDR: 0.0.0.0:8080
       DATABASE_URL: postgres://flagpilot_app:${APP_DB_PASSWORD:?}@db:5432/flagpilot?sslmode=disable
     ports: ["127.0.0.1::8080"]
@@ -44,5 +45,14 @@ services:
       interval: 2s
       timeout: 3s
       retries: 20
+  web:
+    profiles: [browser]
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+      target: runtime
+    ports: ["127.0.0.1::8080"]
+    depends_on:
+      api: {condition: service_healthy}
 volumes:
   pgdata:

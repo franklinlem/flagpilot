@@ -8,6 +8,19 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type AuditEvent struct {
+	ID             pgtype.UUID
+	OrganizationID pgtype.UUID
+	ActorID        pgtype.UUID
+	ActorLabel     string
+	Action         string
+	ResourceType   string
+	ResourceID     pgtype.UUID
+	BeforeRedacted []byte
+	AfterRedacted  []byte
+	CreatedAt      pgtype.Timestamptz
+}
+
 type Membership struct {
 	OrganizationID pgtype.UUID
 	UserID         pgtype.UUID

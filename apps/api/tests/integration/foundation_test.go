@@ -79,6 +79,10 @@ func TestFoundation(t *testing.T) {
 	}
 	check("/api/v1/health/live", 200)
 	check("/api/v1/health/ready", 503)
+	if err := m.Steps(1); err != nil {
+		t.Fatal(err)
+	}
+	check("/api/v1/health/ready", 503)
 	if err := m.Up(); err != nil {
 		t.Fatal(err)
 	}
@@ -111,11 +115,11 @@ func TestFoundation(t *testing.T) {
 		t.Fatal(err)
 	}
 	check("/api/v1/health/ready", 503)
-	if _, err := owner.Exec(ctx, "UPDATE schema_migrations SET dirty=false,version=2"); err != nil {
+	if _, err := owner.Exec(ctx, "UPDATE schema_migrations SET dirty=false,version=3"); err != nil {
 		t.Fatal(err)
 	}
 	check("/api/v1/health/ready", 503)
-	if _, err := owner.Exec(ctx, "UPDATE schema_migrations SET version=1"); err != nil {
+	if _, err := owner.Exec(ctx, "UPDATE schema_migrations SET version=2"); err != nil {
 		t.Fatal(err)
 	}
 	if err := m.Down(); err != nil {
@@ -126,6 +130,7 @@ func TestFoundation(t *testing.T) {
 		t.Fatal(err)
 	}
 	check("/api/v1/health/ready", 200)
+	t.Run("authentication", func(t *testing.T) { exerciseAuth(t, ctx, store, owner) })
 	if _, err := owner.Exec(ctx, "ALTER ROLE flagpilot_app NOLOGIN"); err != nil {
 		t.Fatal(err)
 	}

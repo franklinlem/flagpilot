@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -17,6 +18,9 @@ type Config struct {
 	LogLevel        slog.Level
 	DBTimeout       time.Duration
 	ShutdownTimeout time.Duration
+	AllowedOrigins  []string
+	SessionTTL      time.Duration
+	SecureCookies   bool
 }
 
 func Load() (Config, error) { return load(os.Getenv) }
@@ -64,5 +68,39 @@ func load(get func(string) string) (Config, error) {
 			*v.target = d
 		}
 	}
+
+	c.SessionTTL = 12 * time.Hour
+	if value := get("SESSION_TTL"); value != "" {
+		c.SessionTTL, err = time.ParseDuration(value)
+		if err != nil || c.SessionTTL < time.Hour || c.SessionTTL > 7*24*time.Hour {
+			return c, errors.New("SESSION_TTL deve estar entre 1h e 168h")
+		}
+	}
+	base := get("PUBLIC_BASE_URL")
+	if base == "" {
+		if c.Environment == "production" {
+			return c, errors.New("PUBLIC_BASE_URL obrigatório em produção")
+		}
+		base = "http://127.0.0.1:5173"
+	}
+	origins := get("ALLOWED_ORIGINS")
+	if origins == "" {
+		origins = base
+	}
+	for _, value := range append(strings.Split(origins, ","), base) {
+		value = strings.TrimSpace(value)
+		origin, err := url.Parse(value)
+		if err != nil || origin.Host == "" || origin.User != nil || (origin.Scheme != "https" && origin.Scheme != "http") || origin.RawQuery != "" || origin.Fragment != "" || (origin.Path != "" && origin.Path != "/") {
+			return c, errors.New("origem deve conter apenas scheme e host")
+		}
+		if origin.Scheme == "http" {
+			ip := net.ParseIP(origin.Hostname())
+			if c.Environment == "production" || (origin.Hostname() != "localhost" && (ip == nil || !ip.IsLoopback())) {
+				return c, errors.New("HTTP permitido somente em loopback de desenvolvimento")
+			}
+		}
+		c.AllowedOrigins = append(c.AllowedOrigins, origin.Scheme+"://"+origin.Host)
+	}
+	c.SecureCookies = c.Environment == "production" || strings.HasPrefix(base, "https://")
 	return c, nil
 }
