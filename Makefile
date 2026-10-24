@@ -49,3 +49,7 @@ bootstrap: admin
 	python3 scripts/run-local.py .tools/bin/flagpilot-admin bootstrap $(ARGS)
 reset-password: admin
 	python3 scripts/run-local.py .tools/bin/flagpilot-admin reset-password $(ARGS)
+
+.PHONY: create-user
+create-user: admin
+	python3 scripts/run-local.py .tools/bin/flagpilot-admin create-user $(ARGS)

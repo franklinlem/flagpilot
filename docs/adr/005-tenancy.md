@@ -1,6 +1,6 @@
 # ADR-005 — Tenancy, papéis e revisão
 
-Data: 24/10/2026. Estado: Aceita; schema de identidade iniciado.
+Data: 24/10/2026. Estado: Aceita; autorização de organizações/membros implementada em 2B.
 
 ## Contexto
 
@@ -16,4 +16,4 @@ Grants por projeto/flag e RLS podem ser avaliados depois; não simular permissõ
 
 ## Consequências
 
-Cada consulta valida escopo; metadata da flag terá versão própria. Revisão ambiental e auditoria mudam na mesma transação. Versões históricas restauráveis ficam fora do núcleo. Identidade e consulta das próprias associações estão implementadas; RBAC sobre recursos e invariantes de gestão de membros serão entregues em 2B.
+Cada consulta valida escopo; metadata da flag terá versão própria. Revisão ambiental e auditoria mudam na mesma transação. Versões históricas restauráveis ficam fora do núcleo. Identidade e gestão de membros/organizações estão implementadas com releitura de papel no banco, isolamento e último Owner ativo. Ver ADR-008 para locks e cadastro local; permissões dos demais recursos serão aplicadas junto de cada módulo.

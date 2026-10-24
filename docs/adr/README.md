@@ -9,3 +9,5 @@ O plano foi aprovado por Franklin em 24/10/2026 ("ok. pode continuar."). ADRs re
 - [ADR-005 — Multi-tenancy e revisão](005-tenancy.md)
 - [ADR-006 — Containers e operação](006-containers.md)
 - [ADR-007 — Browser via BFF](007-browser-bff.md)
+
+- [ADR-008 — Organizações, membros e concorrência](008-organizations-members.md)

@@ -2,9 +2,9 @@ openapi: 3.1.0
 info:
   title: FlagPilot API
   version: 0.0.0
-  description: Contrato incremental. Health e autenticação administrativa estão implementados;
-    x-implementation identifica os demais. Bootstrap e recuperação administrativa
-    serão CLI, sem endpoint público. Sem hard delete de domínio no MVP.
+  description: Contrato incremental. Health, autenticação e organizações/membros estão
+    implementados; x-implementation identifica o restante planejado. Bootstrap, cadastro
+    local de usuários e recuperação são CLI, sem signup público.
   contact:
     name: FlagPilot
     url: https://github.com/franklinlem/flagpilot
@@ -187,10 +187,10 @@ paths:
     get:
       operationId: listOrganizations
       summary: Listar organizações autorizadas
-      description: Contrato planejado; endpoint ainda não implementado.
+      description: Disponível no incremento 2B.
       tags:
       - Organizações
-      x-implementation: planned
+      x-implementation: available
       security:
       - sessionCookie: []
       responses:
@@ -214,6 +214,8 @@ paths:
           $ref: '#/components/responses/Problem'
         '404':
           $ref: '#/components/responses/Problem'
+        '503':
+          $ref: '#/components/responses/Problem'
       parameters:
       - name: cursor
         in: query
@@ -230,10 +232,10 @@ paths:
     post:
       operationId: createOrganization
       summary: Criar organização e associação Owner
-      description: Contrato planejado; endpoint ainda não implementado.
+      description: Disponível no incremento 2B.
       tags:
       - Organizações
-      x-implementation: planned
+      x-implementation: available
       security:
       - sessionCookie: []
       responses:
@@ -259,6 +261,12 @@ paths:
           $ref: '#/components/responses/Problem'
         '409':
           $ref: '#/components/responses/Problem'
+        '503':
+          $ref: '#/components/responses/Problem'
+        '413':
+          $ref: '#/components/responses/Problem'
+        '415':
+          $ref: '#/components/responses/Problem'
       parameters:
       - $ref: '#/components/parameters/CSRF'
       requestBody:
@@ -271,11 +279,10 @@ paths:
     get:
       operationId: listMembers
       summary: Listar membros
-      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
-        Viewer+.'
+      description: 'Disponível no incremento 2B. Permissão: Viewer+.'
       tags:
       - Organizações
-      x-implementation: planned
+      x-implementation: available
       security:
       - sessionCookie: []
       responses:
@@ -284,7 +291,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MembershipPage'
+                $ref: '#/components/schemas/MemberPage'
         '400':
           $ref: '#/components/responses/Problem'
         '422':
@@ -298,6 +305,8 @@ paths:
         '403':
           $ref: '#/components/responses/Problem'
         '404':
+          $ref: '#/components/responses/Problem'
+        '503':
           $ref: '#/components/responses/Problem'
       parameters:
       - name: orgId
@@ -321,11 +330,13 @@ paths:
     post:
       operationId: addMember
       summary: Associar usuário existente
-      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
-        Owner.'
+      description: 'Disponível no incremento 2B. Permissão: Owner. Somente Owner.
+        Preservar ao menos um Owner ativo; conflito retorna 409. Mutação e auditoria
+        na mesma transação. Remoção/papel afeta esta organização, sem revogar sessões
+        de outras organizações.'
       tags:
       - Organizações
-      x-implementation: planned
+      x-implementation: available
       security:
       - sessionCookie: []
       responses:
@@ -334,7 +345,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Membership'
+                $ref: '#/components/schemas/OrganizationMember'
         '400':
           $ref: '#/components/responses/Problem'
         '422':
@@ -350,6 +361,12 @@ paths:
         '404':
           $ref: '#/components/responses/Problem'
         '409':
+          $ref: '#/components/responses/Problem'
+        '503':
+          $ref: '#/components/responses/Problem'
+        '413':
+          $ref: '#/components/responses/Problem'
+        '415':
           $ref: '#/components/responses/Problem'
       parameters:
       - name: orgId
@@ -367,11 +384,13 @@ paths:
     patch:
       operationId: changeRole
       summary: Alterar papel preservando último Owner
-      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
-        Owner.'
+      description: 'Disponível no incremento 2B. Permissão: Owner. Somente Owner.
+        Preservar ao menos um Owner ativo; conflito retorna 409. Mutação e auditoria
+        na mesma transação. Remoção/papel afeta esta organização, sem revogar sessões
+        de outras organizações.'
       tags:
       - Organizações
-      x-implementation: planned
+      x-implementation: available
       security:
       - sessionCookie: []
       responses:
@@ -380,7 +399,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Membership'
+                $ref: '#/components/schemas/OrganizationMember'
         '400':
           $ref: '#/components/responses/Problem'
         '422':
@@ -396,6 +415,12 @@ paths:
         '404':
           $ref: '#/components/responses/Problem'
         '409':
+          $ref: '#/components/responses/Problem'
+        '503':
+          $ref: '#/components/responses/Problem'
+        '413':
+          $ref: '#/components/responses/Problem'
+        '415':
           $ref: '#/components/responses/Problem'
       parameters:
       - name: orgId
@@ -416,11 +441,13 @@ paths:
     delete:
       operationId: removeMember
       summary: Remover associação preservando último Owner
-      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
-        Owner.'
+      description: 'Disponível no incremento 2B. Permissão: Owner. Somente Owner.
+        Preservar ao menos um Owner ativo; conflito retorna 409. Mutação e auditoria
+        na mesma transação. Remoção/papel afeta esta organização, sem revogar sessões
+        de outras organizações.'
       tags:
       - Organizações
-      x-implementation: planned
+      x-implementation: available
       security:
       - sessionCookie: []
       responses:
@@ -441,6 +468,12 @@ paths:
         '404':
           $ref: '#/components/responses/Problem'
         '409':
+          $ref: '#/components/responses/Problem'
+        '503':
+          $ref: '#/components/responses/Problem'
+        '413':
+          $ref: '#/components/responses/Problem'
+        '415':
           $ref: '#/components/responses/Problem'
       parameters:
       - name: orgId
@@ -1302,6 +1335,40 @@ paths:
       servers:
       - url: /
         description: Listener interno futuro
+  /organizations/{orgId}:
+    get:
+      operationId: getOrganization
+      summary: Consultar organização autorizada e papel atual
+      description: Disponível em 2B; 404 fora do escopo. Papel revalidado no banco.
+      tags:
+      - Organizações
+      x-implementation: available
+      security:
+      - sessionCookie: []
+      parameters:
+      - name: orgId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Organização do usuário
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '503':
+          $ref: '#/components/responses/Problem'
 components:
   securitySchemes:
     sessionCookie:
@@ -1442,22 +1509,6 @@ components:
       - csrfToken
       description: Sessão administrativa atual. CSRF derivado da sessão, mantido apenas
         em memória e enviado no header X-CSRF-Token em mutações.
-    Membership:
-      type: object
-      additionalProperties: false
-      properties:
-        organizationId: *id001
-        userId: *id001
-        role:
-          $ref: '#/components/schemas/Role'
-        organizationName:
-          type: string
-          description: Nome da organização no perfil autenticado; opcional em outros
-            endpoints planejados.
-      required:
-      - organizationId
-      - userId
-      - role
     MemberRequest:
       type: object
       additionalProperties: false
@@ -1489,10 +1540,13 @@ components:
           type: string
           pattern: ^[a-z][a-z0-9-]{1,62}$
           maxLength: 63
+        role:
+          $ref: '#/components/schemas/Role'
       required:
       - id
       - name
       - slug
+      - role
     Project:
       type: object
       additionalProperties: false
@@ -1787,6 +1841,8 @@ components:
       required:
       - items
       - nextCursor
+      description: Somente organizações do usuário, cursor opaco vinculado à identidade,
+        ordenação estável por id.
     ProjectPage:
       type: object
       additionalProperties: false
@@ -1883,22 +1939,6 @@ components:
       required:
       - items
       - nextCursor
-    MembershipPage:
-      type: object
-      additionalProperties: false
-      properties:
-        items:
-          type: array
-          maxItems: 100
-          items:
-            $ref: '#/components/schemas/Membership'
-        nextCursor:
-          type:
-          - string
-          - 'null'
-      required:
-      - items
-      - nextCursor
     ProfileMembership:
       type: object
       additionalProperties: false
@@ -1918,3 +1958,44 @@ components:
       - userId
       - role
       - organizationName
+    OrganizationMember:
+      type: object
+      additionalProperties: false
+      required:
+      - organizationId
+      - userId
+      - email
+      - role
+      - disabled
+      properties:
+        organizationId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/Role'
+        disabled:
+          type: boolean
+    MemberPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/OrganizationMember'
+        nextCursor:
+          type:
+          - string
+          - 'null'
+      required:
+      - items
+      - nextCursor
+      description: Cursor opaco, vinculado à organização e ao usuário autenticado.
+        Ordenação estável por userId.

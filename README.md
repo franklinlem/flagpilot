@@ -1,6 +1,6 @@
 # FlagPilot
 
-Plataforma self-hosted de feature flags em desenvolvimento. Incremento atual: identidade administrativa sobre a fundação Go/Chi, PostgreSQL/migrations e React/Vite. **Login/logout, conta, organizações do próprio usuário e bootstrap auditável já funcionam.** Gestão de membros/projetos/flags, avaliação e cliente SDK virão nos próximos incrementos.
+Plataforma self-hosted de feature flags em desenvolvimento. Incremento atual: organizações/membros com autorização sobre a fundação Go/Chi, PostgreSQL/migrations e React/Vite. **Login/logout, bootstrap, organizações e gestão de membros auditada já funcionam.** Projetos/ambientes/flags, avaliação e cliente SDK virão nos próximos incrementos.
 
 ## Requisitos e versões
 
@@ -48,7 +48,7 @@ curl -i http://127.0.0.1:8080/api/v1/health/ready
 
 Live verifica o processo. Ready verifica conectividade, schema versão 2 e estado não-dirty; banco vazio, indisponível ou schema incompatível retorna 503 sem detalhes internos. A API continua viva enquanto o banco está indisponível. Nunca executa migrations sozinha.
 
-[OpenAPI 3.1](api/openapi.yaml) descreve o contrato inicial completo. `x-implementation: available` identifica health e login/logout/me; os demais endpoints retornam 404 até seus incrementos. Métricas ainda não implementadas. Nginx de runtime bloqueia readiness e `/metrics` na borda; o painel consulta a sessão em `/me`, sem expor a saúde interna do banco.
+[OpenAPI 3.1](api/openapi.yaml) descreve o contrato inicial completo. `x-implementation: available` identifica health, autenticação e organizações/membros; os demais endpoints retornam 404 até seus incrementos. Métricas ainda não implementadas. Nginx de runtime bloqueia readiness e `/metrics` na borda; o painel consulta a sessão em `/me`, sem expor a saúde interna do banco.
 
 ## Verificar
 
@@ -89,6 +89,8 @@ Testes de integração usam somente credenciais sintéticas em banco efêmero. N
 - [Operação de desenvolvimento](deploy/README.md)
 - [Evidências da fundação](docs/FOUNDATION_STATUS.md)
 - [Estado da autenticação](docs/AUTH_STATUS.md)
+- [Estado de organizações/membros](docs/ORGANIZATIONS_STATUS.md)
+- [Cadastrar usuários e gerenciar membros](docs/runbooks/organizations.md)
 - [Bootstrap e recuperação](docs/runbooks/identity.md)
 
-Próximo incremento: organizações/membros e RBAC com isolamento e proteção do último Owner. Bootstrap, login e recuperação já são auditados. Nenhum DNS, VPS, Coolify ou servidor externo foi alterado. Licença Apache-2.0 e publicação do pacote/remoto continuam pendentes; não há licença atribuída automaticamente.
+Próximo incremento: projetos e ambientes (3A). Organizações/membros já possuem isolamento e proteção do último Owner. Bootstrap, login e recuperação já são auditados. Nenhum DNS, VPS, Coolify ou servidor externo foi alterado. Licença Apache-2.0 e publicação do pacote/remoto continuam pendentes; não há licença atribuída automaticamente.

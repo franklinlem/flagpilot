@@ -8,7 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"fmt"
+	"github.com/franklinlem/flagpilot/apps/api/internal/identifiers"
 	"net/mail"
 	"regexp"
 	"strings"
@@ -103,20 +103,6 @@ func csrf(token string) string {
 func ValidCSRF(token, provided string) bool {
 	return validToken(token) && hmac.Equal([]byte(csrf(token)), []byte(provided))
 }
-func newID() pgtype.UUID {
-	var b [16]byte
-	if _, err := rand.Read(b[:]); err != nil {
-		panic("random source unavailable")
-	}
-	b[6] = (b[6] & 15) | 64
-	b[8] = (b[8] & 63) | 128
-	return pgtype.UUID{Bytes: b, Valid: true}
-}
-func idString(id pgtype.UUID) string {
-	b := id.Bytes
-	return fmt.Sprintf("%x-%x-%x-%x-%x", b[:4], b[4:6], b[6:8], b[8:10], b[10:])
-}
-
 func (s *Service) Find(ctx context.Context, token string) (Identity, error) {
 	if !validToken(token) {
 		return Identity{}, ErrSession
@@ -137,9 +123,9 @@ func (s *Service) Find(ctx context.Context, token string) (Identity, error) {
 	return identity(row.ID, row.Email, row.CreatedAt.Time, members, token), nil
 }
 func identity(id pgtype.UUID, email string, created time.Time, members []q.ListUserMembershipsRow, token string) Identity {
-	out := Identity{User: User{ID: idString(id), Email: email, CreatedAt: created.UTC()}, Memberships: make([]Membership, 0, len(members)), CSRFToken: csrf(token)}
+	out := Identity{User: User{ID: identifiers.String(id), Email: email, CreatedAt: created.UTC()}, Memberships: make([]Membership, 0, len(members)), CSRFToken: csrf(token)}
 	for _, m := range members {
-		out.Memberships = append(out.Memberships, Membership{OrganizationID: idString(m.OrganizationID), UserID: idString(m.UserID), Role: m.Role, OrganizationName: m.OrganizationName})
+		out.Memberships = append(out.Memberships, Membership{OrganizationID: identifiers.String(m.OrganizationID), UserID: identifiers.String(m.UserID), Role: m.Role, OrganizationName: m.OrganizationName})
 	}
 	return out
 }
@@ -189,7 +175,7 @@ func (s *Service) Login(ctx context.Context, email, password, previous string) (
 		return Session{}, err
 	}
 	expires := time.Now().UTC().Add(s.ttl)
-	if err = qt.InsertSession(dbctx, q.InsertSessionParams{ID: newID(), UserID: user.ID, TokenHash: tokenHash(token), ExpiresAt: pgtype.Timestamptz{Time: expires, Valid: true}}); err != nil {
+	if err = qt.InsertSession(dbctx, q.InsertSessionParams{ID: identifiers.New(), UserID: user.ID, TokenHash: tokenHash(token), ExpiresAt: pgtype.Timestamptz{Time: expires, Valid: true}}); err != nil {
 		return Session{}, ErrUnavailable
 	}
 	if validToken(previous) {
@@ -249,7 +235,7 @@ func (s *Service) Logout(ctx context.Context, token string) error {
 }
 func (s *Service) auditMemberships(ctx context.Context, qt *q.Queries, user pgtype.UUID, members []q.ListUserMembershipsRow, action, label string) error {
 	for _, m := range members {
-		if err := qt.InsertAuditEvent(ctx, q.InsertAuditEventParams{ID: newID(), OrganizationID: m.OrganizationID, ActorID: user, ActorLabel: label, Action: action, ResourceType: "user", ResourceID: user}); err != nil {
+		if err := qt.InsertAuditEvent(ctx, q.InsertAuditEventParams{ID: identifiers.New(), OrganizationID: m.OrganizationID, ActorID: user, ActorLabel: label, Action: action, ResourceType: "user", ResourceID: user}); err != nil {
 			return ErrUnavailable
 		}
 	}
@@ -286,19 +272,19 @@ func (s *Service) Bootstrap(ctx context.Context, email, password, name, slug str
 	if !empty.Bool {
 		return ErrConflict
 	}
-	user, err := qt.InsertUser(ctx, q.InsertUserParams{ID: newID(), Email: email, PasswordHash: encoded})
+	user, err := qt.InsertUser(ctx, q.InsertUserParams{ID: identifiers.New(), Email: email, PasswordHash: encoded})
 	if err != nil {
 		return ErrUnavailable
 	}
-	org, err := qt.InsertOrganization(ctx, q.InsertOrganizationParams{ID: newID(), Name: name, Slug: slug})
+	org, err := qt.InsertOrganization(ctx, q.InsertOrganizationParams{ID: identifiers.New(), Name: name, Slug: slug})
 	if err != nil {
 		return ErrUnavailable
 	}
 	if err = qt.InsertOwner(ctx, q.InsertOwnerParams{OrganizationID: org.ID, UserID: user.ID}); err != nil {
 		return ErrUnavailable
 	}
-	after, _ := json.Marshal(map[string]string{"role": "Owner", "userId": idString(user.ID)})
-	if err = qt.InsertAuditEvent(ctx, q.InsertAuditEventParams{ID: newID(), OrganizationID: org.ID, ActorID: user.ID, ActorLabel: "local-operator", Action: "installation.bootstrap", ResourceType: "organization", ResourceID: org.ID, AfterRedacted: after}); err != nil {
+	after, _ := json.Marshal(map[string]string{"role": "Owner", "userId": identifiers.String(user.ID)})
+	if err = qt.InsertAuditEvent(ctx, q.InsertAuditEventParams{ID: identifiers.New(), OrganizationID: org.ID, ActorID: user.ID, ActorLabel: "local-operator", Action: "installation.bootstrap", ResourceType: "organization", ResourceID: org.ID, AfterRedacted: after}); err != nil {
 		return ErrUnavailable
 	}
 	if err = tx.Commit(ctx); err != nil {

@@ -113,13 +113,13 @@ export interface paths {
         };
         /**
          * Listar organizações autorizadas
-         * @description Contrato planejado; endpoint ainda não implementado.
+         * @description Disponível no incremento 2B.
          */
         get: operations["listOrganizations"];
         put?: never;
         /**
          * Criar organização e associação Owner
-         * @description Contrato planejado; endpoint ainda não implementado.
+         * @description Disponível no incremento 2B.
          */
         post: operations["createOrganization"];
         delete?: never;
@@ -137,13 +137,13 @@ export interface paths {
         };
         /**
          * Listar membros
-         * @description Contrato planejado; endpoint ainda não implementado. Permissão: Viewer+.
+         * @description Disponível no incremento 2B. Permissão: Viewer+.
          */
         get: operations["listMembers"];
         put?: never;
         /**
          * Associar usuário existente
-         * @description Contrato planejado; endpoint ainda não implementado. Permissão: Owner.
+         * @description Disponível no incremento 2B. Permissão: Owner. Somente Owner. Preservar ao menos um Owner ativo; conflito retorna 409. Mutação e auditoria na mesma transação. Remoção/papel afeta esta organização, sem revogar sessões de outras organizações.
          */
         post: operations["addMember"];
         delete?: never;
@@ -164,14 +164,14 @@ export interface paths {
         post?: never;
         /**
          * Remover associação preservando último Owner
-         * @description Contrato planejado; endpoint ainda não implementado. Permissão: Owner.
+         * @description Disponível no incremento 2B. Permissão: Owner. Somente Owner. Preservar ao menos um Owner ativo; conflito retorna 409. Mutação e auditoria na mesma transação. Remoção/papel afeta esta organização, sem revogar sessões de outras organizações.
          */
         delete: operations["removeMember"];
         options?: never;
         head?: never;
         /**
          * Alterar papel preservando último Owner
-         * @description Contrato planejado; endpoint ainda não implementado. Permissão: Owner.
+         * @description Disponível no incremento 2B. Permissão: Owner. Somente Owner. Preservar ao menos um Owner ativo; conflito retorna 409. Mutação e auditoria na mesma transação. Remoção/papel afeta esta organização, sem revogar sessões de outras organizações.
          */
         patch: operations["changeRole"];
         trace?: never;
@@ -440,6 +440,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/organizations/{orgId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Consultar organização autorizada e papel atual
+         * @description Disponível em 2B; 404 fora do escopo. Papel revalidado no banco.
+         */
+        get: operations["getOrganization"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -495,15 +515,6 @@ export interface components {
             memberships: components["schemas"]["ProfileMembership"][];
             csrfToken: string;
         };
-        Membership: {
-            /** Format: uuid */
-            organizationId: string;
-            /** Format: uuid */
-            userId: string;
-            role: components["schemas"]["Role"];
-            /** @description Nome da organização no perfil autenticado; opcional em outros endpoints planejados. */
-            organizationName?: string;
-        };
         MemberRequest: {
             /** Format: uuid */
             userId: string;
@@ -517,6 +528,7 @@ export interface components {
             id: string;
             name: string;
             slug: string;
+            role: components["schemas"]["Role"];
         };
         Project: {
             /** Format: uuid */
@@ -668,6 +680,7 @@ export interface components {
         BatchResult: {
             results: components["schemas"]["EvaluationResult"][];
         };
+        /** @description Somente organizações do usuário, cursor opaco vinculado à identidade, ordenação estável por id. */
         OrganizationPage: {
             items: components["schemas"]["Organization"][];
             nextCursor: string | null;
@@ -696,10 +709,6 @@ export interface components {
             items: components["schemas"]["AuditEvent"][];
             nextCursor: string | null;
         };
-        MembershipPage: {
-            items: components["schemas"]["Membership"][];
-            nextCursor: string | null;
-        };
         ProfileMembership: {
             /** Format: uuid */
             organizationId: string;
@@ -708,6 +717,21 @@ export interface components {
             role: components["schemas"]["Role"];
             /** @description Nome da organização no perfil autenticado; opcional em outros endpoints planejados. */
             organizationName: string;
+        };
+        OrganizationMember: {
+            /** Format: uuid */
+            organizationId: string;
+            /** Format: uuid */
+            userId: string;
+            /** Format: email */
+            email: string;
+            role: components["schemas"]["Role"];
+            disabled: boolean;
+        };
+        /** @description Cursor opaco, vinculado à organização e ao usuário autenticado. Ordenação estável por userId. */
+        MemberPage: {
+            items: components["schemas"]["OrganizationMember"][];
+            nextCursor: string | null;
         };
     };
     responses: {
@@ -900,6 +924,7 @@ export interface operations {
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     createOrganization: {
@@ -932,9 +957,12 @@ export interface operations {
             403: components["responses"]["Problem"];
             404: components["responses"]["Problem"];
             409: components["responses"]["Problem"];
+            413: components["responses"]["Problem"];
+            415: components["responses"]["Problem"];
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     listMembers: {
@@ -957,7 +985,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MembershipPage"];
+                    "application/json": components["schemas"]["MemberPage"];
                 };
             };
             400: components["responses"]["Problem"];
@@ -967,6 +995,7 @@ export interface operations {
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     addMember: {
@@ -993,7 +1022,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Membership"];
+                    "application/json": components["schemas"]["OrganizationMember"];
                 };
             };
             400: components["responses"]["Problem"];
@@ -1001,9 +1030,12 @@ export interface operations {
             403: components["responses"]["Problem"];
             404: components["responses"]["Problem"];
             409: components["responses"]["Problem"];
+            413: components["responses"]["Problem"];
+            415: components["responses"]["Problem"];
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     removeMember: {
@@ -1033,9 +1065,12 @@ export interface operations {
             403: components["responses"]["Problem"];
             404: components["responses"]["Problem"];
             409: components["responses"]["Problem"];
+            413: components["responses"]["Problem"];
+            415: components["responses"]["Problem"];
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     changeRole: {
@@ -1063,7 +1098,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Membership"];
+                    "application/json": components["schemas"]["OrganizationMember"];
                 };
             };
             400: components["responses"]["Problem"];
@@ -1071,9 +1106,12 @@ export interface operations {
             403: components["responses"]["Problem"];
             404: components["responses"]["Problem"];
             409: components["responses"]["Problem"];
+            413: components["responses"]["Problem"];
+            415: components["responses"]["Problem"];
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     listProjects: {
@@ -1688,6 +1726,33 @@ export interface operations {
                     "text/plain": string;
                 };
             };
+        };
+    };
+    getOrganization: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orgId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Organização do usuário */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Organization"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+            422: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
 }

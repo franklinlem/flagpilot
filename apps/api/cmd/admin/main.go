@@ -22,13 +22,14 @@ func main() { os.Exit(run()) }
 func run() int {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	if len(os.Args) < 2 || (os.Args[1] != "bootstrap" && os.Args[1] != "reset-password") {
-		fmt.Fprintln(os.Stderr, "Uso: admin bootstrap|reset-password [--email EMAIL] [--org NOME --slug SLUG] [--password-stdin]")
+	if len(os.Args) < 2 || (os.Args[1] != "bootstrap" && os.Args[1] != "reset-password" && os.Args[1] != "create-user") {
+		fmt.Fprintln(os.Stderr, "Uso: admin bootstrap|reset-password|create-user [--email EMAIL] [--org NOME --slug SLUG] [--password-stdin]")
 		return 1
 	}
 	fs := flag.NewFlagSet(os.Args[1], flag.ContinueOnError)
 	email := fs.String("email", "", "Email do administrador")
 	name := fs.String("org", "", "Nome da organização (bootstrap)")
+	organizationID := fs.String("org-id", "", "Organização inicial do novo usuário (Viewer)")
 	slug := fs.String("slug", "", "Slug da organização (bootstrap)")
 	stdin := fs.Bool("password-stdin", false, "Ler uma senha por stdin para automação; nunca usar argumento de senha")
 	if err := fs.Parse(os.Args[2:]); err != nil {
@@ -81,6 +82,11 @@ func run() int {
 			}
 		}
 	}
+	if os.Args[1] == "create-user" {
+		if err := prompt("ID da organização: ", organizationID); err != nil {
+			return fail(err)
+		}
+	}
 	var password string
 	if *stdin {
 		value, err := io.ReadAll(io.LimitReader(os.Stdin, 258))
@@ -126,6 +132,12 @@ func run() int {
 	}
 	if os.Args[1] == "bootstrap" {
 		err = service.Bootstrap(ctx, *email, password, *name, *slug)
+	} else if os.Args[1] == "create-user" {
+		var id string
+		id, err = service.CreateUser(ctx, *email, password, *organizationID)
+		if err == nil {
+			fmt.Println("ID do usuário:", id)
+		}
 	} else {
 		err = service.ResetPassword(ctx, *email, password)
 	}

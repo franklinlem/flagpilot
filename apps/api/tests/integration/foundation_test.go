@@ -131,6 +131,7 @@ func TestFoundation(t *testing.T) {
 	}
 	check("/api/v1/health/ready", 200)
 	t.Run("authentication", func(t *testing.T) { exerciseAuth(t, ctx, store, owner) })
+	t.Run("organizations", func(t *testing.T) { exerciseOrganizations(t, ctx, store, owner) })
 	if _, err := owner.Exec(ctx, "ALTER ROLE flagpilot_app NOLOGIN"); err != nil {
 		t.Fatal(err)
 	}

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Browser real, dados e credenciais efêmeros; nunca usa o volume de desenvolvimento."""
 import os
+import json
+import http.cookiejar
 from pathlib import Path
 import secrets
 import subprocess
@@ -27,16 +29,25 @@ def main():
             subprocess.run(base + ['up', '-d', '--wait', 'api', 'web'], check=True, cwd=ROOT)
             password = secrets.token_urlsafe(32)
             subprocess.run(base + ['exec', '-T', 'api', '/admin', 'bootstrap', '--email', 'owner@example.invalid', '--org', 'E2E Organization', '--slug', 'e2e', '--password-stdin'], input=password + '\n', text=True, check=True)
+            jar = http.cookiejar.CookieJar()
+            client = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+            login = urllib.request.Request(origin + '/api/v1/auth/login', data=json.dumps({'email':'owner@example.invalid','password':password}).encode(), headers={'Origin':origin,'Content-Type':'application/json'})
+            with client.open(login, timeout=5) as response:
+                identity = json.load(response)
+            organization_id = identity['memberships'][0]['organizationId']
+            viewer_password = secrets.token_urlsafe(32)
+            provision = subprocess.run(base + ['exec','-T','api','/admin','create-user','--email','viewer@example.invalid','--org-id',organization_id,'--password-stdin'], input=viewer_password + '\n', text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True)
+            viewer_id = next(line.split(':',1)[1].strip() for line in provision.stdout.splitlines() if line.startswith('ID do usuário:'))
             for _ in range(30):
                 try:
                     with urllib.request.urlopen(origin, timeout=2) as response:
                         if response.status == 200: break
                 except OSError: time.sleep(.2)
             else: raise RuntimeError('Frontend E2E indisponível')
-            env = dict(os.environ, E2E_BASE_URL=origin, E2E_EMAIL='owner@example.invalid', E2E_PASSWORD=password)
+            env = dict(os.environ, E2E_BASE_URL=origin, E2E_EMAIL='owner@example.invalid', E2E_PASSWORD=password, E2E_VIEWER_EMAIL='viewer@example.invalid', E2E_VIEWER_PASSWORD=viewer_password, E2E_VIEWER_ID=viewer_id)
             env.setdefault('PLAYWRIGHT_BROWSERS_PATH', str(ROOT / '.tools/playwright'))
             result = subprocess.run(['npm', 'run', 'test:e2e'], cwd=ROOT, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-            print(result.stdout.replace(password, '[REDACTED]'))
+            print(result.stdout.replace(password, '[REDACTED]').replace(viewer_password, '[REDACTED]'))
             result.check_returncode()
             print('E2E de autenticação aprovado em stack isolada.')
         finally:

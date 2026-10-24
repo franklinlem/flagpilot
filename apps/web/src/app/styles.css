@@ -31,3 +31,17 @@ input[aria-invalid=true] { border-color: #fca5a5; }
 .organizations li { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: space-between; align-items: center; }
 .badge { color: #bfdbfe; background: #1e3a5f; padding: .3rem .65rem; border-radius: .4rem; font-size: .85rem; }
 @media (max-width: 480px) { .brand-heading { align-items: flex-start; } .account-heading { align-items: flex-start; flex-direction: column; } }
+
+a { color: #bfdbfe; }
+a:focus-visible, select:focus-visible { outline: 3px solid #bfdbfe; outline-offset: 3px; }
+.section-heading { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-top: 2rem; }
+.section-heading h3 { margin: 0; }
+select { background: #111827; border: 1px solid #64748b; color: inherit; font: inherit; min-height: 2.8rem; border-radius: .4rem; padding: .5rem; max-width: 100%; }
+.member { display: block !important; }
+.member strong, code { overflow-wrap: anywhere; }
+.member-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin-top: 1rem; }
+.member-actions label { flex-basis: 100%; margin: 0; }
+.confirmation { flex-basis: 100%; border-top: 1px solid #64748b; }
+.confirmation button { margin-right: .5rem; }
+.danger { color: #fecaca !important; }
+legend { font-weight: 650; }

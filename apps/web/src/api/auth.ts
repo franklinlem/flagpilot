@@ -10,7 +10,7 @@ export type Identity = z.infer<typeof identitySchema>;
 export class ApiError extends Error {
   constructor(public readonly status: number, message: string) { super(message); }
 }
-async function request(path: string, options: RequestInit = {}, signal?: AbortSignal): Promise<Response> {
+export async function request(path: string, options: RequestInit = {}, signal?: AbortSignal): Promise<Response> {
   let response: Response;
   try {
     response = await fetch(`/api/v1${path}`, { ...options, credentials: 'same-origin', signal: signal ?? AbortSignal.timeout(8000) });

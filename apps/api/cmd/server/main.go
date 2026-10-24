@@ -13,6 +13,7 @@ import (
 	"github.com/franklinlem/flagpilot/apps/api/internal/auth"
 	"github.com/franklinlem/flagpilot/apps/api/internal/config"
 	httpapi "github.com/franklinlem/flagpilot/apps/api/internal/http"
+	"github.com/franklinlem/flagpilot/apps/api/internal/organizations"
 	"github.com/franklinlem/flagpilot/apps/api/internal/storage/postgres"
 )
 
@@ -39,7 +40,7 @@ func run() int {
 		logger.Error("auth_init_failed")
 		return 1
 	}
-	server := &http.Server{Addr: cfg.HTTPAddr, Handler: httpapi.New(logger, store, httpapi.WithAuth(authService, cfg.AllowedOrigins, cfg.SecureCookies)), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}
+	server := &http.Server{Addr: cfg.HTTPAddr, Handler: httpapi.New(logger, store, httpapi.WithAuth(authService, cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithOrganizations(authService, organizations.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies)), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}
 	done := make(chan error, 1)
 	go func() {
 		logger.Info("server_start", "address", cfg.HTTPAddr, "environment", cfg.Environment)
