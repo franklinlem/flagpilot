@@ -1,6 +1,6 @@
 # FlagPilot — Plano de implementação
 
-Data: 24/10/2026. Estado: **plano aprovado em 24/10/2026; fundação em execução**.
+Data: 24/10/2026. Estado: **plano aprovado em 24/10/2026; fundação validada localmente**.
 
 Registro: Franklin autorizou a continuação após apresentação deste plano. Os limites e propostas abaixo descrevem o planejamento original; acompanhar o estado real em [FOUNDATION_STATUS.md](FOUNDATION_STATUS.md). A aprovação permite a fundação 0/1A/1B; não autoriza deploy ou alterações externas.
 

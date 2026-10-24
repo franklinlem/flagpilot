@@ -1,0 +1,48 @@
+# Somente recursos descartáveis com project name aleatório fornecido por smoke.py.
+services:
+  db:
+    image: postgres:16.13-alpine
+    environment:
+      POSTGRES_DB: flagpilot
+      POSTGRES_USER: flagpilot_migrator
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/init-runtime.sh:/docker-entrypoint-initdb.d/10-runtime.sh:ro
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U flagpilot_migrator -d flagpilot']
+      interval: 2s
+      timeout: 2s
+      retries: 30
+  migrate:
+    image: migrate/migrate:v4.20.1
+    entrypoint: [/bin/sh, -ec]
+    command: ['exec migrate -path /migrations -database "$$MIGRATION_DATABASE_URL" up']
+    environment:
+      MIGRATION_DATABASE_URL: postgres://flagpilot_migrator:${POSTGRES_PASSWORD:?}@db:5432/flagpilot?sslmode=disable
+    volumes:
+      - ../db/migrations:/migrations:ro
+    depends_on:
+      db: {condition: service_healthy}
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    environment:
+      APP_ENV: test
+      HTTP_ADDR: 0.0.0.0:8080
+      DATABASE_URL: postgres://flagpilot_app:${APP_DB_PASSWORD:?}@db:5432/flagpilot?sslmode=disable
+    ports: ["127.0.0.1::8080"]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    healthcheck:
+      test: [CMD, /healthcheck]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+volumes:
+  pgdata:

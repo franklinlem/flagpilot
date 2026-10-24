@@ -1,0 +1,41 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "FlagPilot: banco e migrations",
+      "type": "shell",
+      "command": "make dev-db",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "FlagPilot: testes",
+      "type": "shell",
+      "command": "make test",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "FlagPilot: integra\u00e7\u00e3o PostgreSQL",
+      "type": "shell",
+      "command": "make test-integration",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "FlagPilot: frontend",
+      "type": "shell",
+      "command": "make dev-web",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

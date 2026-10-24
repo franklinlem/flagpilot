@@ -1,0 +1,28 @@
+{
+  "name": "flagpilot",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "packages/sdk-js"
+  ],
+  "engines": {
+    "node": ">=24.22.1 <25"
+  },
+  "scripts": {
+    "dev": "npm run dev --workspace @flagpilot/web",
+    "build": "npm run build --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
+    "lint": "eslint apps/web packages/sdk-js && spectral lint api/openapi.yaml --ruleset api/.spectral.yaml --fail-severity warn",
+    "test": "npm run test --workspace @flagpilot/web",
+    "generate:api": "openapi-typescript api/openapi.yaml -o apps/web/src/api/schema.d.ts"
+  },
+  "devDependencies": {
+    "@stoplight/spectral-cli": "6.17.0",
+    "openapi-typescript": "7.13.0",
+    "eslint": "10.13.0",
+    "typescript-eslint": "8.72.0",
+    "@eslint/js": "10.0.1",
+    "typescript": "5.9.3"
+  }
+}

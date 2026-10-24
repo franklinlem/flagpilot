@@ -1,0 +1,51 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  foundation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: 1.27.3
+          cache-dependency-path: apps/api/go.sum
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Instalar dependências e ferramentas fixadas
+        run: |
+          npm ci
+          python3 scripts/install-tools.py --sqlc --gitleaks
+          echo "$PWD/.tools/bin" >> "$GITHUB_PATH"
+          go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
+      - name: Detectar segredos no histórico
+        run: gitleaks git --redact --no-banner .
+      - name: Verificar código gerado
+        run: |
+          make generate
+          git diff --exit-code -- apps/api/internal/storage/postgres/sqlc apps/web/src/api/schema.d.ts
+      - name: Lint, tipos, testes unitários e integração PostgreSQL
+        run: make ci
+      - name: Vulnerabilidades Go e npm
+        run: |
+          cd apps/api
+          govulncheck ./...
+          cd ../..
+          npm audit --audit-level=high
+      - name: Smoke dos containers sem publicação
+        run: python3 scripts/smoke.py
+      - name: Build do frontend estático sem publicação
+        run: docker build -f apps/web/Dockerfile --target runtime -t flagpilot-web:ci .

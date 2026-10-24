@@ -1,0 +1,26 @@
+{
+  "name": "@flagpilot/sdk-js",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json && node scripts/cjs.mjs",
+    "typecheck": "tsc --noEmit",
+    "check:package": "node --input-type=module -e \"await import('@flagpilot/sdk-js')\" && node -e \"require('@flagpilot/sdk-js')\""
+  }
+}

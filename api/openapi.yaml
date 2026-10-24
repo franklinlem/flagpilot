@@ -1,0 +1,1871 @@
+openapi: 3.1.0
+info:
+  title: FlagPilot API
+  version: 0.0.0
+  description: Contrato incremental. Somente live/ready estão implementados; x-implementation
+    identifica os demais. Bootstrap e recuperação administrativa serão CLI, sem endpoint
+    público. Sem hard delete de domínio no MVP.
+  contact:
+    name: FlagPilot
+    url: https://github.com/franklinlem/flagpilot
+servers:
+- url: /api/v1
+  description: API mesma origem
+tags:
+- name: Operação
+  description: Operação
+- name: Autenticação
+  description: Autenticação
+- name: Organizações
+  description: Organizações
+- name: Projetos
+  description: Projetos
+- name: Flags
+  description: Flags
+- name: Tokens
+  description: Tokens
+- name: Auditoria
+  description: Auditoria
+- name: Avaliação
+  description: Avaliação
+paths:
+  /health/live:
+    get:
+      operationId: liveness
+      summary: Verificar processo
+      description: Disponível na fundação.
+      tags:
+      - Operação
+      x-implementation: available
+      security: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+  /health/ready:
+    get:
+      operationId: readiness
+      summary: Verificar banco e schema
+      description: Disponível na fundação. Acessível somente por loopback/rede interna;
+        bloquear na borda pública.
+      tags:
+      - Operação
+      x-implementation: available
+      security: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        '503':
+          $ref: '#/components/responses/Problem'
+  /auth/login:
+    post:
+      operationId: login
+      summary: Iniciar sessão administrativa
+      description: Contrato planejado; endpoint ainda não implementado. Validar Origin/Fetch
+        Metadata e exigir application/json contra login CSRF. Cookie HttpOnly, SameSite
+        e Secure em HTTPS.
+      tags:
+      - Autenticação
+      x-implementation: planned
+      security: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          headers:
+            Set-Cookie:
+              description: Sessão opaca rotacionada, HttpOnly; nunca retornar token
+                de sessão no JSON.
+              schema: &id002
+                type: string
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+  /auth/logout:
+    post:
+      operationId: logout
+      summary: Revogar sessão
+      description: Contrato planejado; endpoint ainda não implementado.
+      tags:
+      - Autenticação
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '204':
+          description: Operação concluída
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - $ref: '#/components/parameters/CSRF'
+  /me:
+    get:
+      operationId: me
+      summary: Consultar perfil, permissões e CSRF
+      description: Contrato planejado; endpoint ainda não implementado.
+      tags:
+      - Autenticação
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+  /organizations:
+    get:
+      operationId: listOrganizations
+      summary: Listar organizações autorizadas
+      description: Contrato planejado; endpoint ainda não implementado.
+      tags:
+      - Organizações
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationPage'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: cursor
+        in: query
+        schema:
+          type: string
+          maxLength: 512
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 25
+    post:
+      operationId: createOrganization
+      summary: Criar organização e associação Owner
+      description: Contrato planejado; endpoint ainda não implementado.
+      tags:
+      - Organizações
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '201':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - $ref: '#/components/parameters/CSRF'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NamedRequest'
+  /organizations/{orgId}/members:
+    get:
+      operationId: listMembers
+      summary: Listar membros
+      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+        Viewer+.'
+      tags:
+      - Organizações
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipPage'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: orgId
+        in: path
+        required: true
+        schema: &id001
+          type: string
+          format: uuid
+      - name: cursor
+        in: query
+        schema:
+          type: string
+          maxLength: 512
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 25
+    post:
+      operationId: addMember
+      summary: Associar usuário existente
+      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+        Owner.'
+      tags:
+      - Organizações
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '201':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Membership'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: orgId
+        in: path
+        required: true
+        schema: *id001
+      - $ref: '#/components/parameters/CSRF'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemberRequest'
+  /organizations/{orgId}/members/{userId}:
+    patch:
+      operationId: changeRole
+      summary: Alterar papel preservando último Owner
+      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+        Owner.'
+      tags:
+      - Organizações
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Membership'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: orgId
+        in: path
+        required: true
+        schema: *id001
+      - name: userId
+        in: path
+        required: true
+        schema: *id001
+      - $ref: '#/components/parameters/CSRF'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleRequest'
+    delete:
+      operationId: removeMember
+      summary: Remover associação preservando último Owner
+      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+        Owner.'
+      tags:
+      - Organizações
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '204':
+          description: Operação concluída
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: orgId
+        in: path
+        required: true
+        schema: *id001
+      - name: userId
+        in: path
+        required: true
+        schema: *id001
+      - $ref: '#/components/parameters/CSRF'
+  /organizations/{orgId}/projects:
+    get:
+      operationId: listProjects
+      summary: Listar projetos
+      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+        Viewer+.'
+      tags:
+      - Projetos
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectPage'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: orgId
+        in: path
+        required: true
+        schema: *id001
+      - name: cursor
+        in: query
+        schema:
+          type: string
+          maxLength: 512
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 25
+    post:
+      operationId: createProject
+      summary: Criar projeto
+      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+        Admin+.'
+      tags:
+      - Projetos
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '201':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: orgId
+        in: path
+        required: true
+        schema: *id001
+      - $ref: '#/components/parameters/CSRF'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NamedRequest'
+  /projects/{projectId}/environments:
+    get:
+      operationId: listEnvironments
+      summary: Listar ambientes
+      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+        Viewer+.'
+      tags:
+      - Projetos
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentPage'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: projectId
+        in: path
+        required: true
+        schema: *id001
+      - name: cursor
+        in: query
+        schema:
+          type: string
+          maxLength: 512
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 25
+    post:
+      operationId: createEnvironment
+      summary: Criar ambiente
+      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+        Admin+.'
+      tags:
+      - Projetos
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '201':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Environment'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: projectId
+        in: path
+        required: true
+        schema: *id001
+      - $ref: '#/components/parameters/CSRF'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NamedRequest'
+  /projects/{projectId}/flags:
+    get:
+      operationId: listFlags
+      summary: Listar flags
+      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+        Viewer+.'
+      tags:
+      - Flags
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlagPage'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: projectId
+        in: path
+        required: true
+        schema: *id001
+      - name: cursor
+        in: query
+        schema:
+          type: string
+          maxLength: 512
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 25
+      - name: q
+        in: query
+        schema:
+          type: string
+          maxLength: 80
+      - name: archived
+        in: query
+        schema:
+          type: boolean
+          default: false
+    post:
+      operationId: createFlag
+      summary: Criar flag desativada nos ambientes
+      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+        Editor+.'
+      tags:
+      - Flags
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '201':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Flag'
+          headers:
+            ETag:
+              description: ETag forte da representação; reenviar em If-Match. Sintaxe
+                será fixada antes do módulo.
+              schema: *id002
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: projectId
+        in: path
+        required: true
+        schema: *id001
+      - $ref: '#/components/parameters/CSRF'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFlag'
+  /projects/{projectId}/flags/{flagKey}:
+    get:
+      operationId: getFlag
+      summary: Consultar metadados de flag
+      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+        Viewer+.'
+      tags:
+      - Flags
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Flag'
+          headers:
+            ETag:
+              description: ETag forte da representação; reenviar em If-Match. Sintaxe
+                será fixada antes do módulo.
+              schema: *id002
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: projectId
+        in: path
+        required: true
+        schema: *id001
+      - name: flagKey
+        in: path
+        required: true
+        schema: &id003
+          type: string
+          pattern: ^[a-z][a-z0-9_.-]{1,79}$
+          minLength: 2
+          maxLength: 80
+    patch:
+      operationId: updateFlag
+      summary: Editar descrição ou arquivar flag
+      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+        Editor+.'
+      tags:
+      - Flags
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Flag'
+          headers:
+            ETag:
+              description: ETag forte da representação; reenviar em If-Match. Sintaxe
+                será fixada antes do módulo.
+              schema: *id002
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+        '412':
+          $ref: '#/components/responses/Problem'
+        '428':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: projectId
+        in: path
+        required: true
+        schema: *id001
+      - name: flagKey
+        in: path
+        required: true
+        schema: *id003
+      - $ref: '#/components/parameters/CSRF'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFlag'
+  /environments/{envId}/flags:
+    get:
+      operationId: listConfigs
+      summary: Consultar snapshot de configurações
+      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+        Viewer+.'
+      tags:
+      - Flags
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlagConfigPage'
+          headers:
+            ETag:
+              description: ETag forte da representação; reenviar em If-Match. Sintaxe
+                será fixada antes do módulo.
+              schema: *id002
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: envId
+        in: path
+        required: true
+        schema: *id001
+      - name: cursor
+        in: query
+        schema:
+          type: string
+          maxLength: 512
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 25
+  /environments/{envId}/flags/{flagKey}:
+    get:
+      operationId: getConfig
+      summary: Consultar configuração com ETag
+      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+        Viewer+.'
+      tags:
+      - Flags
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlagConfig'
+          headers:
+            ETag:
+              description: ETag forte da representação; reenviar em If-Match. Sintaxe
+                será fixada antes do módulo.
+              schema: *id002
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: envId
+        in: path
+        required: true
+        schema: *id001
+      - name: flagKey
+        in: path
+        required: true
+        schema: *id003
+    put:
+      operationId: updateConfig
+      summary: Atualizar configuração e revisão atomicamente
+      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+        Editor+.'
+      tags:
+      - Flags
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlagConfig'
+          headers:
+            ETag:
+              description: ETag forte da representação; reenviar em If-Match. Sintaxe
+                será fixada antes do módulo.
+              schema: *id002
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+        '412':
+          $ref: '#/components/responses/Problem'
+        '428':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: envId
+        in: path
+        required: true
+        schema: *id001
+      - name: flagKey
+        in: path
+        required: true
+        schema: *id003
+      - $ref: '#/components/parameters/CSRF'
+      - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFlagConfig'
+  /environments/{envId}/tokens:
+    get:
+      operationId: listTokens
+      summary: Listar metadados sem segredo
+      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+        Admin+.'
+      tags:
+      - Tokens
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPage'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: envId
+        in: path
+        required: true
+        schema: *id001
+      - name: cursor
+        in: query
+        schema:
+          type: string
+          maxLength: 512
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 25
+    post:
+      operationId: issueToken
+      summary: Emitir token secreto uma vez
+      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+        Admin+.'
+      tags:
+      - Tokens
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '201':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssuedToken'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: envId
+        in: path
+        required: true
+        schema: *id001
+      - $ref: '#/components/parameters/CSRF'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+  /environments/{envId}/tokens/{tokenId}:
+    delete:
+      operationId: revokeToken
+      summary: Revogar token
+      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+        Admin+.'
+      tags:
+      - Tokens
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '204':
+          description: Operação concluída
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: envId
+        in: path
+        required: true
+        schema: *id001
+      - name: tokenId
+        in: path
+        required: true
+        schema: *id001
+      - $ref: '#/components/parameters/CSRF'
+  /organizations/{orgId}/audit-events:
+    get:
+      operationId: listAudit
+      summary: Consultar auditoria redigida
+      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+        Viewer+.'
+      tags:
+      - Auditoria
+      x-implementation: planned
+      security:
+      - sessionCookie: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditEventPage'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: orgId
+        in: path
+        required: true
+        schema: *id001
+      - name: cursor
+        in: query
+        schema:
+          type: string
+          maxLength: 512
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 25
+  /evaluate:
+    post:
+      operationId: evaluate
+      summary: Avaliar flag
+      description: 'Contrato planejado; endpoint ainda não implementado. Ambiente
+        inferido exclusivamente do token; contexto não é persistido. Limite de body:
+        64 KiB. Flag inexistente/arquivada retorna false/NOT_FOUND; parcial sem bucketingKey
+        retorna false/MISSING_CONTEXT.'
+      tags:
+      - Avaliação
+      x-implementation: planned
+      security:
+      - evaluationToken: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvaluationResult'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvaluationRequest'
+  /evaluate/batch:
+    post:
+      operationId: evaluateBatch
+      summary: Avaliar lote no mesmo snapshot
+      description: 'Contrato planejado; endpoint ainda não implementado. Ambiente
+        inferido exclusivamente do token; contexto não é persistido. Limite de body:
+        64 KiB. Flag inexistente/arquivada retorna false/NOT_FOUND; parcial sem bucketingKey
+        retorna false/MISSING_CONTEXT.'
+      tags:
+      - Avaliação
+      x-implementation: planned
+      security:
+      - evaluationToken: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchResult'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchRequest'
+  /metrics:
+    get:
+      operationId: metrics
+      summary: Consultar métricas Prometheus
+      description: Planejado; rede interna, listener separado. Não expor na borda.
+      tags:
+      - Operação
+      x-implementation: planned
+      security: []
+      responses:
+        '200':
+          description: Métricas agregadas sem identificadores pessoais
+          content:
+            text/plain:
+              schema: *id002
+      servers:
+      - url: /
+        description: Listener interno futuro
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: flagpilot_session
+    evaluationToken:
+      type: http
+      scheme: bearer
+  parameters:
+    CSRF:
+      name: X-CSRF-Token
+      in: header
+      required: true
+      schema: *id002
+      description: Obrigatório em mutações autenticadas por cookie; validar também
+        Origin.
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      schema: *id002
+      description: 'ETag forte recebido na leitura. Ausente: 428; precondição falsa:
+        412; conflito de domínio: 409.'
+  responses:
+    Problem:
+      description: Erro padronizado, sem segredos ou detalhes internos
+      headers:
+        X-Request-ID:
+          schema: *id002
+          description: Identificador opaco da requisição
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    Health:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+          - ok
+      required:
+      - status
+      examples:
+      - status: ok
+    Problem:
+      type: object
+      additionalProperties: false
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title: *id002
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        detail: *id002
+        instance:
+          type: string
+          format: uri-reference
+        requestId: *id002
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - instance
+      - requestId
+      examples:
+      - type: about:blank
+        title: Serviço indisponível
+        status: 503
+        detail: Serviço indisponível
+        instance: urn:request:70ad6dac6c08488588b69de6d4898119
+        requestId: 70ad6dac6c08488588b69de6d4898119
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          minLength: 1
+          maxLength: 1024
+      required:
+      - email
+      - password
+    User:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id001
+        email:
+          type: string
+          format: email
+        createdAt: &id007
+          type: string
+          format: date-time
+      required:
+      - id
+      - email
+      - createdAt
+    Role:
+      type: string
+      enum:
+      - Owner
+      - Admin
+      - Editor
+      - Viewer
+    Me:
+      type: object
+      additionalProperties: false
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/Membership'
+        csrfToken: *id002
+      required:
+      - user
+      - memberships
+      - csrfToken
+    Membership:
+      type: object
+      additionalProperties: false
+      properties:
+        organizationId: *id001
+        userId: *id001
+        role:
+          $ref: '#/components/schemas/Role'
+      required:
+      - organizationId
+      - userId
+      - role
+    MemberRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        userId: *id001
+        role:
+          $ref: '#/components/schemas/Role'
+      required:
+      - userId
+      - role
+    RoleRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        role:
+          $ref: '#/components/schemas/Role'
+      required:
+      - role
+    Organization:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id001
+        name: &id004
+          type: string
+          minLength: 1
+          maxLength: 200
+        slug: &id005
+          type: string
+          pattern: ^[a-z][a-z0-9-]{1,62}$
+          maxLength: 63
+      required:
+      - id
+      - name
+      - slug
+    Project:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id001
+        name: *id004
+        slug: *id005
+        organizationId: *id001
+      required:
+      - id
+      - name
+      - slug
+      - organizationId
+    Environment:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id001
+        name: *id004
+        slug: *id005
+        projectId: *id001
+        revision: &id006
+          type: integer
+          format: int64
+          minimum: 0
+      required:
+      - id
+      - name
+      - slug
+      - projectId
+      - revision
+    NamedRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name: *id004
+        slug: *id005
+      required:
+      - name
+      - slug
+      examples:
+      - name: Meu projeto
+        slug: meu-projeto
+    Flag:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id001
+        projectId: *id001
+        key: *id003
+        description:
+          type: string
+          maxLength: 2000
+        archivedAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+      required:
+      - id
+      - projectId
+      - key
+      - description
+      - archivedAt
+      - version
+    CreateFlag:
+      type: object
+      additionalProperties: false
+      properties:
+        key: *id003
+        description:
+          type: string
+          maxLength: 2000
+          default: ''
+      required:
+      - key
+    UpdateFlag:
+      type: object
+      additionalProperties: false
+      properties:
+        description:
+          type: string
+          maxLength: 2000
+        archived:
+          type: boolean
+      minProperties: 1
+    FlagConfig:
+      type: object
+      additionalProperties: false
+      properties:
+        flagKey: *id003
+        environmentId: *id001
+        enabled:
+          type: boolean
+        rolloutBps:
+          type: integer
+          minimum: 0
+          maximum: 10000
+        version:
+          type: integer
+          format: int64
+          minimum: 1
+        revision: *id006
+      required:
+      - flagKey
+      - environmentId
+      - enabled
+      - rolloutBps
+      - version
+      - revision
+    UpdateFlagConfig:
+      type: object
+      additionalProperties: false
+      properties:
+        enabled:
+          type: boolean
+        rolloutBps:
+          type: integer
+          minimum: 0
+          maximum: 10000
+      required:
+      - enabled
+      - rolloutBps
+      examples:
+      - enabled: true
+        rolloutBps: 10000
+    TokenRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name: *id004
+        expiresAt: *id007
+      required:
+      - name
+      - expiresAt
+    Token:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id001
+        environmentId: *id001
+        name: *id004
+        prefix: *id002
+        expiresAt: *id007
+        revokedAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+      required:
+      - id
+      - environmentId
+      - name
+      - prefix
+      - expiresAt
+      - revokedAt
+    IssuedToken:
+      type: object
+      additionalProperties: false
+      properties:
+        token:
+          $ref: '#/components/schemas/Token'
+        secret:
+          type: string
+          description: Exibido somente nesta resposta; nunca persistir em logs.
+      required:
+      - token
+      - secret
+    AuditEvent:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id001
+        organizationId: *id001
+        actorId:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        action: *id002
+        resourceType: *id002
+        resourceId: *id001
+        before:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+        after:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+        createdAt: *id007
+      required:
+      - id
+      - organizationId
+      - actorId
+      - action
+      - resourceType
+      - resourceId
+      - before
+      - after
+      - createdAt
+    EvaluationRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        flagKey: *id003
+        context:
+          type: object
+          additionalProperties: false
+          properties:
+            bucketingKey:
+              type: string
+              minLength: 1
+              maxLength: 256
+      required:
+      - flagKey
+      examples:
+      - flagKey: new_admin_dashboard
+        context:
+          bucketingKey: pseudonymous-user-123
+    EvaluationResult:
+      type: object
+      additionalProperties: false
+      properties:
+        flagKey: *id003
+        value:
+          type: boolean
+        reason:
+          type: string
+          enum:
+          - DISABLED
+          - ENABLED
+          - PERCENTAGE_ROLLOUT
+          - MISSING_CONTEXT
+          - NOT_FOUND
+        environment: *id005
+        revision: *id006
+      required:
+      - flagKey
+      - value
+      - reason
+      - environment
+      - revision
+      examples:
+      - flagKey: new_admin_dashboard
+        value: true
+        reason: PERCENTAGE_ROLLOUT
+        environment: production
+        revision: 18
+    BatchRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        evaluations:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/EvaluationRequest'
+      required:
+      - evaluations
+    BatchResult:
+      type: object
+      additionalProperties: false
+      properties:
+        results:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/EvaluationResult'
+      required:
+      - results
+    OrganizationPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/Organization'
+        nextCursor:
+          type:
+          - string
+          - 'null'
+      required:
+      - items
+      - nextCursor
+    ProjectPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/Project'
+        nextCursor:
+          type:
+          - string
+          - 'null'
+      required:
+      - items
+      - nextCursor
+    EnvironmentPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/Environment'
+        nextCursor:
+          type:
+          - string
+          - 'null'
+      required:
+      - items
+      - nextCursor
+    FlagPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/Flag'
+        nextCursor:
+          type:
+          - string
+          - 'null'
+      required:
+      - items
+      - nextCursor
+    FlagConfigPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/FlagConfig'
+        nextCursor:
+          type:
+          - string
+          - 'null'
+      required:
+      - items
+      - nextCursor
+    TokenPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/Token'
+        nextCursor:
+          type:
+          - string
+          - 'null'
+      required:
+      - items
+      - nextCursor
+    AuditEventPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/AuditEvent'
+        nextCursor:
+          type:
+          - string
+          - 'null'
+      required:
+      - items
+      - nextCursor
+    MembershipPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/Membership'
+        nextCursor:
+          type:
+          - string
+          - 'null'
+      required:
+      - items
+      - nextCursor

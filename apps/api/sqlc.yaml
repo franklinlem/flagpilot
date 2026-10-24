@@ -1,0 +1,12 @@
+version: "2"
+sql:
+  - engine: postgresql
+    schema:
+      - ../../db/migrations/000001_identity.up.sql
+      - internal/storage/postgres/schema_migrations.sql
+    queries: internal/storage/postgres/queries
+    gen:
+      go:
+        package: sqlc
+        out: internal/storage/postgres/sqlc
+        sql_package: pgx/v5
