@@ -397,3 +397,7 @@ Consultadas em 24/10/2026; orientam as propostas, sem substituir a especificaç�
 - [S2 — PostgreSQL: constraints e foreign keys](https://www.postgresql.org/docs/current/ddl-constraints.html).
 - [S3 — RFC 9110: If-Match e precondições HTTP](https://www.rfc-editor.org/rfc/rfc9110.html#name-if-match).
 - [S4 — Go: organização de módulos e internal/cmd](https://go.dev/doc/modules/layout).
+
+## Continuidade após validação de organizações
+
+Franklin aprovou o funcionamento manual de organizações/membros, incluindo cursor e seletor, e autorizou a continuidade. O incremento 3A implementa criação/listagem de projetos e ambientes, detalhe de projeto, presets development/staging/production, autorização e auditoria. Edição/exclusão não estão implicitamente aprovadas: aguardam política de retenção/concorrência. Decisões em ADR-009 e estado em PROJECTS_STATUS.md. Próxima implementação funcional: 3B.

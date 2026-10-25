@@ -1,8 +1,8 @@
 # FlagPilot — Plano de Engenharia de Software
 
-**Versão:** 1.1 · **Data:** 24/10/2026 · **Estado:** especificação para implementação incremental
+**Versão:** 1.2 · **Data:** 24/10/2026 · **Estado:** implementação incremental
 
-**Revisão 1.1:** incorpora as direções do [plano aprovado](IMPLEMENTATION_PLAN.md) e das [ADRs](adr/README.md). Somente a fundação está em desenvolvimento; endpoints planejados não representam funcionalidades disponíveis. Licença, publicação e alterações externas continuam pendentes.
+**Revisão 1.2:** incorpora as direções do [plano aprovado](IMPLEMENTATION_PLAN.md) e das [ADRs](adr/README.md). Fundação, identidade, organizações/membros e criação/consulta de projetos/ambientes estão implementadas localmente. Ver [estado de projetos](PROJECTS_STATUS.md). Flags, tokens, avaliação e SDK seguem planejados; `api/openapi.yaml` identifica a disponibilidade de cada endpoint. Licença, publicação e alterações externas continuam pendentes.
 
 ## 1. Visão e limites
 
@@ -30,6 +30,8 @@ Plataforma self-hosted de **feature flags** para projetos e ambientes separados,
 No MVP, papéis são organizacionais e herdados por todos os projetos; somente Owner gerencia membros. Não há grants por projeto/flag. Bootstrap e recuperação administrativa serão CLI controlada, sem signup público ou senha padrão; último Owner protegido transacionalmente.
 
 Casos principais: criar projeto; cadastrar ambiente `development`, `staging`, `production`; criar flag; ativar/desativar por ambiente; configurar rollout percentual; consultar flag no frontend/backend; auditar alterações; revogar token; restaurar serviço após falha.
+
+Projetos novos recebem os ambientes development, staging e production na mesma transação. Ambientes adicionais indicam produção explicitamente; o slug production exige essa classificação. Nome/slug/classificação não têm edição neste incremento; exclusão/arquivamento aguardam política específica (ADR-009).
 
 ## 3. Requisitos funcionais
 
@@ -102,7 +104,7 @@ flagpilot/
 | users | id, email, password_hash, disabled_at, created_at | UNIQUE(lower(email)) via índice |
 | memberships | organization_id, user_id, role | PK composta; role enum/check |
 | projects | id, organization_id, name, slug | UNIQUE(organization_id,slug) |
-| environments | id, project_id, name, slug, revision BIGINT | UNIQUE(project_id,slug) |
+| environments | id, project_id, name, slug, is_production BOOLEAN, revision BIGINT | UNIQUE(project_id,slug) |
 | flags | id, project_id, key, description, archived_at | UNIQUE(project_id,key) |
 | flag_configs | id, flag_id, environment_id, enabled, rollout_bps INT, salt, updated_at, version | UNIQUE(flag_id,environment_id); 0..10000 |
 | api_tokens | id, project_id, environment_id, token_prefix, token_hash, scope, expires_at, revoked_at | Nunca guardar token em claro |
@@ -157,6 +159,7 @@ Base: `/api/v1`. JSON UTF-8. Erros padronizados `application/problem+json` (RFC 
 | GET | `/me` | Sessão | Perfil e permissões |
 | GET/POST | `/organizations` | Sessão | Listar/criar organizações |
 | GET/POST | `/organizations/{orgId}/projects` | RBAC | Projetos |
+| GET | `/projects/{projectId}` | Viewer+ | Detalhe e papel herdado no projeto |
 | GET/POST | `/projects/{projectId}/environments` | RBAC | Ambientes |
 | GET/POST | `/projects/{projectId}/flags` | RBAC | Listar/criar flags |
 | GET | `/projects/{projectId}/flags/{flagKey}` | RBAC | Detalhe |

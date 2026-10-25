@@ -537,15 +537,54 @@ paths:
         required: true
         schema: *id001
       - $ref: '#/components/parameters/CSRF'
+  /projects/{projectId}:
+    get:
+      operationId: getProject
+      summary: Consultar projeto
+      description: 'Disponível no incremento 3A. Permissão:
+        Viewer+.'
+      tags:
+      - Projetos
+      x-implementation: available
+      security:
+      - sessionCookie: []
+      responses:
+        '200':
+          description: Operação concluída
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '503':
+          $ref: '#/components/responses/Problem'
+        '500':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+      parameters:
+      - name: projectId
+        in: path
+        required: true
+        schema: *id001
   /organizations/{orgId}/projects:
     get:
       operationId: listProjects
       summary: Listar projetos
-      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+      description: 'Disponível no incremento 3A. Permissão:
         Viewer+.'
       tags:
       - Projetos
-      x-implementation: planned
+      x-implementation: available
       security:
       - sessionCookie: []
       responses:
@@ -560,6 +599,8 @@ paths:
         '422':
           $ref: '#/components/responses/Problem'
         '429':
+          $ref: '#/components/responses/Problem'
+        '503':
           $ref: '#/components/responses/Problem'
         '500':
           $ref: '#/components/responses/Problem'
@@ -589,11 +630,11 @@ paths:
     post:
       operationId: createProject
       summary: Criar projeto
-      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+      description: 'Disponível no incremento 3A. Permissão:
         Admin+.'
       tags:
       - Projetos
-      x-implementation: planned
+      x-implementation: available
       security:
       - sessionCookie: []
       responses:
@@ -608,6 +649,8 @@ paths:
         '422':
           $ref: '#/components/responses/Problem'
         '429':
+          $ref: '#/components/responses/Problem'
+        '503':
           $ref: '#/components/responses/Problem'
         '500':
           $ref: '#/components/responses/Problem'
@@ -635,11 +678,11 @@ paths:
     get:
       operationId: listEnvironments
       summary: Listar ambientes
-      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+      description: 'Disponível no incremento 3A. Permissão:
         Viewer+.'
       tags:
       - Projetos
-      x-implementation: planned
+      x-implementation: available
       security:
       - sessionCookie: []
       responses:
@@ -654,6 +697,8 @@ paths:
         '422':
           $ref: '#/components/responses/Problem'
         '429':
+          $ref: '#/components/responses/Problem'
+        '503':
           $ref: '#/components/responses/Problem'
         '500':
           $ref: '#/components/responses/Problem'
@@ -683,11 +728,11 @@ paths:
     post:
       operationId: createEnvironment
       summary: Criar ambiente
-      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+      description: 'Disponível no incremento 3A. Permissão:
         Admin+.'
       tags:
       - Projetos
-      x-implementation: planned
+      x-implementation: available
       security:
       - sessionCookie: []
       responses:
@@ -702,6 +747,8 @@ paths:
         '422':
           $ref: '#/components/responses/Problem'
         '429':
+          $ref: '#/components/responses/Problem'
+        '503':
           $ref: '#/components/responses/Problem'
         '500':
           $ref: '#/components/responses/Problem'
@@ -724,7 +771,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NamedRequest'
+              $ref: '#/components/schemas/EnvironmentRequest'
   /projects/{projectId}/flags:
     get:
       operationId: listFlags
@@ -1607,11 +1654,14 @@ components:
         name: *id004
         slug: *id005
         organizationId: *id001
+        role:
+          $ref: '#/components/schemas/Role'
       required:
       - id
       - name
       - slug
       - organizationId
+      - role
     Environment:
       type: object
       additionalProperties: false
@@ -1620,6 +1670,8 @@ components:
         name: *id004
         slug: *id005
         projectId: *id001
+        isProduction:
+          type: boolean
         revision: &id006
           type: integer
           format: int64
@@ -1630,6 +1682,7 @@ components:
       - slug
       - projectId
       - revision
+      - isProduction
     NamedRequest:
       type: object
       additionalProperties: false
@@ -2069,3 +2122,14 @@ components:
           items: {$ref: '#/components/schemas/Candidate'}
         nextCursor:
           type: [string, 'null']
+
+    EnvironmentRequest:
+      type: object
+      additionalProperties: false
+      required: [name, slug, isProduction]
+      properties:
+        name: *id004
+        slug: *id005
+        isProduction:
+          type: boolean
+          description: Identificação persistente; slug production exige true.

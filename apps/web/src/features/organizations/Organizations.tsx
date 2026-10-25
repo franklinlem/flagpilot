@@ -27,7 +27,7 @@ export function Organizations({ identity, onExpired }: { identity: Identity; onE
     </form> : null}
     {query.isPending ? <p role="status">Carregando organizações…</p> : null}
     {query.error ? <QueryFailure error={query.error} retry={() => { void query.refetch(); }} onExpired={onExpired} /> : null}
-    {query.data ? <><ul className="organizations">{query.data.pages.flatMap(page => page.items).map(org => <li className="card" key={org.id}><div><strong>{org.name}</strong><p className="hint">{org.slug}</p></div><span className="badge">{roleNames[org.role]}</span><Link to={`/organizations/${org.id}/members`}>Ver membros</Link></li>)}</ul>
+    {query.data ? <><ul className="organizations">{query.data.pages.flatMap(page => page.items).map(org => <li className="card" key={org.id}><div><strong>{org.name}</strong><p className="hint">{org.slug}</p></div><span className="badge">{roleNames[org.role]}</span><Link to={`/organizations/${org.id}/projects`}>Ver projetos</Link><Link to={`/organizations/${org.id}/members`}>Ver membros</Link></li>)}</ul>
       {query.data.pages[0].items.length === 0 ? <p>Você ainda não faz parte de uma organização.</p> : null}
       {query.hasNextPage ? <button className="secondary" disabled={query.isFetchingNextPage} onClick={() => { void query.fetchNextPage(); }}>Carregar mais organizações</button> : null}
     </> : null}

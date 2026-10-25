@@ -1,7 +1,6 @@
 package httpapi
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"github.com/franklinlem/flagpilot/apps/api/internal/auth"
@@ -15,7 +14,7 @@ import (
 
 type principalKey struct{}
 type organizationHandlers struct {
-	session *authHandlers
+	*accessHandlers
 	service *organizations.Service
 }
 
@@ -25,7 +24,7 @@ func WithOrganizations(session *auth.Service, service *organizations.Service, or
 		for _, origin := range origins {
 			a.origins[origin] = true
 		}
-		h := &organizationHandlers{session: a, service: service}
+		h := &organizationHandlers{accessHandlers: &accessHandlers{session: a}, service: service}
 		router.Group(func(r chi.Router) {
 			r.Use(h.requireSession)
 			r.Get("/api/v1/organizations", h.list)
@@ -41,33 +40,6 @@ func WithOrganizations(session *auth.Service, service *organizations.Service, or
 			})
 		})
 	}
-}
-func (h *organizationHandlers) requireSession(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("Sec-Fetch-Site") == "cross-site" {
-			problem(w, r, 403, "Origem não permitida")
-			return
-		}
-		identity, err := h.session.service.Find(r.Context(), cookieToken(r))
-		if err != nil {
-			h.session.authError(w, r, err)
-			return
-		}
-		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), principalKey{}, identity)))
-	})
-}
-func (h *organizationHandlers) requireMutation(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !h.session.validOrigin(r) {
-			problem(w, r, 403, "Origem não permitida")
-			return
-		}
-		if !auth.ValidCSRF(cookieToken(r), r.Header.Get("X-CSRF-Token")) {
-			problem(w, r, 403, "Token CSRF inválido")
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
 }
 func actor(r *http.Request) string { return r.Context().Value(principalKey{}).(auth.Identity).User.ID }
 func organizationError(w http.ResponseWriter, r *http.Request, err error) {

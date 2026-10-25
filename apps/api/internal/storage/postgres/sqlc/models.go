@@ -21,6 +21,16 @@ type AuditEvent struct {
 	CreatedAt      pgtype.Timestamptz
 }
 
+type Environment struct {
+	ID           pgtype.UUID
+	ProjectID    pgtype.UUID
+	Name         string
+	Slug         string
+	IsProduction bool
+	Revision     int64
+	CreatedAt    pgtype.Timestamptz
+}
+
 type Membership struct {
 	OrganizationID pgtype.UUID
 	UserID         pgtype.UUID
@@ -33,6 +43,14 @@ type Organization struct {
 	Name      string
 	Slug      string
 	CreatedAt pgtype.Timestamptz
+}
+
+type Project struct {
+	ID             pgtype.UUID
+	OrganizationID pgtype.UUID
+	Name           string
+	Slug           string
+	CreatedAt      pgtype.Timestamptz
 }
 
 type SchemaMigration struct {

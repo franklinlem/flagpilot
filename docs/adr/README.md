@@ -11,3 +11,5 @@ O plano foi aprovado por Franklin em 24/10/2026 ("ok. pode continuar."). ADRs re
 - [ADR-007 — Browser via BFF](007-browser-bff.md)
 
 - [ADR-008 — Organizações, membros e concorrência](008-organizations-members.md)
+
+- [ADR-009 — Projetos e ambientes iniciais](009-projects-environments.md)

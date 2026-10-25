@@ -38,3 +38,5 @@ Próximo incremento: 3A, projetos e ambientes. Não implementados nesta etapa: f
 - Validação adicionada: regressão do cursor no Chromium com CSS real, ciclo de salvamento e liberação após erro, isolamento/permissões/paginação de candidatos no PostgreSQL e reinclusão pelo seletor no E2E.
 
 Verificação desta correção: `make ci` aprovado (9 testes frontend, Go/race, integração PostgreSQL, lint/contrato/tipos e builds); 3 cenários Playwright aprovados em stack descartável, incluindo cursor e reinclusão pelo seletor. Gitleaks staged sem segredos. Containers locais atualizados e saudáveis, preservando o volume existente. Sem execução remota de CI.
+
+Aceitação manual posterior: Franklin confirmou que o ponteiro voltou ao normal e que o seletor funciona, e autorizou continuar. Próxima entrega em [PROJECTS_STATUS.md](PROJECTS_STATUS.md).

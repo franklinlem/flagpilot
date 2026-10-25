@@ -1,5 +1,7 @@
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router';
+import { Projects } from '../features/projects/Projects';
+import { Environments } from '../features/projects/Environments';
 import { Members } from '../features/organizations/Members';
 import { useEffect, useState } from 'react';
 import { ApiError, getIdentity, type Identity } from '../api/auth';
@@ -33,7 +35,7 @@ function SessionApp() {
       {state.status === 'checking' ? <p role="status">Verificando sessão…</p> : null}
       {state.status === 'unavailable' ? <section className="card"><h2>Serviço indisponível</h2><p role="alert">Não foi possível verificar sua sessão.</p><button onClick={retry}>Tentar novamente</button></section> : null}
       {state.status === 'anonymous' ? <LoginForm onLogin={signedIn} /> : null}
-      {state.status === 'authenticated' ? <Routes><Route path="/" element={<Account identity={state.identity} onLogout={signedOut} />} /><Route path="/organizations/:orgId/members" element={<Members key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="*" element={<Navigate to="/" replace />} /></Routes> : null}
+      {state.status === 'authenticated' ? <Routes><Route path="/" element={<Account identity={state.identity} onLogout={signedOut} />} /><Route path="/organizations/:orgId/members" element={<Members key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/organizations/:orgId/projects" element={<Projects key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/projects/:projectId/environments" element={<Environments key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="*" element={<Navigate to="/" replace />} /></Routes> : null}
     </main>
   );
 }

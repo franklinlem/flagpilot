@@ -1,8 +1,8 @@
 # Migrations — operação inicial
 
-Ferramenta: golang-migrate 4.20.1; SQL sequencial em `db/migrations`. A API não migra o banco. `make dev-db` e `make migrate` executam o job controlado com credencial de DDL separada. Runtime verifica exatamente a versão compatível (2 no incremento de identidade), além de dirty=false.
+Ferramenta: golang-migrate 4.20.1; SQL sequencial em `db/migrations`. A API não migra o banco. `make dev-db` e `make migrate` executam o job controlado com credencial de DDL separada. Runtime verifica exatamente a versão compatível (3 no incremento de projetos/ambientes), além de dirty=false.
 
-`000001_identity` cria users, organizations, memberships e sessions. Não cria usuário administrador. `000002_audit` cria eventos append-only para o runtime; bootstrap e recuperação já usam auditoria transacional. Não editar a migration 000001 já aplicada.
+`000001_identity` cria users, organizations, memberships e sessions. Não cria usuário administrador. `000002_audit` cria eventos append-only para o runtime; bootstrap e recuperação já usam auditoria transacional. `000003_projects_environments` acrescenta projetos/ambientes e classificação de produção. Não editar migrations já aplicadas.
 
 Cada par up/down é versionado e usa transação/lock_timeout. Não editar migration compartilhada. O `.down.sql` inicial remove dados: é apenas para teste em banco descartável. Restore e rollback de imagem não se confundem com down de schema.
 
@@ -15,7 +15,7 @@ Se uma migration falhar:
 5. Não executar `force` automaticamente. Somente um operador, após reconciliar schema e versão e registrar evidência, pode ajustar marcador.
 6. Reexecutar validação, testes de integridade e readiness antes de considerar o banco pronto.
 
-Testes automatizados cobrem banco vazio/up, up sem mudanças, down/up descartável, dirty/incompatibilidade, unicidade case-insensitive de email, FK, hash de sessão e proibição de DDL no runtime. O upgrade de schema 1 para 2 já é verificado com banco real.
+Testes automatizados cobrem banco vazio/up, up sem mudanças, down/up descartável, dirty/incompatibilidade, unicidade case-insensitive de email, FK, hash de sessão e proibição de DDL no runtime. O upgrade de schema 2 para 3 é verificado com identidade existente preservada em banco real.
 
 O papel `flagpilot_app` é preexistente, criado pelo provisionamento local/init. Migrations concedem apenas permissões necessárias ao runtime. `schema_migrations.sql` dentro de storage é somente entrada de tipos para sqlc; a tabela operacional é criada exclusivamente por golang-migrate, não por esse arquivo.
 

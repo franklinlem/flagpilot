@@ -196,6 +196,26 @@ export interface paths {
         patch: operations["changeRole"];
         trace?: never;
     };
+    "/projects/{projectId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Consultar projeto
+         * @description Disponível no incremento 3A. Permissão: Viewer+.
+         */
+        get: operations["getProject"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/organizations/{orgId}/projects": {
         parameters: {
             query?: never;
@@ -205,13 +225,13 @@ export interface paths {
         };
         /**
          * Listar projetos
-         * @description Contrato planejado; endpoint ainda não implementado. Permissão: Viewer+.
+         * @description Disponível no incremento 3A. Permissão: Viewer+.
          */
         get: operations["listProjects"];
         put?: never;
         /**
          * Criar projeto
-         * @description Contrato planejado; endpoint ainda não implementado. Permissão: Admin+.
+         * @description Disponível no incremento 3A. Permissão: Admin+.
          */
         post: operations["createProject"];
         delete?: never;
@@ -229,13 +249,13 @@ export interface paths {
         };
         /**
          * Listar ambientes
-         * @description Contrato planejado; endpoint ainda não implementado. Permissão: Viewer+.
+         * @description Disponível no incremento 3A. Permissão: Viewer+.
          */
         get: operations["listEnvironments"];
         put?: never;
         /**
          * Criar ambiente
-         * @description Contrato planejado; endpoint ainda não implementado. Permissão: Admin+.
+         * @description Disponível no incremento 3A. Permissão: Admin+.
          */
         post: operations["createEnvironment"];
         delete?: never;
@@ -557,6 +577,7 @@ export interface components {
             slug: string;
             /** Format: uuid */
             organizationId: string;
+            role: components["schemas"]["Role"];
         };
         Environment: {
             /** Format: uuid */
@@ -565,6 +586,7 @@ export interface components {
             slug: string;
             /** Format: uuid */
             projectId: string;
+            isProduction: boolean;
             /** Format: int64 */
             revision: number;
         };
@@ -762,6 +784,12 @@ export interface components {
         CandidatePage: {
             items: components["schemas"]["Candidate"][];
             nextCursor: string | null;
+        };
+        EnvironmentRequest: {
+            name: string;
+            slug: string;
+            /** @description Identificação persistente; slug production exige true. */
+            isProduction: boolean;
         };
     };
     responses: {
@@ -1177,6 +1205,36 @@ export interface operations {
             503: components["responses"]["Problem"];
         };
     };
+    getProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operação concluída */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Project"];
+                };
+            };
+            400: components["responses"]["Problem"];
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+            422: components["responses"]["Problem"];
+            429: components["responses"]["Problem"];
+            500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
+        };
+    };
     listProjects: {
         parameters: {
             query?: {
@@ -1207,6 +1265,7 @@ export interface operations {
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     createProject: {
@@ -1244,6 +1303,7 @@ export interface operations {
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     listEnvironments: {
@@ -1276,6 +1336,7 @@ export interface operations {
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     createEnvironment: {
@@ -1292,7 +1353,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["NamedRequest"];
+                "application/json": components["schemas"]["EnvironmentRequest"];
             };
         };
         responses: {
@@ -1313,6 +1374,7 @@ export interface operations {
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     listFlags: {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/franklinlem/flagpilot/apps/api/internal/pagination"
 	"regexp"
 	"strings"
 	"time"
@@ -21,7 +22,7 @@ import (
 var (
 	ErrNotFound    = errors.New("recurso não encontrado")
 	ErrForbidden   = errors.New("operação não permitida para seu papel")
-	ErrValidation  = errors.New("dados ou paginação inválidos")
+	ErrValidation  = pagination.ErrValidation
 	ErrConflict    = errors.New("recurso já existe ou slug indisponível")
 	ErrLastOwner   = errors.New("a organização precisa manter ao menos um Proprietário ativo")
 	ErrUnavailable = errors.New("serviço indisponível")
@@ -102,7 +103,7 @@ func (s *Service) List(ctx context.Context, actor string, page PageRequest) (Pag
 		return out, ErrValidation
 	}
 	scope := identifiers.String(actorID)
-	after, err := page.after("organizations", scope)
+	after, err := page.After("organizations", scope)
 	if err != nil {
 		return out, err
 	}
@@ -113,7 +114,7 @@ func (s *Service) List(ctx context.Context, actor string, page PageRequest) (Pag
 		return out, ErrUnavailable
 	}
 	if len(rows) > page.Limit {
-		out.NextCursor = nextCursor("organizations", scope, rows[page.Limit-1].ID)
+		out.NextCursor = pagination.NextCursor("organizations", scope, rows[page.Limit-1].ID)
 		rows = rows[:page.Limit]
 	}
 	for _, row := range rows {
@@ -185,7 +186,7 @@ func (s *Service) Members(ctx context.Context, actor, organization string, page 
 		return out, ErrValidation
 	}
 	scope := identifiers.String(org) + ":" + identifiers.String(actorID)
-	after, err := page.after("members", scope)
+	after, err := page.After("members", scope)
 	if err != nil {
 		return out, err
 	}
@@ -205,7 +206,7 @@ func (s *Service) Members(ctx context.Context, actor, organization string, page 
 		return out, ErrUnavailable
 	}
 	if len(rows) > page.Limit {
-		out.NextCursor = nextCursor("members", scope, rows[page.Limit-1].UserID)
+		out.NextCursor = pagination.NextCursor("members", scope, rows[page.Limit-1].UserID)
 		rows = rows[:page.Limit]
 	}
 	for _, row := range rows {
@@ -234,7 +235,7 @@ func (s *Service) Candidates(ctx context.Context, actor, organization string, pa
 		return out, ErrValidation
 	}
 	scope := identifiers.String(org) + ":" + identifiers.String(actorID)
-	after, err := page.after("candidates", scope)
+	after, err := page.After("candidates", scope)
 	if err != nil {
 		return out, err
 	}
@@ -258,7 +259,7 @@ func (s *Service) Candidates(ctx context.Context, actor, organization string, pa
 		return out, ErrUnavailable
 	}
 	if len(rows) > page.Limit {
-		out.NextCursor = nextCursor("candidates", scope, rows[page.Limit-1].ID)
+		out.NextCursor = pagination.NextCursor("candidates", scope, rows[page.Limit-1].ID)
 		rows = rows[:page.Limit]
 	}
 	for _, row := range rows {

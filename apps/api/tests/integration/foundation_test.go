@@ -83,8 +83,26 @@ func TestFoundation(t *testing.T) {
 		t.Fatal(err)
 	}
 	check("/api/v1/health/ready", 503)
+
+	if err := m.Steps(1); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.Pool.Exec(ctx, "INSERT INTO organizations(id,name,slug) VALUES('00000000-0000-4000-8000-000000000010','Legacy identity','legacy-identity')"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.Pool.Exec(ctx, "INSERT INTO users(id,email,password_hash) VALUES('00000000-0000-4000-8000-000000000011','legacy@example.invalid','test-hash-preserved')"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.Pool.Exec(ctx, "INSERT INTO memberships(organization_id,user_id,role) VALUES('00000000-0000-4000-8000-000000000010','00000000-0000-4000-8000-000000000011','Owner')"); err != nil {
+		t.Fatal(err)
+	}
 	if err := m.Up(); err != nil {
 		t.Fatal(err)
+	}
+
+	var preserved int
+	if err := store.Pool.QueryRow(ctx, "SELECT count(*) FROM memberships m JOIN users u ON u.id=m.user_id JOIN organizations o ON o.id=m.organization_id WHERE o.slug='legacy-identity' AND u.password_hash='test-hash-preserved' AND m.role='Owner'").Scan(&preserved); err != nil || preserved != 1 {
+		t.Fatal("upgrade perdeu identidade existente", err)
 	}
 	if err := m.Up(); !errors.Is(err, migrate.ErrNoChange) {
 		t.Fatalf("migration não idempotente: %v", err)
@@ -115,11 +133,11 @@ func TestFoundation(t *testing.T) {
 		t.Fatal(err)
 	}
 	check("/api/v1/health/ready", 503)
-	if _, err := owner.Exec(ctx, "UPDATE schema_migrations SET dirty=false,version=3"); err != nil {
+	if _, err := owner.Exec(ctx, "UPDATE schema_migrations SET dirty=false,version=4"); err != nil {
 		t.Fatal(err)
 	}
 	check("/api/v1/health/ready", 503)
-	if _, err := owner.Exec(ctx, "UPDATE schema_migrations SET version=2"); err != nil {
+	if _, err := owner.Exec(ctx, "UPDATE schema_migrations SET version=3"); err != nil {
 		t.Fatal(err)
 	}
 	if err := m.Down(); err != nil {
@@ -132,6 +150,7 @@ func TestFoundation(t *testing.T) {
 	check("/api/v1/health/ready", 200)
 	t.Run("authentication", func(t *testing.T) { exerciseAuth(t, ctx, store, owner) })
 	t.Run("organizations", func(t *testing.T) { exerciseOrganizations(t, ctx, store, owner) })
+	t.Run("projects", func(t *testing.T) { exerciseProjects(t, ctx, store, owner) })
 	if _, err := owner.Exec(ctx, "ALTER ROLE flagpilot_app NOLOGIN"); err != nil {
 		t.Fatal(err)
 	}
