@@ -1,8 +1,8 @@
 # FlagPilot — Plano de Engenharia de Software
 
-**Versão:** 1.5 · **Data:** 24/10/2026 · **Estado:** implementação incremental
+**Versão:** 1.6 · **Data:** 25/10/2026 · **Estado:** implementação incremental
 
-**Revisão 1.5:** incorpora as direções do [plano aprovado](IMPLEMENTATION_PLAN.md) e das [ADRs](adr/README.md). Fundação, identidade, organizações/membros, criação/consulta de projetos/ambientes e gestão de flags booleanas, tokens por ambiente e avaliação booleana/percentual single/batch estão implementados localmente. Ver [estado de avaliação](EVALUATION_STATUS.md). Rollout determinístico v1 está implementado com vetores Go/JS; o SDK segue planejado; `api/openapi.yaml` identifica a disponibilidade de cada endpoint. Licença, publicação e alterações externas continuam pendentes.
+**Revisão 1.6:** incorpora as direções do [plano aprovado](IMPLEMENTATION_PLAN.md) e das [ADRs](adr/README.md). Fundação, identidade, organizações/membros, criação/consulta de projetos/ambientes e gestão de flags booleanas, tokens por ambiente e avaliação booleana/percentual single/batch estão implementados localmente. Ver [estado de avaliação](EVALUATION_STATUS.md). Rollout determinístico v1 está implementado com vetores Go/JS; o SDK HTTP privado para backend está implementado com cache/timeout/fallback (ver SDK_STATUS.md); `api/openapi.yaml` identifica a disponibilidade de cada endpoint. Licença, publicação e alterações externas continuam pendentes.
 
 ## 1. Visão e limites
 
@@ -260,7 +260,7 @@ components:
 
 ## 8. SDK JavaScript/TypeScript
 
-**Pacote:** `@flagpilot/sdk-js` (nome proposto, verificar disponibilidade antes de publicar). Suportar Node.js e browser, com estratégias distintas de autenticação. API pública proposta:
+**Pacote:** `@flagpilot/sdk-js` (nome proposto, verificar disponibilidade antes de publicar). Suportar Node.js e browser, com estratégias distintas de autenticação. API do pacote privado implementada para backend:
 
 ```ts
 import { FlagPilotClient } from '@flagpilot/sdk-js';

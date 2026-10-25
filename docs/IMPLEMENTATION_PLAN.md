@@ -413,3 +413,7 @@ Franklin confirmou criação, ativação e arquivamento de flags e autorizou 4A.
 ## Continuidade após validação de tokens
 
 Franklin confirmou manualmente emissão com validades diferentes, cópia, ocultação e revogação no painel e autorizou 4B. Essa aceitação cobre os cenários exercitados de gestão, sem presumir testes manuais da API. Rollout percentual determinístico, edição decimal por ambiente, confirmação de produção e vetores Go/TS compartilhados estão implementados conforme ADR-003. Sem migration, dependências ou variáveis novas; schema 5 preservado. Próxima etapa: 5, cliente SDK HTTP com cache/timeout/fallback. Evidências e limites em EVALUATION_STATUS.md.
+
+## Continuidade após validação de rollout
+
+Em 25/10/2026, Franklin confirmou visualização e salvamento de porcentagens diferentes e autorizou a etapa 5. O SDK privado HTTP para Node 24.x implementa evaluate/isEnabled/close, cache LRU limitado, timeout total, retry transitório máximo 1, deduplicação/cancelamento e fallback por chamada. ESM/CJS/tipos e integração com API real são verificados. Contrato em ADR-004, evidências em SDK_STATUS.md e exemplo no runbook/sdk.md. Sem novas dependências, migrations ou credenciais reais. A próxima etapa é 6, consolidação do dashboard (filtros, consulta de auditoria e acessibilidade); homologação continua sujeita à autorização externa.

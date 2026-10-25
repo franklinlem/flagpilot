@@ -47,6 +47,7 @@ def main():
             else: raise RuntimeError('Frontend E2E indisponível')
             env = dict(os.environ, E2E_BASE_URL=origin, E2E_EMAIL='owner@example.invalid', E2E_PASSWORD=password, E2E_VIEWER_EMAIL='viewer@example.invalid', E2E_VIEWER_PASSWORD=viewer_password, E2E_VIEWER_ID=viewer_id)
             env.setdefault('PLAYWRIGHT_BROWSERS_PATH', str(ROOT / '.tools/playwright'))
+            subprocess.run(['npm', 'run', 'build', '--workspace', '@flagpilot/sdk-js'], cwd=ROOT, check=True)
             result = subprocess.run(['npm', 'run', 'test:e2e'], cwd=ROOT, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
             output = result.stdout.replace(password, '[REDACTED]').replace(viewer_password, '[REDACTED]')
             print(re.sub(r'fp_eval_[a-f0-9]{64}', '[REDACTED_EVALUATION_TOKEN]', output))

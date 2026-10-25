@@ -1,3 +1,4 @@
+import { FlagPilotClient } from '@flagpilot/sdk-js';
 import { expect, test } from '@playwright/test';
 test('emissão única, avaliação single/batch, isolamento e revogação', async ({ page, browser }) => {
   await page.goto('/');
@@ -34,12 +35,16 @@ test('emissão única, avaliação single/batch, isolamento e revogação', asyn
   await expect(page.getByLabel('Segredo do token')).toHaveCount(0);
   expect(await page.evaluate(() => localStorage.length + sessionStorage.length)).toBe(0);
   const caller = await browser.newContext();
+  const sdk = new FlagPilotClient({ baseUrl: new URL('/api/v1', tokenPage).toString(), token: secret, cacheTtlMs: 0 });
+  const cachedSdk = new FlagPilotClient({ baseUrl: new URL('/api/v1', tokenPage).toString(), token: secret });
   try {
     const headers = { Authorization: `Bearer ${secret}` };
     const evaluated = await caller.request.post(new URL('/api/v1/evaluate', tokenPage).toString(), { headers, data: { flagKey: 'token_flag' } });
     expect(evaluated.status()).toBe(200);
     const result = await evaluated.json();
     expect(result.value).toBe(true); expect(result.reason).toBe('ENABLED'); expect(result.environment).toBe('development');
+    expect(await sdk.isEnabled('token_flag')).toBe(true);
+    expect(await cachedSdk.isEnabled('token_flag')).toBe(true);
     const batch = await caller.request.post(new URL('/api/v1/evaluate/batch', tokenPage).toString(), { headers, data: { evaluations: [{ flagKey: 'token_flag' }, { flagKey: 'missing_flag' }] } });
     expect(batch.status()).toBe(200);
     const snapshot = await batch.json();
@@ -47,6 +52,10 @@ test('emissão única, avaliação single/batch, isolamento e revogação', asyn
     expect(snapshot.results[1].reason).toBe('NOT_FOUND');
     const current = await page.request.get(`/api/v1/environments/${devId}/flags/token_flag`);
     expect((await page.request.put(`/api/v1/environments/${devId}/flags/token_flag`, { headers: { ...adminHeaders, 'If-Match': current.headers()['etag'] }, data: { enabled: true, rolloutBps: 3725 } })).status()).toBe(200);
+    expect((await sdk.evaluate('token_flag')).reason).toBe('MISSING_CONTEXT');
+    expect(await sdk.isEnabled('token_flag', { defaultValue: true })).toBe(true);
+    expect((await sdk.evaluate('token_flag', { bucketingKey: 'contexto:á:🚀' })).reason).toBe('PERCENTAGE_ROLLOUT');
+    expect((await cachedSdk.evaluate('token_flag')).reason).toBe('ENABLED'); // TTL torna a alteração eventualmente visível.
     const missingContext = await caller.request.post(new URL('/api/v1/evaluate', tokenPage).toString(), { headers, data: { flagKey: 'token_flag' } });
     expect(missingContext.status()).toBe(200);
     expect(await missingContext.json()).toMatchObject({ value: false, reason: 'MISSING_CONTEXT' });
@@ -71,5 +80,7 @@ test('emissão única, avaliação single/batch, isolamento e revogação', asyn
     await row.getByRole('button', { name: 'Confirmar revogação', exact: true }).click();
     await expect(row.getByText('Revogado', { exact: true })).toBeVisible();
     expect((await caller.request.post(new URL('/api/v1/evaluate', tokenPage).toString(), { headers, data: { flagKey: 'token_flag' } })).status()).toBe(401);
-  } finally { await caller.close(); }
+    expect((await sdk.evaluate('token_flag')).reason).toBe('SDK_UNAUTHORIZED');
+    expect(await sdk.isEnabled('token_flag')).toBe(false);
+  } finally { sdk.close(); cachedSdk.close(); await caller.close(); }
 });

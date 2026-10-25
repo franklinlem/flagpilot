@@ -1,6 +1,6 @@
 # FlagPilot
 
-Plataforma self-hosted de feature flags em desenvolvimento. Incremento atual: tokens e avaliação booleana com autorização sobre a fundação Go/Chi, PostgreSQL/migrations e React/Vite. **Login/logout, bootstrap, organizações, membros, projetos, ambientes e gestão de flags, tokens auditados e avaliação booleana já funcionam.** Rollout percentual e cliente SDK virão nos próximos incrementos.
+Plataforma self-hosted de feature flags em desenvolvimento. Incremento atual: SDK HTTP privado TypeScript/JavaScript para backend, sobre a fundação Go/Chi, PostgreSQL/migrations e React/Vite. **Login/logout, bootstrap, organizações, membros, projetos, ambientes e gestão de flags, tokens auditados e avaliação booleana/percentual e SDK com cache/timeout/fallback já funcionam localmente.** Próxima etapa: consolidação do dashboard.
 
 ## Requisitos e versões
 
@@ -93,10 +93,11 @@ Testes de integração usam somente credenciais sintéticas em banco efêmero. N
 - [Estado de projetos/ambientes](docs/PROJECTS_STATUS.md)
 - [Estado de flags booleanas](docs/FLAGS_STATUS.md)
 - [Estado de tokens/avaliação](docs/EVALUATION_STATUS.md)
+- [Estado do SDK](docs/SDK_STATUS.md) e [uso em backend](docs/runbooks/sdk.md)
 - [Uso de tokens/avaliação](docs/runbooks/evaluation.md)
 - [Uso de flags](docs/runbooks/flags.md)
 - [Uso de projetos/ambientes](docs/runbooks/projects.md)
 - [Cadastrar usuários e gerenciar membros](docs/runbooks/organizations.md)
 - [Bootstrap e recuperação](docs/runbooks/identity.md)
 
-Próximo incremento: SDK JavaScript/TypeScript (5). Rollout percentual determinístico (4B) disponível, com edição de porcentagem e vetores Go/JS compartilhados. Avaliação HTTP de servidor disponível com tokens por ambiente; o SDK ainda não está funcional. Flags possuem revisão otimista e confirmação de produção. Projetos/ambientes oferecem criação e consulta; edição/exclusão continuam pendentes de política. Organizações/membros já possuem isolamento e proteção do último Owner. Bootstrap, login e recuperação já são auditados. Nenhum DNS, VPS, Coolify ou servidor externo foi alterado. Licença Apache-2.0 e publicação do pacote/remoto continuam pendentes; não há licença atribuída automaticamente.
+SDK HTTP privado TypeScript/JavaScript disponível para backend (5). Próximo incremento: consolidação do dashboard (6). Rollout percentual determinístico (4B) disponível, com edição de porcentagem e vetores Go/JS compartilhados. Avaliação HTTP de servidor disponível com tokens por ambiente; o SDK implementa cache limitado, timeout total e fallback, com builds ESM/CJS. Flags possuem revisão otimista e confirmação de produção. Projetos/ambientes oferecem criação e consulta; edição/exclusão continuam pendentes de política. Organizações/membros já possuem isolamento e proteção do último Owner. Bootstrap, login e recuperação já são auditados. Nenhum DNS, VPS, Coolify ou servidor externo foi alterado. Licença Apache-2.0 e publicação do pacote/remoto continuam pendentes; não há licença atribuída automaticamente.

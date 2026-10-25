@@ -1,2 +1,2 @@
-/** Fundação do pacote. O cliente de avaliação será entregue no incremento 5. */
-export {};
+export { FlagPilotClient } from './client.js';
+export type { ClientOptions, EvaluateOptions, EvaluationResult, RemoteResult, LocalResult, RemoteReason, LocalReason } from './types.js';

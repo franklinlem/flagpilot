@@ -1,6 +1,6 @@
 {
   "name": "@flagpilot/sdk-js",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "files": [
@@ -22,6 +22,9 @@
     "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json && node scripts/cjs.mjs",
     "typecheck": "tsc --noEmit",
     "check:package": "node --input-type=module -e \"await import('@flagpilot/sdk-js')\" && node -e \"require('@flagpilot/sdk-js')\"",
-    "test": "npm run build && node --test tests/bucketing.test.mjs"
+    "test": "npm run build && tsc --noEmit --strict --target ES2022 --module NodeNext --moduleResolution NodeNext --skipLibCheck tests/types.mts tests/types.cts && node --test tests/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=24.22.1 <25"
   }
 }

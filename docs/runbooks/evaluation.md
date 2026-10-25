@@ -66,4 +66,4 @@ Limites por segundo nesta etapa: 600 globais, 120 por peer real e 100 por creden
 
 `make dev-containers` aplica migration 000005 e atualiza a stack local, sem apagar volumes ou dados existentes. Readiness exige schema 5. Atualize http://127.0.0.1:5173 com Ctrl+Shift+R. Nenhum token real é criado automaticamente pelo desenvolvimento; cada emissão pelo painel é explícita e auditada.
 
-O SDK JavaScript ainda não está funcional. Integração HTTP de servidor já está disponível; Rollout percentual está disponível; a etapa 5 entregará SDK/cache/fallback. Não armazenar token consumidor no `.env` do servidor FlagPilot; configure-o no ambiente secreto do backend que fará as consultas.
+O SDK TypeScript/JavaScript privado para backend está disponível com cache, timeout e fallback. Veja [uso do SDK](sdk.md). Integração HTTP direta e rollout percentual também estão disponíveis. Não armazenar token consumidor no `.env` do servidor FlagPilot; configure-o no ambiente secreto do backend que fará as consultas.

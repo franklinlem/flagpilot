@@ -43,3 +43,7 @@ Editor+ configura 0 a 100%, com até duas casas decimais. Vírgula/ponto são ac
 A referência TypeScript do algoritmo é interna e não exporta um cliente público. Próxima etapa: 5, SDK HTTP com cache, timeout e fallback. Aceitação manual do novo campo de percentual segue com Franklin. Distribuição aproximada por contexto não é quota exata; benchmark/SLO, homologação e produção continuam pendentes.
 
 Containers locais reconstruídos e saudáveis, volume existente preservado. Readiness/frontend HTTP 200, novo campo servido pelo frontend e avaliação sem Bearer HTTP 401. Regeneração sqlc/OpenAPI sem diferenças e Gitleaks staged aprovado. Os dois vetores extremos usam identificadores sintéticos preenchidos com zeros, sem supressão de regras de detecção. Nenhuma credencial real emitida pelos testes e nenhum servidor externo alterado.
+
+## Aceitação manual e continuidade — 25/10/2026
+
+Franklin confirmou visualização e salvamento de percentuais diferentes no painel e autorizou a etapa 5. Isso confirma os cenários exercitados de configuração; não presume aceitação manual da distribuição determinística via HTTP. SDK entregue em [SDK_STATUS.md](SDK_STATUS.md); cache do consumidor pode retardar a observação de mudanças/revogação até o TTL.
