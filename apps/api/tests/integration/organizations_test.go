@@ -77,6 +77,14 @@ func exerciseOrganizations(t *testing.T, ctx context.Context, store *postgres.St
 	if err != nil || len(list.Items) != 1 || list.Items[0].ID != orgB.ID {
 		t.Fatal("listagem cruzou tenants")
 	}
+
+	// Nenhum diretório global: B é ativo, mas não compartilha escopo com A.
+	candidates, err := service.Candidates(ctx, aid, orgA.ID, organizations.PageRequest{Limit: 25})
+	if err != nil || len(candidates.Items) != 0 {
+		t.Fatal("candidatos expuseram usuário externo ou membro atual", err)
+	}
+	_, err = service.Candidates(ctx, bid, orgA.ID, organizations.PageRequest{Limit: 25})
+	checkErr(err, organizations.ErrNotFound)
 	checkList(bid, orgA.ID, organizations.ErrNotFound)
 	_, err = service.Add(ctx, bid, orgA.ID, bid, "Owner")
 	checkErr(err, organizations.ErrNotFound)
@@ -88,6 +96,9 @@ func exerciseOrganizations(t *testing.T, ctx context.Context, store *postgres.St
 			t.Fatal(err)
 		}
 		checkList(c, orgA.ID, nil)
+		_, err = service.Candidates(ctx, c, orgA.ID, organizations.PageRequest{Limit: 25})
+		checkErr(err, organizations.ErrForbidden)
+
 		_, err = service.Add(ctx, c, orgA.ID, bid, "Viewer")
 		checkErr(err, organizations.ErrForbidden)
 		_, err = service.Change(ctx, c, orgA.ID, aid, "Viewer")
@@ -102,6 +113,39 @@ func exerciseOrganizations(t *testing.T, ctx context.Context, store *postgres.St
 	_, err = service.Add(ctx, aid, orgA.ID, bid, "Root")
 	checkErr(err, organizations.ErrValidation)
 	if _, err = service.Add(ctx, aid, orgA.ID, bid, "Viewer"); err != nil {
+		t.Fatal(err)
+	}
+
+	// Seleção entre organizações conhecidas; paginação e exclusão de desativados.
+	selection, err := service.Create(ctx, aid, "Seleção", "selection-org")
+	if err != nil {
+		t.Fatal(err)
+	}
+	candidatePage, err := service.Candidates(ctx, aid, selection.ID, organizations.PageRequest{Limit: 1})
+	if err != nil || len(candidatePage.Items) != 1 || candidatePage.NextCursor == nil {
+		t.Fatal("paginação de candidatos", err)
+	}
+	candidateNext, err := service.Candidates(ctx, aid, selection.ID, organizations.PageRequest{Limit: 1, Cursor: *candidatePage.NextCursor})
+	if err != nil || len(candidateNext.Items) != 1 || candidateNext.Items[0].UserID == candidatePage.Items[0].UserID || candidateNext.NextCursor != nil {
+		t.Fatal("candidatos repetidos/omitidos", err)
+	}
+	_, err = service.Candidates(ctx, aid, orgA.ID, organizations.PageRequest{Limit: 1, Cursor: *candidatePage.NextCursor})
+	checkErr(err, organizations.ErrValidation)
+	_, err = service.Members(ctx, aid, selection.ID, organizations.PageRequest{Limit: 1, Cursor: *candidatePage.NextCursor})
+	checkErr(err, organizations.ErrValidation)
+	exec("UPDATE users SET disabled_at=now() WHERE id=$1", c)
+	candidates, err = service.Candidates(ctx, aid, selection.ID, organizations.PageRequest{Limit: 25})
+	if err != nil || len(candidates.Items) != 1 || candidates.Items[0].UserID != bid {
+		t.Fatal("candidato desativado", err)
+	}
+	exec("UPDATE users SET disabled_at=NULL WHERE id=$1", c)
+	// Remoção da única associação não impede selecionar o antigo membro pelo email.
+	checkErr(service.Remove(ctx, aid, orgA.ID, c), nil)
+	candidates, err = service.Candidates(ctx, aid, orgA.ID, organizations.PageRequest{Limit: 25})
+	if err != nil || len(candidates.Items) != 1 || candidates.Items[0].UserID != c {
+		t.Fatal("antigo membro ausente", err)
+	}
+	if _, err = service.Add(ctx, aid, orgA.ID, c, "Admin"); err != nil {
 		t.Fatal(err)
 	}
 	// Cursor validado por coleção, organização e usuário; página estável sem duplicatas.
@@ -275,6 +319,12 @@ func exerciseOrganizations(t *testing.T, ctx context.Context, store *postgres.St
 	call("GET", "/api/v1/organizations", nil, "", "", 401)
 	call("GET", "/api/v1/organizations/"+orgA.ID+"/members", nil, cs.Token, "", 404)
 	call("GET", "/api/v1/organizations/"+orgB.ID+"/members", nil, cs.Token, "", 200)
+
+	call("GET", "/api/v1/organizations/"+orgA.ID+"/member-candidates", nil, "", "", 401)
+	call("GET", "/api/v1/organizations/"+orgA.ID+"/member-candidates", nil, cs.Token, "", 404)
+	call("GET", "/api/v1/organizations/"+orgB.ID+"/member-candidates", nil, cs.Token, "", 403)
+	call("GET", "/api/v1/organizations/"+orgA.ID+"/member-candidates", nil, as.Token, "", 200)
+	call("GET", "/api/v1/organizations/"+orgA.ID+"/member-candidates?limit=101", nil, as.Token, "", 422)
 	call("GET", "/api/v1/organizations?limit=101", nil, as.Token, "", 422)
 	call("POST", "/api/v1/organizations", map[string]string{"name": "HTTP", "slug": "http-org"}, as.Token, "", 403)
 	call("POST", "/api/v1/organizations", map[string]string{"name": "HTTP", "slug": "http-org"}, as.Token, as.Identity.CSRFToken, 201)

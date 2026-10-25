@@ -128,6 +128,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/organizations/{orgId}/member-candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Listar usuários disponíveis para associação
+         * @description Somente Owner. Usuários ativos em organizações compartilhadas com o ator ou antigos membros deste escopo; exclui membros atuais. Não é diretório global.
+         */
+        get: operations["listMemberCandidates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/organizations/{orgId}/members": {
         parameters: {
             query?: never;
@@ -733,6 +753,16 @@ export interface components {
             items: components["schemas"]["OrganizationMember"][];
             nextCursor: string | null;
         };
+        Candidate: {
+            /** Format: uuid */
+            userId: string;
+            /** Format: email */
+            email: string;
+        };
+        CandidatePage: {
+            items: components["schemas"]["Candidate"][];
+            nextCursor: string | null;
+        };
     };
     responses: {
         /** @description Erro padronizado, sem segredos ou detalhes internos */
@@ -959,6 +989,39 @@ export interface operations {
             409: components["responses"]["Problem"];
             413: components["responses"]["Problem"];
             415: components["responses"]["Problem"];
+            422: components["responses"]["Problem"];
+            429: components["responses"]["Problem"];
+            500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
+        };
+    };
+    listMemberCandidates: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                orgId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Operação concluída */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CandidatePage"];
+                };
+            };
+            400: components["responses"]["Problem"];
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];

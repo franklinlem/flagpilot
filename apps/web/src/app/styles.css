@@ -18,7 +18,7 @@ input { width: 100%; min-height: 2.8rem; border: 1px solid #64748b; background: 
 button { cursor: pointer; min-height: 2.8rem; border: 1px solid transparent; border-radius: .4rem; background: #93c5fd; color: #111827; padding: .65rem 1.1rem; font: inherit; font-weight: 650; }
 form button { margin-top: 1.4rem; width: 100%; }
 button.secondary { background: transparent; border-color: #64748b; color: inherit; }
-button:disabled { opacity: .65; cursor: wait; }
+button:disabled { opacity: .65; cursor: default; }
 input:focus-visible, button:focus-visible { outline: 3px solid #bfdbfe; outline-offset: 3px; }
 input[aria-invalid=true] { border-color: #fca5a5; }
 .error, .field-error { color: #fecaca; }
@@ -45,3 +45,5 @@ select { background: #111827; border: 1px solid #64748b; color: inherit; font: i
 .confirmation button { margin-right: .5rem; }
 .danger { color: #fecaca !important; }
 legend { font-weight: 650; }
+
+button[aria-busy="true"] { cursor: progress; }

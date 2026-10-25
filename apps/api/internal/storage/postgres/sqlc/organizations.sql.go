@@ -162,6 +162,58 @@ func (q *Queries) ListActorOrganizations(ctx context.Context, arg ListActorOrgan
 	return items, nil
 }
 
+const listMemberCandidates = `-- name: ListMemberCandidates :many
+SELECT u.id, u.email FROM users u
+WHERE u.disabled_at IS NULL
+AND NOT EXISTS (SELECT 1 FROM memberships m WHERE m.organization_id=$1 AND m.user_id=u.id)
+AND (
+ EXISTS (SELECT 1 FROM memberships known JOIN memberships actor ON actor.organization_id=known.organization_id
+         WHERE known.user_id=u.id AND actor.user_id=$2)
+ OR EXISTS (SELECT 1 FROM audit_events a WHERE a.organization_id=$1 AND a.resource_id=u.id
+            AND a.resource_type='membership' AND a.action IN ('member.added','member.removed','member.role_changed'))
+)
+AND ($3::uuid IS NULL OR u.id>$3::uuid)
+ORDER BY u.id LIMIT $4
+`
+
+type ListMemberCandidatesParams struct {
+	OrganizationID pgtype.UUID
+	ActorID        pgtype.UUID
+	AfterID        pgtype.UUID
+	PageLimit      int32
+}
+
+type ListMemberCandidatesRow struct {
+	ID    pgtype.UUID
+	Email string
+}
+
+// Visibilidade limitada a associações compartilhadas ou histórico deste escopo.
+func (q *Queries) ListMemberCandidates(ctx context.Context, arg ListMemberCandidatesParams) ([]ListMemberCandidatesRow, error) {
+	rows, err := q.db.Query(ctx, listMemberCandidates,
+		arg.OrganizationID,
+		arg.ActorID,
+		arg.AfterID,
+		arg.PageLimit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListMemberCandidatesRow
+	for rows.Next() {
+		var i ListMemberCandidatesRow
+		if err := rows.Scan(&i.ID, &i.Email); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listOrganizationMembers = `-- name: ListOrganizationMembers :many
 SELECT m.user_id, m.role, u.email, (u.disabled_at IS NOT NULL)::boolean AS disabled
 FROM memberships m JOIN users u ON u.id=m.user_id

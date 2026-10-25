@@ -217,6 +217,59 @@ func (s *Service) Members(ctx context.Context, actor, organization string, page 
 	return out, nil
 }
 
+// Candidate contém somente os dados necessários à seleção, sem diretório global.
+type Candidate struct {
+	UserID string `json:"userId"`
+	Email  string `json:"email"`
+}
+
+func (s *Service) Candidates(ctx context.Context, actor, organization string, page PageRequest) (Page[Candidate], error) {
+	out := Page[Candidate]{Items: []Candidate{}}
+	actorID, err := identifiers.Parse(actor)
+	if err != nil {
+		return out, ErrValidation
+	}
+	org, err := identifiers.Parse(organization)
+	if err != nil {
+		return out, ErrValidation
+	}
+	scope := identifiers.String(org) + ":" + identifiers.String(actorID)
+	after, err := page.after("candidates", scope)
+	if err != nil {
+		return out, err
+	}
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return out, ErrUnavailable
+	}
+	defer func() { _ = tx.Rollback(context.Background()) }()
+	qt := s.query.WithTx(tx)
+	_, role, err := s.scope(ctx, qt, org, actorID, false)
+	if err != nil {
+		return out, err
+	}
+	if !auth.Can(role, auth.ManageMembers) {
+		return out, ErrForbidden
+	}
+	rows, err := qt.ListMemberCandidates(ctx, q.ListMemberCandidatesParams{OrganizationID: org, ActorID: actorID, AfterID: after, PageLimit: int32(page.Limit + 1)})
+	if err != nil {
+		return out, ErrUnavailable
+	}
+	if len(rows) > page.Limit {
+		out.NextCursor = nextCursor("candidates", scope, rows[page.Limit-1].ID)
+		rows = rows[:page.Limit]
+	}
+	for _, row := range rows {
+		out.Items = append(out.Items, Candidate{UserID: identifiers.String(row.ID), Email: row.Email})
+	}
+	if err = tx.Commit(ctx); err != nil {
+		return out, ErrUnavailable
+	}
+	return out, nil
+}
+
 // Add/Change/Remove compartilham a mesma fronteira transacional e autorização.
 func (s *Service) Add(ctx context.Context, actor, org, user, role string) (Member, error) {
 	return s.mutate(ctx, actor, org, user, role, "member.added")

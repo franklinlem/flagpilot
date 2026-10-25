@@ -12,7 +12,7 @@ Sem signup público, convites por email ou senha padrão. O operador local cadas
 make create-user ARGS='--email novo-usuario@example.com --org-id UUID_DA_ORGANIZACAO'
 ```
 
-A senha é solicitada e confirmada sem echo. O comando imprime o UUID do usuário (não é segredo), cria a associação Viewer e a auditoria na mesma transação. Não modifica credenciais de usuário existente; use o ID conhecido para associá-lo pelo painel. Senhas seguem a política de identidade (12+ caracteres, até 256 bytes). Não compartilhar senhas no chat ou passar por argumentos.
+A senha é solicitada e confirmada sem echo. O comando imprime o UUID do usuário (não é segredo), cria a associação Viewer e a auditoria na mesma transação. Não modifica credenciais de usuário existente. Para associar uma conta já cadastrada, use **Usuário existente** no painel e selecione pelo email. Senhas seguem a política de identidade (12+ caracteres, até 256 bytes). Não compartilhar senhas no chat ou passar por argumentos.
 
 Alternativa usando o binário da imagem, sem Go no host:
 
@@ -40,3 +40,9 @@ Collections usam default 25, máximo 100 e botões para carregar mais. Não reut
 ## Dados preservados
 
 O incremento 2B usa schema 2 existente; não há migration, reset de banco ou alteração da senha/conta local de Franklin. `make dev-containers` atualiza somente os containers deste projeto e preserva o volume. Exclusão/edição de organizações, desativação global de usuários, convites e transferência formal de propriedade continuam fora deste incremento.
+
+## Selecionar um usuário existente
+
+O formulário de adição agora usa um seletor por email, sem digitar UUID. Aparecem usuários ativos de organizações às quais o operador tem acesso e antigos membros desta organização. Contas já associadas e desativadas são excluídas. Use **Carregar mais usuários** quando disponível. Somente Proprietários podem consultar essa lista e adicionar membros. Uma conta sem relação com suas organizações não aparece; o cadastro inicial pelo CLI continua indicando a organização correta.
+
+Após salvar um papel, o botão fica desabilitado até haver outra alteração e o cursor volta à seta. Durante a operação aparece **Salvando…** com indicador de progresso; em caso de erro os controles são liberados e há aviso.

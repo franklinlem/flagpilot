@@ -26,10 +26,13 @@ test('organizações, membros, último Owner e Viewer sem privilégios', async (
   await viewer.getByLabel(`Papel de ${viewerEmail}`).selectOption('Editor');
   await viewer.getByRole('button', { name: 'Salvar papel', exact: true }).click();
   await expect(viewer.getByLabel(`Papel de ${viewerEmail}`)).toHaveValue('Editor');
+  await expect(viewer.getByRole('button', { name: 'Salvar papel', exact: true })).toBeDisabled();
+  await expect(viewer.getByRole('button', { name: 'Salvar papel', exact: true })).toHaveCSS('cursor', 'default');
   await viewer.getByRole('button', { name: 'Remover membro', exact: true }).click();
   await viewer.getByRole('button', { name: 'Confirmar remoção', exact: true }).click();
   await expect(viewer).toHaveCount(0);
-  await page.getByLabel('ID do usuário', { exact: true }).fill(viewerID);
+  await expect(page.getByLabel('Usuário existente', { exact: true }).getByRole('option', { name: viewerEmail, exact: true })).toHaveCount(1);
+  await page.getByLabel('Usuário existente', { exact: true }).selectOption({ label: viewerEmail });
   await page.getByRole('button', { name: 'Adicionar membro', exact: true }).click();
   await expect(viewer.getByLabel(`Papel de ${viewerEmail}`)).toHaveValue('Viewer');
   const viewerContext = await browser.newContext();
@@ -46,6 +49,7 @@ test('organizações, membros, último Owner e Viewer sem privilégios', async (
     const identity = await (await other.request.get('/api/v1/me')).json();
     const denied = await other.request.patch(`/api/v1/organizations/${orgId}/members/${viewerID}`, { headers: { Origin: new URL(page.url()).origin, 'X-CSRF-Token': identity.csrfToken }, data: { role: 'Owner' } });
     expect(denied.status()).toBe(403);
+    expect((await other.request.get(`/api/v1/organizations/${orgId}/member-candidates`)).status()).toBe(403);
     const outside = await other.request.get(`/api/v1${foreignPath!}`);
     expect(outside.status()).toBe(404);
   } finally { await viewerContext.close(); }

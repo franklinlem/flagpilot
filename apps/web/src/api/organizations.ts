@@ -6,6 +6,7 @@ export type Role = typeof roles[number];
 export const roleNames: Record<Role, string> = { Owner: 'Proprietário', Admin: 'Administrador', Editor: 'Editor', Viewer: 'Visualizador' };
 const organizationSchema = z.object({ id: z.uuid(), name: z.string(), slug: z.string(), role: z.enum(roles) });
 const memberSchema = z.object({ organizationId: z.uuid(), userId: z.uuid(), email: z.email(), role: z.enum(roles), disabled: z.boolean() });
+const candidatesPageSchema = z.object({ items: z.array(z.object({ userId: z.uuid(), email: z.email() })), nextCursor: z.string().nullable() });
 const organizationsPageSchema = z.object({ items: z.array(organizationSchema), nextCursor: z.string().nullable() });
 const membersPageSchema = z.object({ items: z.array(memberSchema), nextCursor: z.string().nullable() });
 export type Organization = z.infer<typeof organizationSchema>;
@@ -24,3 +25,5 @@ export async function createOrganization(body: components['schemas']['NamedReque
 export async function addMember(org: string, body: components['schemas']['MemberRequest'], csrf: string) { return parsed(await request(`/organizations/${encodeURIComponent(org)}/members`, mutation('POST', csrf, body)), memberSchema); }
 export async function changeRole(org: string, user: string, role: Role, csrf: string) { return parsed(await request(`/organizations/${encodeURIComponent(org)}/members/${encodeURIComponent(user)}`, mutation('PATCH', csrf, { role })), memberSchema); }
 export async function removeMember(org: string, user: string, csrf: string) { await request(`/organizations/${encodeURIComponent(org)}/members/${encodeURIComponent(user)}`, mutation('DELETE', csrf)); }
+
+export async function listCandidates(orgId: string, cursor = '', signal?: AbortSignal) { return parsed(await request(`/organizations/${encodeURIComponent(orgId)}/member-candidates${page(cursor)}`, {}, signal), candidatesPageSchema); }

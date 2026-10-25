@@ -47,3 +47,17 @@ UPDATE memberships SET role=$3 WHERE organization_id=$1 AND user_id=$2;
 
 -- name: RemoveOrganizationMember :exec
 DELETE FROM memberships WHERE organization_id=$1 AND user_id=$2;
+
+-- name: ListMemberCandidates :many
+-- Visibilidade limitada a associações compartilhadas ou histórico deste escopo.
+SELECT u.id, u.email FROM users u
+WHERE u.disabled_at IS NULL
+AND NOT EXISTS (SELECT 1 FROM memberships m WHERE m.organization_id=sqlc.arg(organization_id) AND m.user_id=u.id)
+AND (
+ EXISTS (SELECT 1 FROM memberships known JOIN memberships actor ON actor.organization_id=known.organization_id
+         WHERE known.user_id=u.id AND actor.user_id=sqlc.arg(actor_id))
+ OR EXISTS (SELECT 1 FROM audit_events a WHERE a.organization_id=sqlc.arg(organization_id) AND a.resource_id=u.id
+            AND a.resource_type='membership' AND a.action IN ('member.added','member.removed','member.role_changed'))
+)
+AND (sqlc.narg(after_id)::uuid IS NULL OR u.id>sqlc.narg(after_id)::uuid)
+ORDER BY u.id LIMIT sqlc.arg(page_limit);

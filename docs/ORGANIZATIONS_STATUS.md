@@ -9,7 +9,7 @@ Data: 24/10/2026. Implementação e validação locais; CI configurada, sem exec
 - Último Owner ativo protegido por transação e lock; autorização relida depois da espera, sem confiar em papel antigo do middleware.
 - Alteração e auditoria atômicas; cadastro local de usuário como Viewer via CLI create-user. Sem cadastro público ou diretório global de emails.
 - Paginação cursor vinculada ao usuário/escopo, validação de JSON/UUID/papel/limites, sessão + Origin + CSRF nas mutações e erros padronizados.
-- Navegação React Router, TanStack Query com cache por identidade/organização, nova organização, listagem, adição por ID, alteração de papel e confirmação de remoção. Sem retry automático de mutações.
+- Navegação React Router, TanStack Query com cache por identidade/organização, nova organização, listagem, adição por seletor de email, alteração de papel e confirmação de remoção. Sem retry automático de mutações.
 - Nenhuma migration nova: schema 2 preservado, próximo número SQL reservado ao módulo de projetos/ambientes. Conta, senha e organização locais de Franklin preservadas; não provisionar usuários reais automaticamente.
 
 ## Evidências
@@ -24,8 +24,17 @@ Data: 24/10/2026. Implementação e validação locais; CI configurada, sem exec
 
 ## Aceitação e próximos passos
 
-Franklin validou manualmente a criação de senha/login do incremento 2A: captura exibiu conta autenticada, organização franklem e papel Proprietário. Isso confirma apenas esses cenários. As novas telas 2B ainda dependem da aceitação visual/manual do usuário; testes headless não substituem teclado/acessibilidade e browser humano.
+Franklin validou manualmente a criação de senha/login do incremento 2A: captura exibiu conta autenticada, organização franklem e papel Proprietário. Isso confirma apenas esses cenários. Franklin também exercitou as telas 2B e relatou que os demais fluxos funcionaram, solicitando correção do cursor ao salvar papel e um seletor de usuários existentes. Isso não representa validação manual de todos os cenários de segurança/acessibilidade.
 
 Atualize http://127.0.0.1:5173. A conta existente continua válida. Ver [uso de organizações/membros](runbooks/organizations.md).
 
 Próximo incremento: 3A, projetos e ambientes. Não implementados nesta etapa: flags/rollout/avaliação, SDK funcional, gestão global de usuários/desativação, hard delete de organizações, convites, auditoria consultável ou operação de produção.
+
+## Correções após uso manual
+
+- Cursor padrão em botões sem alteração; progresso e texto Salvando… somente enquanto a operação está pendente. Causa reproduzida: CSS aplicava cursor wait a todo botão desabilitado, mesmo depois de salvar.
+- Seletor por email e endpoint Owner-only de candidatos, com paginação e exclusão de membros atuais/desativados. Visibilidade limitada a organizações compartilhadas com o ator ou histórico de associação do destino (ADR-008); permite reincluir membro removido sem copiar ID.
+- Contrato OpenAPI e cliente gerado atualizados; sem migration ou alteração de contas/senhas existentes.
+- Validação adicionada: regressão do cursor no Chromium com CSS real, ciclo de salvamento e liberação após erro, isolamento/permissões/paginação de candidatos no PostgreSQL e reinclusão pelo seletor no E2E.
+
+Verificação desta correção: `make ci` aprovado (9 testes frontend, Go/race, integração PostgreSQL, lint/contrato/tipos e builds); 3 cenários Playwright aprovados em stack descartável, incluindo cursor e reinclusão pelo seletor. Gitleaks staged sem segredos. Containers locais atualizados e saudáveis, preservando o volume existente. Sem execução remota de CI.

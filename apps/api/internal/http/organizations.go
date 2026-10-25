@@ -31,6 +31,7 @@ func WithOrganizations(session *auth.Service, service *organizations.Service, or
 			r.Get("/api/v1/organizations", h.list)
 			r.Get("/api/v1/organizations/{orgId}", h.get)
 			r.Get("/api/v1/organizations/{orgId}/members", h.members)
+			r.Get("/api/v1/organizations/{orgId}/member-candidates", h.candidates)
 			r.Group(func(w chi.Router) {
 				w.Use(h.requireMutation)
 				w.Post("/api/v1/organizations", h.create)
@@ -207,6 +208,20 @@ func (h *organizationHandlers) remove(w http.ResponseWriter, r *http.Request) {
 
 func (h *organizationHandlers) get(w http.ResponseWriter, r *http.Request) {
 	result, err := h.service.Get(r.Context(), actor(r), chi.URLParam(r, "orgId"))
+	if err != nil {
+		organizationError(w, r, err)
+		return
+	}
+	jsonResponse(w, 200, result)
+}
+
+func (h *organizationHandlers) candidates(w http.ResponseWriter, r *http.Request) {
+	page, err := pageRequest(r)
+	if err != nil {
+		organizationError(w, r, err)
+		return
+	}
+	result, err := h.service.Candidates(r.Context(), actor(r), chi.URLParam(r, "orgId"), page)
 	if err != nil {
 		organizationError(w, r, err)
 		return
