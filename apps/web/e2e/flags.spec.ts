@@ -100,6 +100,8 @@ test('flags booleanas, isolamento de ambientes, confirmação, revisão e arquiv
   await expect(page.getByText('Nenhuma flag encontrada para os filtros atuais.')).toBeVisible();
   await page.reload(); await expect(page.getByLabel('Buscar chave')).toHaveValue('missing_key');
   await page.getByRole('button', { name: 'Limpar filtros', exact: true }).click();
+  // Esperar o catálogo sem filtros antes de editar o formulário remontado pela URL.
+  await expect(page.getByRole('link', { name: 'Ver flag', exact: true })).toBeVisible();
   await page.getByLabel('Estado no catálogo').selectOption('active');
   await page.getByRole('button', { name: 'Aplicar filtros', exact: true }).click();
   await expect(page.getByText('Nenhuma flag encontrada para os filtros atuais.')).toBeVisible();
