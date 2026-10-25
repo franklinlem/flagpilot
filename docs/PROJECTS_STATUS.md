@@ -24,3 +24,5 @@ Ver [projetos e ambientes](runbooks/projects.md) e [ADR-009](adr/009-projects-en
 O escopo inicial oferece criação e consulta. Edição/arquivamento/exclusão precisam de políticas próprias; não declarar CRUD completo. Próximo incremento: 3B, flags booleanas, configurações por ambiente, auditoria/revisão e concorrência. Ainda sem avaliação, tokens, SDK funcional, rollout ou implantação externa.
 
 Containers de desenvolvimento atualizados com schema 3; DB/API/web saudáveis. Readiness HTTP 200 e frontend HTTP 200 após a atualização. Volume existente preservado, sem provisionar contas/projetos reais automaticamente. Gitleaks sobre alterações staged sem segredos. A verificação adicional das permissões SQL e códigos de constraints também passou em PostgreSQL isolado.
+
+Aceitação manual posterior: Franklin confirmou criação dos projetos e atribuição automática dos ambientes, incluindo a identificação visual de produção, e autorizou continuar. Estado seguinte em [FLAGS_STATUS.md](FLAGS_STATUS.md).

@@ -273,13 +273,13 @@ export interface paths {
         };
         /**
          * Listar flags
-         * @description Contrato planejado; endpoint ainda não implementado. Permissão: Viewer+.
+         * @description Disponível no incremento 3B. Permissão: Viewer+.
          */
         get: operations["listFlags"];
         put?: never;
         /**
          * Criar flag desativada nos ambientes
-         * @description Contrato planejado; endpoint ainda não implementado. Permissão: Editor+.
+         * @description Disponível no incremento 3B. Permissão: Editor+.
          */
         post: operations["createFlag"];
         delete?: never;
@@ -297,7 +297,7 @@ export interface paths {
         };
         /**
          * Consultar metadados de flag
-         * @description Contrato planejado; endpoint ainda não implementado. Permissão: Viewer+.
+         * @description Disponível no incremento 3B. Permissão: Viewer+.
          */
         get: operations["getFlag"];
         put?: never;
@@ -307,7 +307,7 @@ export interface paths {
         head?: never;
         /**
          * Editar descrição ou arquivar flag
-         * @description Contrato planejado; endpoint ainda não implementado. Permissão: Editor+.
+         * @description Disponível no incremento 3B. Permissão: Editor+.
          */
         patch: operations["updateFlag"];
         trace?: never;
@@ -321,7 +321,7 @@ export interface paths {
         };
         /**
          * Consultar snapshot de configurações
-         * @description Contrato planejado; endpoint ainda não implementado. Permissão: Viewer+.
+         * @description Disponível no incremento 3B. Permissão: Viewer+.
          */
         get: operations["listConfigs"];
         put?: never;
@@ -341,12 +341,12 @@ export interface paths {
         };
         /**
          * Consultar configuração com ETag
-         * @description Contrato planejado; endpoint ainda não implementado. Permissão: Viewer+.
+         * @description Disponível no incremento 3B. Permissão: Viewer+.
          */
         get: operations["getConfig"];
         /**
          * Atualizar configuração e revisão atomicamente
-         * @description Contrato planejado; endpoint ainda não implementado. Permissão: Editor+.
+         * @description Disponível no incremento 3B. Permissão: Editor+.
          */
         put: operations["updateConfig"];
         post?: never;
@@ -619,9 +619,14 @@ export interface components {
         };
         UpdateFlag: {
             description?: string;
-            archived?: boolean;
-        };
+            /** @constant */
+            archived?: true;
+            /** @default false */
+            confirmProduction: boolean;
+        } | unknown | unknown;
         FlagConfig: {
+            /** Format: uuid */
+            flagId: string;
             flagKey: string;
             /** Format: uuid */
             environmentId: string;
@@ -640,7 +645,10 @@ export interface components {
          */
         UpdateFlagConfig: {
             enabled: boolean;
-            rolloutBps: number;
+            /** @enum {integer} */
+            rolloutBps: 0 | 10000;
+            /** @default false */
+            confirmProduction: boolean;
         };
         TokenRequest: {
             name: string;
@@ -740,6 +748,9 @@ export interface components {
             nextCursor: string | null;
         };
         FlagConfigPage: {
+            environment: components["schemas"]["Environment"];
+            projectName: string;
+            role: components["schemas"]["Role"];
             items: components["schemas"]["FlagConfig"][];
             nextCursor: string | null;
         };
@@ -1382,8 +1393,6 @@ export interface operations {
             query?: {
                 cursor?: string;
                 limit?: number;
-                q?: string;
-                archived?: boolean;
             };
             header?: never;
             path: {
@@ -1409,6 +1418,7 @@ export interface operations {
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     createFlag: {
@@ -1432,7 +1442,7 @@ export interface operations {
             /** @description Operação concluída */
             201: {
                 headers: {
-                    /** @description ETag forte da representação; reenviar em If-Match. Sintaxe será fixada antes do módulo. */
+                    /** @description ETag forte da representação; reenviar em If-Match. Reenviar o valor exato de uma leitura recente; sem wildcard ou lista. */
                     ETag?: string;
                     [name: string]: unknown;
                 };
@@ -1448,6 +1458,7 @@ export interface operations {
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     getFlag: {
@@ -1465,7 +1476,7 @@ export interface operations {
             /** @description Operação concluída */
             200: {
                 headers: {
-                    /** @description ETag forte da representação; reenviar em If-Match. Sintaxe será fixada antes do módulo. */
+                    /** @description ETag forte da representação; reenviar em If-Match. Reenviar o valor exato de uma leitura recente; sem wildcard ou lista. */
                     ETag?: string;
                     [name: string]: unknown;
                 };
@@ -1480,6 +1491,7 @@ export interface operations {
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     updateFlag: {
@@ -1506,7 +1518,7 @@ export interface operations {
             /** @description Operação concluída */
             200: {
                 headers: {
-                    /** @description ETag forte da representação; reenviar em If-Match. Sintaxe será fixada antes do módulo. */
+                    /** @description ETag forte da representação; reenviar em If-Match. Reenviar o valor exato de uma leitura recente; sem wildcard ou lista. */
                     ETag?: string;
                     [name: string]: unknown;
                 };
@@ -1524,6 +1536,7 @@ export interface operations {
             428: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     listConfigs: {
@@ -1543,7 +1556,7 @@ export interface operations {
             /** @description Operação concluída */
             200: {
                 headers: {
-                    /** @description ETag forte da representação; reenviar em If-Match. Sintaxe será fixada antes do módulo. */
+                    /** @description ETag forte da representação; reenviar em If-Match. Reenviar o valor exato de uma leitura recente; sem wildcard ou lista. */
                     ETag?: string;
                     [name: string]: unknown;
                 };
@@ -1558,6 +1571,7 @@ export interface operations {
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     getConfig: {
@@ -1575,7 +1589,7 @@ export interface operations {
             /** @description Operação concluída */
             200: {
                 headers: {
-                    /** @description ETag forte da representação; reenviar em If-Match. Sintaxe será fixada antes do módulo. */
+                    /** @description ETag forte da representação; reenviar em If-Match. Reenviar o valor exato de uma leitura recente; sem wildcard ou lista. */
                     ETag?: string;
                     [name: string]: unknown;
                 };
@@ -1590,6 +1604,7 @@ export interface operations {
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     updateConfig: {
@@ -1616,7 +1631,7 @@ export interface operations {
             /** @description Operação concluída */
             200: {
                 headers: {
-                    /** @description ETag forte da representação; reenviar em If-Match. Sintaxe será fixada antes do módulo. */
+                    /** @description ETag forte da representação; reenviar em If-Match. Reenviar o valor exato de uma leitura recente; sem wildcard ou lista. */
                     ETag?: string;
                     [name: string]: unknown;
                 };
@@ -1634,6 +1649,7 @@ export interface operations {
             428: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     listTokens: {

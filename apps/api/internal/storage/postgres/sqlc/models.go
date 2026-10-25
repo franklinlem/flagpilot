@@ -31,6 +31,28 @@ type Environment struct {
 	CreatedAt    pgtype.Timestamptz
 }
 
+type Flag struct {
+	ID          pgtype.UUID
+	ProjectID   pgtype.UUID
+	Key         string
+	Description string
+	ArchivedAt  pgtype.Timestamptz
+	Version     int64
+	CreatedAt   pgtype.Timestamptz
+}
+
+type FlagConfig struct {
+	ID            pgtype.UUID
+	ProjectID     pgtype.UUID
+	FlagID        pgtype.UUID
+	EnvironmentID pgtype.UUID
+	Enabled       bool
+	RolloutBps    int32
+	Salt          string
+	Version       int64
+	UpdatedAt     pgtype.Timestamptz
+}
+
 type Membership struct {
 	OrganizationID pgtype.UUID
 	UserID         pgtype.UUID

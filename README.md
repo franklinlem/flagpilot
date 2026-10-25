@@ -1,6 +1,6 @@
 # FlagPilot
 
-Plataforma self-hosted de feature flags em desenvolvimento. Incremento atual: projetos/ambientes com autorização sobre a fundação Go/Chi, PostgreSQL/migrations e React/Vite. **Login/logout, bootstrap, organizações, membros, projetos e ambientes auditados já funcionam.** Flags, avaliação e cliente SDK virão nos próximos incrementos.
+Plataforma self-hosted de feature flags em desenvolvimento. Incremento atual: flags booleanas por ambiente com autorização sobre a fundação Go/Chi, PostgreSQL/migrations e React/Vite. **Login/logout, bootstrap, organizações, membros, projetos, ambientes e gestão de flags auditada já funcionam.** Tokens, avaliação e cliente SDK virão nos próximos incrementos.
 
 ## Requisitos e versões
 
@@ -46,7 +46,7 @@ curl -i http://127.0.0.1:8080/api/v1/health/live
 curl -i http://127.0.0.1:8080/api/v1/health/ready
 ```
 
-Live verifica o processo. Ready verifica conectividade, schema versão 3 e estado não-dirty; banco vazio, indisponível ou schema incompatível retorna 503 sem detalhes internos. A API continua viva enquanto o banco está indisponível. Nunca executa migrations sozinha.
+Live verifica o processo. Ready verifica conectividade, schema versão 4 e estado não-dirty; banco vazio, indisponível ou schema incompatível retorna 503 sem detalhes internos. A API continua viva enquanto o banco está indisponível. Nunca executa migrations sozinha.
 
 [OpenAPI 3.1](api/openapi.yaml) descreve o contrato inicial completo. `x-implementation: available` identifica health, autenticação e organizações/membros; os demais endpoints retornam 404 até seus incrementos. Métricas ainda não implementadas. Nginx de runtime bloqueia readiness e `/metrics` na borda; o painel consulta a sessão em `/me`, sem expor a saúde interna do banco.
 
@@ -91,8 +91,10 @@ Testes de integração usam somente credenciais sintéticas em banco efêmero. N
 - [Estado da autenticação](docs/AUTH_STATUS.md)
 - [Estado de organizações/membros](docs/ORGANIZATIONS_STATUS.md)
 - [Estado de projetos/ambientes](docs/PROJECTS_STATUS.md)
+- [Estado de flags booleanas](docs/FLAGS_STATUS.md)
+- [Uso de flags](docs/runbooks/flags.md)
 - [Uso de projetos/ambientes](docs/runbooks/projects.md)
 - [Cadastrar usuários e gerenciar membros](docs/runbooks/organizations.md)
 - [Bootstrap e recuperação](docs/runbooks/identity.md)
 
-Próximo incremento: flags booleanas e configurações por ambiente (3B). Projetos/ambientes oferecem criação e consulta; edição/exclusão continuam pendentes de política. Organizações/membros já possuem isolamento e proteção do último Owner. Bootstrap, login e recuperação já são auditados. Nenhum DNS, VPS, Coolify ou servidor externo foi alterado. Licença Apache-2.0 e publicação do pacote/remoto continuam pendentes; não há licença atribuída automaticamente.
+Próximo incremento: tokens e avaliação booleana (4A). Flags possuem revisão otimista e confirmação de produção; ainda não há endpoint de avaliação para aplicações consumidoras. Projetos/ambientes oferecem criação e consulta; edição/exclusão continuam pendentes de política. Organizações/membros já possuem isolamento e proteção do último Owner. Bootstrap, login e recuperação já são auditados. Nenhum DNS, VPS, Coolify ou servidor externo foi alterado. Licença Apache-2.0 e publicação do pacote/remoto continuam pendentes; não há licença atribuída automaticamente.

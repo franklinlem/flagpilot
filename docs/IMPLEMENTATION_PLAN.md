@@ -401,3 +401,7 @@ Consultadas em 24/10/2026; orientam as propostas, sem substituir a especificaç�
 ## Continuidade após validação de organizações
 
 Franklin aprovou o funcionamento manual de organizações/membros, incluindo cursor e seletor, e autorizou a continuidade. O incremento 3A implementa criação/listagem de projetos e ambientes, detalhe de projeto, presets development/staging/production, autorização e auditoria. Edição/exclusão não estão implicitamente aprovadas: aguardam política de retenção/concorrência. Decisões em ADR-009 e estado em PROJECTS_STATUS.md. Próxima implementação funcional: 3B.
+
+## Continuidade após validação de projetos
+
+Franklin confirmou criação de projetos e ambientes automáticos e autorizou a etapa 3B. Flags booleanas, configurações por ambiente, auditoria/revisão atômicas, chave imutável, arquivamento e confirmação de produção estão implementados conforme ADR-010; resultados em FLAGS_STATUS.md. Filtros de catálogo e consulta de auditoria permanecem para a consolidação do painel. Próximo incremento: 4A, tokens e avaliação.

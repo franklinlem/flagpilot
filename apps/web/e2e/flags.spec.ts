@@ -1,0 +1,78 @@
+import { expect, test } from '@playwright/test';
+test('flags booleanas, isolamento de ambientes, confirmação, revisão e arquivamento', async ({ page, browser }) => {
+  await page.goto('/');
+  await page.getByLabel('Email', { exact: true }).fill(process.env.E2E_EMAIL!);
+  await page.getByLabel('Senha', { exact: true }).fill(process.env.E2E_PASSWORD!);
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+  await page.getByRole('listitem').filter({ hasText: 'E2E Organization' }).getByRole('link', { name: 'Ver projetos' }).click();
+  await page.getByRole('button', { name: 'Novo projeto', exact: true }).click();
+  await page.getByLabel('Nome do projeto').fill('Flags E2E');
+  await page.getByLabel('Slug do projeto').fill('flags-e2e');
+  await page.getByRole('button', { name: 'Criar projeto', exact: true }).click();
+  await page.getByRole('listitem').filter({ hasText: 'Flags E2E' }).getByRole('link', { name: 'Ver ambientes' }).click();
+  const environmentsURL = page.url();
+  const projectId = new URL(environmentsURL).pathname.split('/')[2];
+  const stageLink = await page.getByRole('listitem').filter({ hasText: 'staging' }).getByRole('link', { name: 'Configurar flags' }).getAttribute('href');
+  const productionLink = await page.getByRole('listitem').filter({ hasText: 'production' }).getByRole('link', { name: 'Configurar flags' }).getAttribute('href');
+  await page.getByRole('link', { name: 'Ver flags do projeto' }).click();
+  await page.getByRole('button', { name: 'Nova flag', exact: true }).click();
+  await page.getByLabel('Chave da flag').fill('new_checkout');
+  await page.getByLabel('Descrição', { exact: true }).fill('Checkout novo');
+  await page.getByRole('button', { name: 'Criar flag', exact: true }).click();
+  await page.getByRole('link', { name: 'Ver flag', exact: true }).click();
+  await page.getByLabel('Descrição da flag').fill('Checkout editado');
+  await page.getByRole('button', { name: 'Salvar descrição', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Salvar descrição', exact: true })).toBeDisabled();
+  await page.goto(stageLink!);
+  await expect(page.getByText('Desativada', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Ativar flag', exact: true }).click();
+  await expect(page.getByText('Ativada', { exact: true })).toBeVisible();
+  await page.goto(productionLink!);
+  await expect(page.getByText('Desativada', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Ativar flag', exact: true }).click();
+  await expect(page.getByRole('group', { name: 'Confirmar alteração em produção', exact: true })).toContainText('Flags E2E / Produção');
+  await page.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  await expect(page.getByText('Desativada', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Ativar flag', exact: true }).click();
+  await page.getByRole('button', { name: 'Confirmar alteração em produção', exact: true }).click();
+  await expect(page.getByText('Ativada', { exact: true })).toBeVisible();
+  // Dois leitores com a mesma revisão: a escrita da segunda aba deve conflitar.
+  await page.goto(stageLink!);
+  const stale = await page.context().newPage();
+  try {
+    await stale.goto(new URL(stageLink!, page.url()).toString());
+    await expect(stale.getByText('Ativada', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Desativar flag', exact: true }).click();
+    await expect(page.getByText('Desativada', { exact: true })).toBeVisible();
+    await stale.getByRole('button', { name: 'Desativar flag', exact: true }).click();
+    await expect(stale.getByRole('alert')).toHaveText('os dados foram alterados; recarregue antes de salvar');
+    await stale.getByRole('button', { name: 'Recarregar configurações', exact: true }).click();
+    await expect(stale.getByText('Desativada', { exact: true })).toBeVisible();
+  } finally { await stale.close(); }
+  const identity = await (await page.request.get('/api/v1/me')).json();
+  const extra = await page.request.post(`/api/v1/projects/${projectId}/environments`, { headers: { Origin: new URL(page.url()).origin, 'X-CSRF-Token': identity.csrfToken }, data: { name: 'QA', slug: 'qa', isProduction: false } });
+  expect(extra.status()).toBe(201);
+  const extraID = (await extra.json()).id;
+  const defaultConfig = await (await page.request.get(`/api/v1/environments/${extraID}/flags/new_checkout`)).json();
+  expect(defaultConfig.enabled).toBe(false);
+  const viewerContext = await browser.newContext();
+  try {
+    const viewer = await viewerContext.newPage();
+    await viewer.goto(new URL('/', page.url()).toString());
+    await viewer.getByLabel('Email', { exact: true }).fill(process.env.E2E_VIEWER_EMAIL!);
+    await viewer.getByLabel('Senha', { exact: true }).fill(process.env.E2E_VIEWER_PASSWORD!);
+    await viewer.getByRole('button', { name: 'Entrar', exact: true }).click();
+    await expect(viewer.getByText(process.env.E2E_VIEWER_EMAIL!, { exact: true })).toBeVisible();
+    await viewer.goto(new URL(productionLink!, page.url()).toString());
+    await expect(viewer.getByText('Ativada', { exact: true })).toBeVisible();
+    await expect(viewer.getByRole('button', { name: 'Desativar flag', exact: true })).toHaveCount(0);
+  } finally { await viewerContext.close(); }
+  await page.goto(`/projects/${projectId}/flags`);
+  await page.getByRole('link', { name: 'Ver flag', exact: true }).click();
+  await page.getByRole('button', { name: 'Arquivar flag', exact: true }).click();
+  await expect(page.getByRole('group', { name: 'Confirmar arquivamento' })).toContainText('inclusive produção');
+  await page.getByRole('button', { name: 'Confirmar arquivamento', exact: true }).click();
+  await expect(page.getByText('Arquivada', { exact: true })).toBeVisible();
+  await page.goto(productionLink!);
+  await expect(page.getByText('Nenhuma flag ativa no catálogo deste projeto. Crie uma flag para configurar os ambientes.')).toBeVisible();
+});

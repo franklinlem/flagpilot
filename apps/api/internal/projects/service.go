@@ -10,6 +10,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/franklinlem/flagpilot/apps/api/internal/auth"
+	"github.com/franklinlem/flagpilot/apps/api/internal/flagstate"
 	"github.com/franklinlem/flagpilot/apps/api/internal/identifiers"
 	"github.com/franklinlem/flagpilot/apps/api/internal/pagination"
 	q "github.com/franklinlem/flagpilot/apps/api/internal/storage/postgres/sqlc"
@@ -74,17 +75,13 @@ func toEnvironment(row q.Environment) Environment {
 }
 
 // O lock do escopo precede a releitura do papel; sessão não é cache de autorização.
-func scope(ctx context.Context, qt *q.Queries, org, user pgtype.UUID, write bool) (string, error) {
+func scope(ctx context.Context, qt *q.Queries, org, user pgtype.UUID, permission auth.Permission) (string, error) {
 	if _, err := qt.ProjectScopeOrganization(ctx, q.ProjectScopeOrganizationParams{ID: org, UserID: user}); err != nil {
 		return "", storageError(err)
 	}
 	role, err := qt.ActorOrganizationRole(ctx, q.ActorOrganizationRoleParams{OrganizationID: org, UserID: user})
 	if err != nil {
 		return "", storageError(err)
-	}
-	permission := auth.ReadProjects
-	if write {
-		permission = auth.ManageProjects
 	}
 	if !auth.Can(role, permission) {
 		return "", ErrForbidden
@@ -125,6 +122,9 @@ func insertEnvironment(ctx context.Context, qt *q.Queries, org, user, project pg
 	if err != nil {
 		return Environment{}, storageError(err)
 	}
+	if err = flagstate.Initialize(ctx, qt, project, row.ID); err != nil {
+		return Environment{}, ErrUnavailable
+	}
 	out := toEnvironment(row)
 	if err = audit(ctx, qt, org, user, row.ID, "environment", out); err != nil {
 		return Environment{}, err
@@ -146,7 +146,7 @@ func (s *Service) Create(ctx context.Context, actor, organization, name, slug st
 		return out, ErrValidation
 	}
 	err = s.transaction(ctx, func(ctx context.Context, qt *q.Queries) error {
-		role, err := scope(ctx, qt, org, user, true)
+		role, err := scope(ctx, qt, org, user, auth.ManageProjects)
 		if err != nil {
 			return err
 		}
@@ -170,17 +170,20 @@ func (s *Service) Create(ctx context.Context, actor, organization, name, slug st
 	})
 	return out, err
 }
-func projectScope(ctx context.Context, qt *q.Queries, user, id pgtype.UUID, write bool) (q.Project, string, error) {
+
+// Authorize exige Queries vinculadas à transação completa da operação.
+// O lock de organização protege a autorização; lock=true serializa o catálogo no projeto.
+func Authorize(ctx context.Context, qt *q.Queries, user, id pgtype.UUID, permission auth.Permission, lock bool) (q.Project, string, error) {
 	row, err := qt.ScopedProject(ctx, q.ScopedProjectParams{ID: id, UserID: user})
 	if err != nil {
 		return row, "", storageError(err)
 	}
-	role, err := scope(ctx, qt, row.OrganizationID, user, write)
+	role, err := scope(ctx, qt, row.OrganizationID, user, permission)
 	if err != nil {
 		return row, "", err
 	}
 	// Preparar ordem organização → projeto para futuras criações de flags/configurações.
-	if write {
+	if lock {
 		if _, err = qt.LockProject(ctx, id); err != nil {
 			return row, "", storageError(err)
 		}
@@ -198,7 +201,7 @@ func (s *Service) Get(ctx context.Context, actor, project string) (Project, erro
 		return out, ErrValidation
 	}
 	err = s.transaction(ctx, func(ctx context.Context, qt *q.Queries) error {
-		row, role, err := projectScope(ctx, qt, user, id, false)
+		row, role, err := Authorize(ctx, qt, user, id, auth.ReadProjects, false)
 		if err != nil {
 			return err
 		}
@@ -223,7 +226,7 @@ func (s *Service) List(ctx context.Context, actor, organization string, page pag
 		return out, err
 	}
 	err = s.transaction(ctx, func(ctx context.Context, qt *q.Queries) error {
-		role, err := scope(ctx, qt, org, user, false)
+		role, err := scope(ctx, qt, org, user, auth.ReadProjects)
 		if err != nil {
 			return err
 		}
@@ -258,7 +261,7 @@ func (s *Service) Environments(ctx context.Context, actor, project string, page 
 		return out, err
 	}
 	err = s.transaction(ctx, func(ctx context.Context, qt *q.Queries) error {
-		if _, _, err := projectScope(ctx, qt, user, id, false); err != nil {
+		if _, _, err := Authorize(ctx, qt, user, id, auth.ReadProjects, false); err != nil {
 			return err
 		}
 		rows, err := qt.ListEnvironments(ctx, q.ListEnvironmentsParams{ProjectID: id, AfterID: after, PageLimit: int32(page.Limit + 1)})
@@ -291,7 +294,7 @@ func (s *Service) CreateEnvironment(ctx context.Context, actor, project, name, s
 		return out, ErrValidation
 	}
 	err = s.transaction(ctx, func(ctx context.Context, qt *q.Queries) error {
-		row, _, err := projectScope(ctx, qt, user, id, true)
+		row, _, err := Authorize(ctx, qt, user, id, auth.ManageProjects, true)
 		if err != nil {
 			return err
 		}

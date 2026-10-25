@@ -52,3 +52,7 @@ button[aria-busy="true"] { cursor: progress; }
 .checkbox-label input { width: 1.2rem; min-height: 1.2rem; height: 1.2rem; flex-shrink: 0; }
 .badge.production { color: #fde68a; background: #713f12; }
 .organizations strong { overflow-wrap: anywhere; }
+
+textarea { width: 100%; min-height: 6rem; border: 1px solid #64748b; background: #111827; color: inherit; padding: .7rem; border-radius: .4rem; font: inherit; resize: vertical; }
+textarea:focus-visible { outline: 3px solid #bfdbfe; outline-offset: 3px; }
+.card p, h3 { overflow-wrap: anywhere; }

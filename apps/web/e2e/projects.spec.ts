@@ -5,12 +5,12 @@ test('projetos e ambientes, produção explícita e Viewer em leitura', async ({
   await page.getByLabel('Senha', { exact: true }).fill(process.env.E2E_PASSWORD!);
   await page.getByRole('button', { name: 'Entrar', exact: true }).click();
   await page.getByRole('listitem').filter({ hasText: 'E2E Organization' }).getByRole('link', { name: 'Ver projetos' }).click();
-  await expect(page.getByText('Nenhum projeto cadastrado nesta organização.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Projetos da organização' })).toBeVisible();
   await page.getByRole('button', { name: 'Novo projeto', exact: true }).click();
   await page.getByLabel('Nome do projeto').fill('Loja E2E');
   await page.getByLabel('Slug do projeto').fill('loja-e2e');
   await page.getByRole('button', { name: 'Criar projeto', exact: true }).click();
-  await page.getByRole('link', { name: 'Ver ambientes' }).click();
+  await page.getByRole('listitem').filter({ hasText: 'Loja E2E' }).getByRole('link', { name: 'Ver ambientes' }).click();
   await expect(page.getByRole('listitem')).toHaveCount(3);
   await expect(page.getByRole('listitem').filter({ hasText: 'production' }).getByText('Produção', { exact: true })).toHaveCount(2);
   await page.getByRole('button', { name: 'Novo ambiente', exact: true }).click();
@@ -50,7 +50,7 @@ test('projetos e ambientes, produção explícita e Viewer em leitura', async ({
     await viewer.getByRole('button', { name: 'Entrar', exact: true }).click();
     await viewer.getByRole('link', { name: 'Ver projetos' }).click();
     await expect(viewer.getByRole('button', { name: 'Novo projeto', exact: true })).toHaveCount(0);
-    await viewer.getByRole('link', { name: 'Ver ambientes' }).click();
+    await viewer.getByRole('listitem').filter({ hasText: 'Loja E2E' }).getByRole('link', { name: 'Ver ambientes' }).click();
     await expect(viewer.getByRole('listitem')).toHaveCount(4);
     await expect(viewer.getByRole('button', { name: 'Novo ambiente', exact: true })).toHaveCount(0);
     const profile = await (await viewer.request.get('/api/v1/me')).json();

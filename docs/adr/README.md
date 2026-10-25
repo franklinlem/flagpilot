@@ -13,3 +13,5 @@ O plano foi aprovado por Franklin em 24/10/2026 ("ok. pode continuar."). ADRs re
 - [ADR-008 — Organizações, membros e concorrência](008-organizations-members.md)
 
 - [ADR-009 — Projetos e ambientes iniciais](009-projects-environments.md)
+
+- [ADR-010 — Flags booleanas e revisões](010-boolean-flags.md)

@@ -5,6 +5,7 @@ sql:
       - ../../db/migrations/000001_identity.up.sql
       - ../../db/migrations/000002_audit.up.sql
       - ../../db/migrations/000003_projects_environments.up.sql
+      - ../../db/migrations/000004_boolean_flags.up.sql
       - internal/storage/postgres/schema_migrations.sql
     queries: internal/storage/postgres/queries
     gen:

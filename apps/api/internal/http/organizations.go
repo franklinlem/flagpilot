@@ -74,12 +74,15 @@ func pageRequest(r *http.Request) (organizations.PageRequest, error) {
 	return p, nil
 }
 func decodeJSON(w http.ResponseWriter, r *http.Request, destination any) bool {
+	return decodeJSONLimit(w, r, destination, 4096)
+}
+func decodeJSONLimit(w http.ResponseWriter, r *http.Request, destination any, limit int64) bool {
 	media, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 	if err != nil || media != "application/json" {
 		problem(w, r, 415, "Envie application/json")
 		return false
 	}
-	r.Body = http.MaxBytesReader(w, r.Body, 4096)
+	r.Body = http.MaxBytesReader(w, r.Body, limit)
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
 	fail := func(err error) {
