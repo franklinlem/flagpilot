@@ -433,3 +433,7 @@ Continuidade autorizada após 6B. Script sintético de backup/restore destrói o
 ## Medição local de capacidade — 6D
 
 Continuidade autorizada após 6C. Cenários k6 10/50/100 e sobrecarga 150 req/s executados em stack sintética com cotas, mantendo limites de segurança. Percentis dos sucessos e de todos os resultados, 429/erros/descartes, amostras de recursos e condições registrados em CAPACITY_STATUS.md e evidence/load-2026-10-25.json. Nenhuma alteração de negócio, schema, dependências da aplicação ou infraestrutura externa. Método em runbooks/capacity.md e ADR-014. Não certifica SLO sustentado, saturação máxima ou sizing da VPS. Próximo incremento proposto: artefatos de release (scans/SBOM/digests) e ensaio local de rollback, mantendo licença/publicação/deploy pendentes.
+
+## Evidências de release e rollback compatível — 6E
+
+Continuidade autorizada após 6D. Bases/imagens upstream fixadas por digest; SBOM CycloneDX e scans dos quatro runtimes com manifest de hashes, gate fail-closed e workflow manual sem push/deploy. Ensaio de reversão da API 6B/candidata, ambas schema 5, preservou DB/tabelas/sessão/revogação/avaliação/escritas e reaplicou candidata sem down migration/restore. Fontes históricas reconstruídas, sem alegar release publicada. Gate de imagens bloqueado por HIGH/CRITICAL; remediação/triagem é próximo incremento antes de release. Nenhuma dependência de negócio, migração, publicação ou servidor externo alterado. Método em runbooks/release.md, decisão ADR-015, evidências/limites em RELEASE_STATUS.md.

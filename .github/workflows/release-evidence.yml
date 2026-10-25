@@ -1,0 +1,36 @@
+name: Evidências locais de release (sem publicação)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: release-evidence-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Guardas e gate de evidência
+        run: |
+          python3 -m unittest discover -s scripts/tests
+          python3 -m py_compile scripts/local_docker.py scripts/image_evidence.py scripts/release-artifacts.py scripts/rollback.py
+      - name: Rollback sintético com schema compatível
+        run: python3 scripts/rollback.py --report docs/evidence/ci-rollback.json
+      - name: SBOM e scan de imagens (HIGH/CRITICAL bloqueiam)
+        run: python3 scripts/release-artifacts.py --output .tools/releases/ci
+      - name: Guardar artefatos mesmo com gate bloqueado
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-evidence
+          path: |
+            .tools/releases/ci/*.json
+            docs/evidence/ci-rollback.json
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7

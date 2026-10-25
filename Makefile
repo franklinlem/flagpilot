@@ -61,3 +61,9 @@ recovery-rehearsal:
 .PHONY: load-rehearsal
 load-rehearsal:
 	python3 scripts/load.py $(ARGS)
+
+.PHONY: release-artifacts rollback-rehearsal
+release-artifacts:
+	python3 scripts/release-artifacts.py $(ARGS)
+rollback-rehearsal:
+	python3 scripts/rollback.py $(ARGS)

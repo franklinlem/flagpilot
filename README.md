@@ -1,6 +1,6 @@
 # FlagPilot
 
-Plataforma self-hosted de feature flags em desenvolvimento. Incremento atual: medição local de capacidade com k6, após backup/restore sintético e métricas em listener separado, sobre a fundação Go/Chi, PostgreSQL/migrations e React/Vite. **Login/logout, bootstrap, organizações, membros, projetos, ambientes e gestão de flags, tokens auditados e avaliação booleana/percentual e SDK com cache/timeout/fallback já funcionam localmente.** Filtros/auditoria disponíveis em 6A; navegação/recuperação e Chromium/Firefox em 6B.
+Plataforma self-hosted de feature flags em desenvolvimento. Incremento atual: SBOM/scans e ensaio local de rollback de API, com gate de imagens bloqueado por achados de segurança, sobre a fundação Go/Chi, PostgreSQL/migrations e React/Vite. **Login/logout, bootstrap, organizações, membros, projetos, ambientes e gestão de flags, tokens auditados e avaliação booleana/percentual e SDK com cache/timeout/fallback já funcionam localmente.** Filtros/auditoria disponíveis em 6A; navegação/recuperação e Chromium/Firefox em 6B.
 
 ## Requisitos e versões
 
@@ -94,6 +94,7 @@ Testes de integração usam somente credenciais sintéticas em banco efêmero. N
 - [Estado de flags booleanas](docs/FLAGS_STATUS.md)
 - [Estado de tokens/avaliação](docs/EVALUATION_STATUS.md)
 - [Operação local](docs/OPERATIONS_STATUS.md), [ensaio de restauração](docs/runbooks/recovery.md) e [métricas](docs/runbooks/observability.md)
+- [Imagens e gate de release](docs/RELEASE_STATUS.md) e [SBOM/rollback](docs/runbooks/release.md)
 - [Capacidade local](docs/CAPACITY_STATUS.md) e [reprodução com k6](docs/runbooks/capacity.md)
 - [Critérios locais e pendências do MVP](docs/MVP_READINESS.md)
 - [Estado do dashboard](docs/DASHBOARD_STATUS.md) e [uso de filtros/auditoria](docs/runbooks/dashboard.md)
@@ -104,4 +105,4 @@ Testes de integração usam somente credenciais sintéticas em banco efêmero. N
 - [Cadastrar usuários e gerenciar membros](docs/runbooks/organizations.md)
 - [Bootstrap e recuperação](docs/runbooks/identity.md)
 
-SDK HTTP privado TypeScript/JavaScript disponível para backend (5). Filtros e consulta de auditoria disponíveis (6A); navegação/recuperação verificadas em Chromium/Firefox (6B). Backup/restore sintético e métricas locais entregues em 6C; capacidade local medida em 6D. Próximo incremento proposto: artefatos de release e ensaio local de rollback antes de homologação. Rollout percentual determinístico (4B) disponível, com edição de porcentagem e vetores Go/JS compartilhados. Avaliação HTTP de servidor disponível com tokens por ambiente; o SDK implementa cache limitado, timeout total e fallback, com builds ESM/CJS. Flags possuem revisão otimista e confirmação de produção. Projetos/ambientes oferecem criação e consulta; edição/exclusão continuam pendentes de política. Organizações/membros já possuem isolamento e proteção do último Owner. Bootstrap, login e recuperação já são auditados. Nenhum DNS, VPS, Coolify ou servidor externo foi alterado. Licença Apache-2.0 e publicação do pacote/remoto continuam pendentes; não há licença atribuída automaticamente.
+SDK HTTP privado TypeScript/JavaScript disponível para backend (5). Filtros e consulta de auditoria disponíveis (6A); navegação/recuperação verificadas em Chromium/Firefox (6B). Backup/restore sintético e métricas locais entregues em 6C; capacidade local medida em 6D. Artefatos e rollback compatível entregues em 6E, com gate bloqueado; próximo incremento: remediar/triagem das imagens antes de homologação. Rollout percentual determinístico (4B) disponível, com edição de porcentagem e vetores Go/JS compartilhados. Avaliação HTTP de servidor disponível com tokens por ambiente; o SDK implementa cache limitado, timeout total e fallback, com builds ESM/CJS. Flags possuem revisão otimista e confirmação de produção. Projetos/ambientes oferecem criação e consulta; edição/exclusão continuam pendentes de política. Organizações/membros já possuem isolamento e proteção do último Owner. Bootstrap, login e recuperação já são auditados. Nenhum DNS, VPS, Coolify ou servidor externo foi alterado. Licença Apache-2.0 e publicação do pacote/remoto continuam pendentes; não há licença atribuída automaticamente.

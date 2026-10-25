@@ -1,7 +1,7 @@
 # Somente recursos descartáveis com project name aleatório fornecido por smoke.py.
 services:
   db:
-    image: postgres:16.13-alpine
+    image: postgres:16.13-alpine@sha256:4e6e670bb069649261c9c18031f0aded7bb249a5b6664ddec29c013a89310d50
     environment:
       POSTGRES_DB: flagpilot
       POSTGRES_USER: flagpilot_migrator
@@ -16,7 +16,7 @@ services:
       timeout: 2s
       retries: 30
   migrate:
-    image: migrate/migrate:v4.20.1
+    image: migrate/migrate:v4.20.1@sha256:76cc2074cb6642631f34a898ced71e6aeaa6b1a4d78c4daa743275a22e0c5be7
     entrypoint: [/bin/sh, -ec]
     command: ['exec migrate -path /migrations -database "$$MIGRATION_DATABASE_URL" up']
     environment:

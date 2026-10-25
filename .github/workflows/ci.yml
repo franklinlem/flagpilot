@@ -43,6 +43,7 @@ jobs:
         run: |
           make ci
           python3 scripts/check-admin-terminal.py
+          python3 -m unittest discover -s scripts/tests
       - name: Vulnerabilidades Go e npm
         run: |
           cd apps/api
