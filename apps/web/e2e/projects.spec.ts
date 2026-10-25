@@ -6,6 +6,8 @@ test('projetos e ambientes, produção explícita e Viewer em leitura', async ({
   await page.getByRole('button', { name: 'Entrar', exact: true }).click();
   await page.getByRole('listitem').filter({ hasText: 'E2E Organization' }).getByRole('link', { name: 'Ver projetos' }).click();
   await expect(page.getByRole('heading', { name: 'Projetos da organização' })).toBeVisible();
+  // A lista inicial altera o layout; aguardar o estado de carregamento terminar.
+  await expect(page.getByRole('status')).not.toBeVisible();
   await page.getByRole('button', { name: 'Novo projeto', exact: true }).click();
   await page.getByLabel('Nome do projeto').fill('Loja E2E');
   await page.getByLabel('Slug do projeto').fill('loja-e2e');

@@ -30,7 +30,8 @@ def main():
             port = subprocess.check_output(base + ['port', 'web', '8080'], text=True).strip()
             origin = 'http://' + port
             # Origem conhecida somente depois da atribuição da porta efêmera.
-            envfile.write_text(config + 'PUBLIC_BASE_URL=' + origin + '\n')
+            # Preservar a porta ao recriar web por mudança da dependência API.
+            envfile.write_text(config + 'PUBLIC_BASE_URL=' + origin + '\nBROWSER_PORT=' + port.rsplit(':',1)[1] + '\n')
             subprocess.run(base + ['up', '-d', '--wait', 'api', 'web'], check=True, cwd=ROOT)
             password = secrets.token_urlsafe(32)
             subprocess.run(base + ['exec', '-T', 'api', '/admin', 'bootstrap', '--email', 'owner@example.invalid', '--org', 'E2E Organization', '--slug', 'e2e', '--password-stdin'], input=password + '\n', text=True, check=True)
