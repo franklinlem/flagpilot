@@ -53,6 +53,9 @@ test('projetos e ambientes, produção explícita e Viewer em leitura', async ({
     await viewer.getByRole('listitem').filter({ hasText: 'Loja E2E' }).getByRole('link', { name: 'Ver ambientes' }).click();
     await expect(viewer.getByRole('listitem')).toHaveCount(4);
     await expect(viewer.getByRole('button', { name: 'Novo ambiente', exact: true })).toHaveCount(0);
+    await expect(viewer.getByRole('link', { name: 'Gerenciar tokens', exact: true })).toHaveCount(0);
+    const viewerEnvPath = await viewer.getByRole('link', { name: 'Configurar flags', exact: true }).first().getAttribute('href');
+    expect((await viewer.request.get(`/api/v1/environments/${viewerEnvPath!.split('/')[2]}/tokens`)).status()).toBe(403);
     const profile = await (await viewer.request.get('/api/v1/me')).json();
     const headers = { Origin: new URL(page.url()).origin, 'X-CSRF-Token': profile.csrfToken };
     expect((await viewer.request.post(`/api/v1/organizations/${orgId}/projects`, { headers, data: { name: 'Forbidden', slug: 'forbidden' } })).status()).toBe(403);

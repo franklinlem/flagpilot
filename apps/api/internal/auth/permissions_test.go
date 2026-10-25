@@ -17,6 +17,9 @@ func TestRolePolicy(t *testing.T) {
 		if Can(role, ReadFlags) != read || Can(role, ManageFlags) != (role == "Owner" || role == "Admin" || role == "Editor") {
 			t.Fatalf("flags: permissão inesperada %s", role)
 		}
+		if Can(role, ManageTokens) != (role == "Owner" || role == "Admin") {
+			t.Fatalf("tokens: permissão inesperada %s", role)
+		}
 		if Can(role, Permission("unknown")) {
 			t.Fatal("permissão desconhecida concedida")
 		}

@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-const SchemaVersion int64 = 4
+const SchemaVersion int64 = 5
 
 type Store struct {
 	Pool    *pgxpool.Pool

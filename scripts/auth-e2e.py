@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Browser real, dados e credenciais efêmeros; nunca usa o volume de desenvolvimento."""
 import os
+import re
 import json
 import http.cookiejar
 from pathlib import Path
@@ -47,9 +48,14 @@ def main():
             env = dict(os.environ, E2E_BASE_URL=origin, E2E_EMAIL='owner@example.invalid', E2E_PASSWORD=password, E2E_VIEWER_EMAIL='viewer@example.invalid', E2E_VIEWER_PASSWORD=viewer_password, E2E_VIEWER_ID=viewer_id)
             env.setdefault('PLAYWRIGHT_BROWSERS_PATH', str(ROOT / '.tools/playwright'))
             result = subprocess.run(['npm', 'run', 'test:e2e'], cwd=ROOT, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-            print(result.stdout.replace(password, '[REDACTED]').replace(viewer_password, '[REDACTED]'))
+            output = result.stdout.replace(password, '[REDACTED]').replace(viewer_password, '[REDACTED]')
+            print(re.sub(r'fp_eval_[a-f0-9]{64}', '[REDACTED_EVALUATION_TOKEN]', output))
+            for artifact in (ROOT / 'apps/web/test-results').rglob('*'):
+                if artifact.is_file() and artifact.suffix in {'.md', '.txt', '.json', '.html', '.log'}:
+                    content = artifact.read_text(errors='replace').replace(password, '[REDACTED]').replace(viewer_password, '[REDACTED]')
+                    artifact.write_text(re.sub(r'fp_eval_[a-f0-9]{64}', '[REDACTED_EVALUATION_TOKEN]', content))
             result.check_returncode()
-            print('E2E de autenticação aprovado em stack isolada.')
+            print('E2E administrativo e de avaliação aprovado em stack isolada.')
         finally:
             subprocess.run(base + ['down', '--volumes', '--remove-orphans'], check=True)
 

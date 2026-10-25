@@ -8,6 +8,20 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type ApiToken struct {
+	ID            pgtype.UUID
+	ProjectID     pgtype.UUID
+	EnvironmentID pgtype.UUID
+	Name          string
+	TokenPrefix   string
+	TokenHash     []byte
+	Scope         string
+	ExpiresAt     pgtype.Timestamptz
+	RevokedAt     pgtype.Timestamptz
+	CreatedAt     pgtype.Timestamptz
+	CreatedBy     pgtype.UUID
+}
+
 type AuditEvent struct {
 	ID             pgtype.UUID
 	OrganizationID pgtype.UUID

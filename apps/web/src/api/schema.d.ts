@@ -365,13 +365,13 @@ export interface paths {
         };
         /**
          * Listar metadados sem segredo
-         * @description Contrato planejado; endpoint ainda não implementado. Permissão: Admin+.
+         * @description Disponível no incremento 4A. Permissão: Admin+.
          */
         get: operations["listTokens"];
         put?: never;
         /**
          * Emitir token secreto uma vez
-         * @description Contrato planejado; endpoint ainda não implementado. Permissão: Admin+.
+         * @description Disponível no incremento 4A. Permissão: Admin+.
          */
         post: operations["issueToken"];
         delete?: never;
@@ -392,7 +392,7 @@ export interface paths {
         post?: never;
         /**
          * Revogar token
-         * @description Contrato planejado; endpoint ainda não implementado. Permissão: Admin+.
+         * @description Disponível no incremento 4A. Permissão: Admin+.
          */
         delete: operations["revokeToken"];
         options?: never;
@@ -431,7 +431,7 @@ export interface paths {
         put?: never;
         /**
          * Avaliar flag
-         * @description Contrato planejado; endpoint ainda não implementado. Ambiente inferido exclusivamente do token; contexto não é persistido. Limite de body: 64 KiB. Flag inexistente/arquivada retorna false/NOT_FOUND; parcial sem bucketingKey retorna false/MISSING_CONTEXT.
+         * @description Disponível no incremento 4A. Somente Bearer de avaliação, sem cookie ou acesso direto de browser. Ambiente inferido do token; contexto não é persistido. Body até 64 KiB; lote até 100, na ordem recebida, mesma revisão. Ausente/arquivada retorna false/NOT_FOUND; desativada ou 0 retorna false/DISABLED; habilitada 10000 retorna true/ENABLED. Parcial ainda não suportado retorna 503. Limites por segundo: global 600, peer 120 e credencial 100; uma réplica, memória limitada.
          */
         post: operations["evaluate"];
         delete?: never;
@@ -451,7 +451,7 @@ export interface paths {
         put?: never;
         /**
          * Avaliar lote no mesmo snapshot
-         * @description Contrato planejado; endpoint ainda não implementado. Ambiente inferido exclusivamente do token; contexto não é persistido. Limite de body: 64 KiB. Flag inexistente/arquivada retorna false/NOT_FOUND; parcial sem bucketingKey retorna false/MISSING_CONTEXT.
+         * @description Disponível no incremento 4A. Somente Bearer de avaliação, sem cookie ou acesso direto de browser. Ambiente inferido do token; contexto não é persistido. Body até 64 KiB; lote até 100, na ordem recebida, mesma revisão. Ausente/arquivada retorna false/NOT_FOUND; desativada ou 0 retorna false/DISABLED; habilitada 10000 retorna true/ENABLED. Parcial ainda não suportado retorna 503. Limites por segundo: global 600, peer 120 e credencial 100; uma réplica, memória limitada.
          */
         post: operations["evaluateBatch"];
         delete?: never;
@@ -652,7 +652,10 @@ export interface components {
         };
         TokenRequest: {
             name: string;
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description Prazo explícito futuro, até 365 dias; UI sugere 90 dias.
+             */
             expiresAt: string;
         };
         Token: {
@@ -703,6 +706,7 @@ export interface components {
         EvaluationRequest: {
             flagKey: string;
             context?: {
+                /** @description Até 256 bytes UTF-8; somente em memória, sem logs. */
                 bucketingKey?: string;
             };
         };
@@ -728,6 +732,8 @@ export interface components {
             evaluations: components["schemas"]["EvaluationRequest"][];
         };
         BatchResult: {
+            /** Format: int64 */
+            revision: number;
             results: components["schemas"]["EvaluationResult"][];
         };
         /** @description Somente organizações do usuário, cursor opaco vinculado à identidade, ordenação estável por id. */
@@ -755,6 +761,9 @@ export interface components {
             nextCursor: string | null;
         };
         TokenPage: {
+            environment: components["schemas"]["Environment"];
+            projectName: string;
+            role: components["schemas"]["Role"];
             items: components["schemas"]["Token"][];
             nextCursor: string | null;
         };
@@ -1682,6 +1691,7 @@ export interface operations {
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     issueToken: {
@@ -1719,6 +1729,7 @@ export interface operations {
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     revokeToken: {
@@ -1751,6 +1762,7 @@ export interface operations {
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     listAudit: {
@@ -1812,9 +1824,12 @@ export interface operations {
             403: components["responses"]["Problem"];
             404: components["responses"]["Problem"];
             409: components["responses"]["Problem"];
+            413: components["responses"]["Problem"];
+            415: components["responses"]["Problem"];
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     evaluateBatch: {
@@ -1844,9 +1859,12 @@ export interface operations {
             403: components["responses"]["Problem"];
             404: components["responses"]["Problem"];
             409: components["responses"]["Problem"];
+            413: components["responses"]["Problem"];
+            415: components["responses"]["Problem"];
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     metrics: {

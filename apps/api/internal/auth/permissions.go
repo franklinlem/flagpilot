@@ -3,6 +3,7 @@ package auth
 type Permission string
 
 const (
+	ManageTokens   Permission = "tokens.manage"
 	ReadFlags      Permission = "flags.read"
 	ManageFlags    Permission = "flags.manage"
 	ReadProjects   Permission = "projects.read"
@@ -29,7 +30,7 @@ func Can(role string, permission Permission) bool {
 		return true
 	case ManageFlags:
 		return role == "Owner" || role == "Admin" || role == "Editor"
-	case ManageProjects:
+	case ManageProjects, ManageTokens:
 		return role == "Owner" || role == "Admin"
 	case ManageMembers:
 		return role == "Owner"

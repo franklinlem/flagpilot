@@ -28,3 +28,5 @@ Próximo incremento: **4A — tokens e avaliação booleana single/batch**. Roll
 Ambiente local atualizado: DB/API/web saudáveis, migration 000004 aplicada sem remover o volume nem criar flags demonstrativas nas contas reais. A API exige schema 4.
 
 Verificações finais: geração sqlc/OpenAPI sem diferenças após regenerar; scan Gitleaks staged sem vazamentos; API pronta e frontend HTTP 200; flags sem sessão retornam 401. ETags canônicos também foram verificados com UUID em maiúsculas, sem conflito falso de revisão.
+
+Aceitação manual posterior: Franklin confirmou criação, ativação em ambientes distintos e arquivamento de flags e autorizou a etapa 4A. Estado seguinte em [EVALUATION_STATUS.md](EVALUATION_STATUS.md).

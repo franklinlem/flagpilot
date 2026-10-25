@@ -1,0 +1,64 @@
+import { expect, test } from '@playwright/test';
+test('emissão única, avaliação single/batch, isolamento e revogação', async ({ page, browser }) => {
+  await page.goto('/');
+  await page.getByLabel('Email', { exact: true }).fill(process.env.E2E_EMAIL!);
+  await page.getByLabel('Senha', { exact: true }).fill(process.env.E2E_PASSWORD!);
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+  await page.getByRole('listitem').filter({ hasText: 'E2E Organization' }).getByRole('link', { name: 'Ver projetos' }).click();
+  await page.getByRole('button', { name: 'Novo projeto', exact: true }).click();
+  await page.getByLabel('Nome do projeto').fill('Tokens E2E');
+  await page.getByLabel('Slug do projeto').fill('tokens-e2e');
+  await page.getByRole('button', { name: 'Criar projeto', exact: true }).click();
+  await page.getByRole('listitem').filter({ hasText: 'Tokens E2E' }).getByRole('link', { name: 'Ver ambientes' }).click();
+  const projectId = new URL(page.url()).pathname.split('/')[2];
+  const identity = await (await page.request.get('/api/v1/me')).json();
+  const adminHeaders = { Origin: new URL(page.url()).origin, 'X-CSRF-Token': identity.csrfToken };
+  expect((await page.request.post(`/api/v1/projects/${projectId}/flags`, { headers: adminHeaders, data: { key: 'token_flag', description: 'Flag para avaliação E2E' } })).status()).toBe(201);
+  const dev = page.getByRole('listitem').filter({ hasText: 'development' });
+  const devPath = await dev.getByRole('link', { name: 'Configurar flags' }).getAttribute('href');
+  const devId = devPath!.split('/')[2];
+  const production = page.getByRole('listitem').filter({ hasText: 'production' });
+  const productionPath = await production.getByRole('link', { name: 'Gerenciar tokens' }).getAttribute('href');
+  const prodId = productionPath!.split('/')[2];
+  const configuration = await page.request.get(`/api/v1/environments/${devId}/flags/token_flag`);
+  expect((await page.request.put(`/api/v1/environments/${devId}/flags/token_flag`, { headers: { ...adminHeaders, 'If-Match': configuration.headers()['etag'] }, data: { enabled: true, rolloutBps: 10000 } })).status()).toBe(200);
+  await dev.getByRole('link', { name: 'Gerenciar tokens' }).click();
+  const tokenPage = page.url();
+  await page.getByRole('button', { name: 'Novo token', exact: true }).click();
+  await page.getByLabel('Nome do token').fill('Backend E2E');
+  await page.getByRole('button', { name: 'Emitir token', exact: true }).click();
+  let secret: string;
+  try { secret = await page.getByLabel('Segredo do token').inputValue(); }
+  finally { await page.getByRole('button', { name: 'Já guardei, ocultar segredo' }).click(); }
+  expect(/^fp_eval_[a-f0-9]{64}$/.test(secret)).toBe(true);
+  await expect(page.getByLabel('Segredo do token')).toHaveCount(0);
+  expect(await page.evaluate(() => localStorage.length + sessionStorage.length)).toBe(0);
+  const caller = await browser.newContext();
+  try {
+    const headers = { Authorization: `Bearer ${secret}` };
+    const evaluated = await caller.request.post(new URL('/api/v1/evaluate', tokenPage).toString(), { headers, data: { flagKey: 'token_flag' } });
+    expect(evaluated.status()).toBe(200);
+    const result = await evaluated.json();
+    expect(result.value).toBe(true); expect(result.reason).toBe('ENABLED'); expect(result.environment).toBe('development');
+    const batch = await caller.request.post(new URL('/api/v1/evaluate/batch', tokenPage).toString(), { headers, data: { evaluations: [{ flagKey: 'token_flag' }, { flagKey: 'missing_flag' }] } });
+    expect(batch.status()).toBe(200);
+    const snapshot = await batch.json();
+    expect(snapshot.results[0].revision).toBe(snapshot.results[1].revision);
+    expect(snapshot.results[1].reason).toBe('NOT_FOUND');
+    expect((await caller.request.post(new URL(`/api/v1/projects/${projectId}/flags`, tokenPage).toString(), { headers, data: { key: 'intrusion' } })).status()).toBe(401);
+    const prodIssued = await page.request.post(`/api/v1/environments/${prodId}/tokens`, { headers: adminHeaders, data: { name: 'Production E2E', expiresAt: new Date(Date.now() + 86400000).toISOString() } });
+    expect(prodIssued.status()).toBe(201);
+    const prodSecret = (await prodIssued.json()).secret;
+    const prodEvaluation = await caller.request.post(new URL('/api/v1/evaluate', tokenPage).toString(), { headers: { Authorization: `Bearer ${prodSecret}` }, data: { flagKey: 'token_flag' } });
+    expect((await prodEvaluation.json()).value).toBe(false);
+    const metadata = await page.request.get(`/api/v1/environments/${devId}/tokens`);
+    expect((await metadata.text()).includes(secret)).toBe(false);
+    await page.reload();
+    await expect(page.getByLabel('Segredo do token')).toHaveCount(0);
+    const row = page.getByRole('listitem').filter({ hasText: 'Backend E2E' });
+    await row.getByRole('button', { name: 'Revogar token', exact: true }).click();
+    await row.getByRole('button', { name: 'Confirmar revogação', exact: true }).click();
+    await expect(row.getByText('Revogado', { exact: true })).toBeVisible();
+    expect((await caller.request.post(new URL('/api/v1/evaluate', tokenPage).toString(), { headers, data: { flagKey: 'token_flag' } })).status()).toBe(401);
+  } finally { await caller.close(); }
+});

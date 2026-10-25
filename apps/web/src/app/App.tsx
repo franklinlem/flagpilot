@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router';
+import { Tokens } from '../features/tokens/Tokens';
 import { Flags } from '../features/flags/Flags';
 import { FlagDetail } from '../features/flags/FlagDetail';
 import { Configurations } from '../features/flags/Configurations';
@@ -38,7 +39,7 @@ function SessionApp() {
       {state.status === 'checking' ? <p role="status">Verificando sessão…</p> : null}
       {state.status === 'unavailable' ? <section className="card"><h2>Serviço indisponível</h2><p role="alert">Não foi possível verificar sua sessão.</p><button onClick={retry}>Tentar novamente</button></section> : null}
       {state.status === 'anonymous' ? <LoginForm onLogin={signedIn} /> : null}
-      {state.status === 'authenticated' ? <Routes><Route path="/" element={<Account identity={state.identity} onLogout={signedOut} />} /><Route path="/organizations/:orgId/members" element={<Members key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/organizations/:orgId/projects" element={<Projects key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/projects/:projectId/environments" element={<Environments key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/projects/:projectId/flags" element={<Flags key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/projects/:projectId/flags/:flagKey" element={<FlagDetail key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/environments/:envId/flags" element={<Configurations key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="*" element={<Navigate to="/" replace />} /></Routes> : null}
+      {state.status === 'authenticated' ? <Routes><Route path="/" element={<Account identity={state.identity} onLogout={signedOut} />} /><Route path="/organizations/:orgId/members" element={<Members key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/organizations/:orgId/projects" element={<Projects key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/projects/:projectId/environments" element={<Environments key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/projects/:projectId/flags" element={<Flags key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/projects/:projectId/flags/:flagKey" element={<FlagDetail key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/environments/:envId/flags" element={<Configurations key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/environments/:envId/tokens" element={<Tokens key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="*" element={<Navigate to="/" replace />} /></Routes> : null}
     </main>
   );
 }

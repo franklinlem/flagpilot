@@ -1151,11 +1151,11 @@ paths:
     get:
       operationId: listTokens
       summary: Listar metadados sem segredo
-      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+      description: 'Disponível no incremento 4A. Permissão:
         Admin+.'
       tags:
       - Tokens
-      x-implementation: planned
+      x-implementation: available
       security:
       - sessionCookie: []
       responses:
@@ -1170,6 +1170,8 @@ paths:
         '422':
           $ref: '#/components/responses/Problem'
         '429':
+          $ref: '#/components/responses/Problem'
+        '503':
           $ref: '#/components/responses/Problem'
         '500':
           $ref: '#/components/responses/Problem'
@@ -1199,11 +1201,11 @@ paths:
     post:
       operationId: issueToken
       summary: Emitir token secreto uma vez
-      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+      description: 'Disponível no incremento 4A. Permissão:
         Admin+.'
       tags:
       - Tokens
-      x-implementation: planned
+      x-implementation: available
       security:
       - sessionCookie: []
       responses:
@@ -1218,6 +1220,8 @@ paths:
         '422':
           $ref: '#/components/responses/Problem'
         '429':
+          $ref: '#/components/responses/Problem'
+        '503':
           $ref: '#/components/responses/Problem'
         '500':
           $ref: '#/components/responses/Problem'
@@ -1245,11 +1249,11 @@ paths:
     delete:
       operationId: revokeToken
       summary: Revogar token
-      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
+      description: 'Disponível no incremento 4A. Permissão:
         Admin+.'
       tags:
       - Tokens
-      x-implementation: planned
+      x-implementation: available
       security:
       - sessionCookie: []
       responses:
@@ -1260,6 +1264,8 @@ paths:
         '422':
           $ref: '#/components/responses/Problem'
         '429':
+          $ref: '#/components/responses/Problem'
+        '503':
           $ref: '#/components/responses/Problem'
         '500':
           $ref: '#/components/responses/Problem'
@@ -1334,13 +1340,10 @@ paths:
     post:
       operationId: evaluate
       summary: Avaliar flag
-      description: 'Contrato planejado; endpoint ainda não implementado. Ambiente
-        inferido exclusivamente do token; contexto não é persistido. Limite de body:
-        64 KiB. Flag inexistente/arquivada retorna false/NOT_FOUND; parcial sem bucketingKey
-        retorna false/MISSING_CONTEXT.'
+      description: 'Disponível no incremento 4A. Somente Bearer de avaliação, sem cookie ou acesso direto de browser. Ambiente inferido do token; contexto não é persistido. Body até 64 KiB; lote até 100, na ordem recebida, mesma revisão. Ausente/arquivada retorna false/NOT_FOUND; desativada ou 0 retorna false/DISABLED; habilitada 10000 retorna true/ENABLED. Parcial ainda não suportado retorna 503. Limites por segundo: global 600, peer 120 e credencial 100; uma réplica, memória limitada.'
       tags:
       - Avaliação
-      x-implementation: planned
+      x-implementation: available
       security:
       - evaluationToken: []
       responses:
@@ -1355,6 +1358,12 @@ paths:
         '422':
           $ref: '#/components/responses/Problem'
         '429':
+          $ref: '#/components/responses/Problem'
+        '503':
+          $ref: '#/components/responses/Problem'
+        '413':
+          $ref: '#/components/responses/Problem'
+        '415':
           $ref: '#/components/responses/Problem'
         '500':
           $ref: '#/components/responses/Problem'
@@ -1376,13 +1385,10 @@ paths:
     post:
       operationId: evaluateBatch
       summary: Avaliar lote no mesmo snapshot
-      description: 'Contrato planejado; endpoint ainda não implementado. Ambiente
-        inferido exclusivamente do token; contexto não é persistido. Limite de body:
-        64 KiB. Flag inexistente/arquivada retorna false/NOT_FOUND; parcial sem bucketingKey
-        retorna false/MISSING_CONTEXT.'
+      description: 'Disponível no incremento 4A. Somente Bearer de avaliação, sem cookie ou acesso direto de browser. Ambiente inferido do token; contexto não é persistido. Body até 64 KiB; lote até 100, na ordem recebida, mesma revisão. Ausente/arquivada retorna false/NOT_FOUND; desativada ou 0 retorna false/DISABLED; habilitada 10000 retorna true/ENABLED. Parcial ainda não suportado retorna 503. Limites por segundo: global 600, peer 120 e credencial 100; uma réplica, memória limitada.'
       tags:
       - Avaliação
-      x-implementation: planned
+      x-implementation: available
       security:
       - evaluationToken: []
       responses:
@@ -1397,6 +1403,12 @@ paths:
         '422':
           $ref: '#/components/responses/Problem'
         '429':
+          $ref: '#/components/responses/Problem'
+        '503':
+          $ref: '#/components/responses/Problem'
+        '413':
+          $ref: '#/components/responses/Problem'
+        '415':
           $ref: '#/components/responses/Problem'
         '500':
           $ref: '#/components/responses/Problem'
@@ -1797,7 +1809,10 @@ components:
       additionalProperties: false
       properties:
         name: *id004
-        expiresAt: *id007
+        expiresAt:
+          type: string
+          format: date-time
+          description: Prazo explícito futuro, até 365 dias; UI sugere 90 dias.
       required:
       - name
       - expiresAt
@@ -1882,6 +1897,7 @@ components:
               type: string
               minLength: 1
               maxLength: 256
+              description: Até 256 bytes UTF-8; somente em memória, sem logs.
       required:
       - flagKey
       examples:
@@ -1933,6 +1949,7 @@ components:
       type: object
       additionalProperties: false
       properties:
+        revision: *id006
         results:
           type: array
           maxItems: 100
@@ -1940,6 +1957,7 @@ components:
             $ref: '#/components/schemas/EvaluationResult'
       required:
       - results
+      - revision
     OrganizationPage:
       type: object
       additionalProperties: false
@@ -2035,6 +2053,12 @@ components:
       type: object
       additionalProperties: false
       properties:
+        environment:
+          $ref: '#/components/schemas/Environment'
+        projectName:
+          type: string
+        role:
+          $ref: '#/components/schemas/Role'
         items:
           type: array
           maxItems: 100
@@ -2045,6 +2069,9 @@ components:
           - string
           - 'null'
       required:
+      - environment
+      - projectName
+      - role
       - items
       - nextCursor
     AuditEventPage:
