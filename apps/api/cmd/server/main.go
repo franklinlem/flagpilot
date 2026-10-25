@@ -16,6 +16,7 @@ import (
 	"github.com/franklinlem/flagpilot/apps/api/internal/evaluation"
 	"github.com/franklinlem/flagpilot/apps/api/internal/flags"
 	httpapi "github.com/franklinlem/flagpilot/apps/api/internal/http"
+	"github.com/franklinlem/flagpilot/apps/api/internal/observability"
 	"github.com/franklinlem/flagpilot/apps/api/internal/organizations"
 	"github.com/franklinlem/flagpilot/apps/api/internal/projects"
 	"github.com/franklinlem/flagpilot/apps/api/internal/storage/postgres"
@@ -45,27 +46,44 @@ func run() int {
 		logger.Error("auth_init_failed")
 		return 1
 	}
-	server := &http.Server{Addr: cfg.HTTPAddr, Handler: httpapi.New(logger, store, httpapi.WithAuth(authService, cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithAudit(authService, audit.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithOrganizations(authService, organizations.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithProjects(authService, projects.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithFlags(authService, flags.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithTokens(authService, tokens.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithEvaluation(evaluation.New(store.Pool, cfg.DBTimeout))), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}
-	done := make(chan error, 1)
-	go func() {
-		logger.Info("server_start", "address", cfg.HTTPAddr, "environment", cfg.Environment)
-		done <- server.ListenAndServe()
-	}()
+	var metrics *observability.Metrics
+	var observer httpapi.Observer
+	if cfg.MetricsAddr != "" {
+		metrics = observability.New(store.Pool)
+		observer = metrics
+	}
+	server := &http.Server{Addr: cfg.HTTPAddr, Handler: httpapi.NewObserved(logger, store, observer, httpapi.WithAuth(authService, cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithAudit(authService, audit.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithOrganizations(authService, organizations.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithProjects(authService, projects.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithFlags(authService, flags.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithTokens(authService, tokens.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithEvaluation(evaluation.New(store.Pool, cfg.DBTimeout))), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}
+
+	servers := []*http.Server{server}
+	if metrics != nil {
+		servers = append(servers, &http.Server{Addr: cfg.MetricsAddr, Handler: metrics.Handler(), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 5 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 30 * time.Second, MaxHeaderBytes: 8 * 1024})
+	}
+	done := make(chan error, len(servers))
+	for _, current := range servers {
+		go func() { done <- current.ListenAndServe() }()
+	}
+	logger.Info("server_start", "address", cfg.HTTPAddr, "environment", cfg.Environment)
+	if metrics != nil {
+		logger.Info("metrics_server_start", "address", cfg.MetricsAddr)
+	}
+	code := 0
 	select {
 	case err := <-done:
 		if !errors.Is(err, http.ErrServerClosed) {
 			logger.Error("server_failed")
-			return 1
+			code = 1
 		}
 	case <-ctx.Done():
-		shutdown, cancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeout)
-		defer cancel()
-		if err := server.Shutdown(shutdown); err != nil {
-			_ = server.Close()
+	}
+	shutdown, cancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeout)
+	defer cancel()
+	for _, current := range servers {
+		if err := current.Shutdown(shutdown); err != nil {
+			_ = current.Close()
 			logger.Error("shutdown_timeout")
-			return 1
+			code = 1
 		}
 	}
 	logger.Info("server_stop")
-	return 0
+	return code
 }

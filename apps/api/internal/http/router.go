@@ -18,7 +18,14 @@ type requestIDKey struct{}
 
 func RequestID(ctx context.Context) string { id, _ := ctx.Value(requestIDKey{}).(string); return id }
 
+type Observer interface {
+	ObserveHTTP(method, route string, status int, duration time.Duration)
+}
+
 func New(logger *slog.Logger, db Readiness, options ...Option) http.Handler {
+	return NewObserved(logger, db, nil, options...)
+}
+func NewObserved(logger *slog.Logger, db Readiness, observer Observer, options ...Option) http.Handler {
 	r := chi.NewRouter()
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -42,7 +49,14 @@ func New(logger *slog.Logger, db Readiness, options ...Option) http.Handler {
 				if route == "" {
 					route = "unmatched"
 				}
-				logger.Info("http_request", "request_id", id, "method", req.Method, "route", route, "status", wrapped.Status(), "duration_ms", time.Since(start).Milliseconds())
+				status := wrapped.Status()
+				if status == 0 {
+					status = 200
+				}
+				if observer != nil {
+					observer.ObserveHTTP(req.Method, route, status, time.Since(start))
+				}
+				logger.Info("http_request", "request_id", id, "method", req.Method, "route", route, "status", status, "duration_ms", time.Since(start).Milliseconds())
 			}()
 			next.ServeHTTP(wrapped, req)
 		})

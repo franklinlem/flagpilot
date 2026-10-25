@@ -14,6 +14,7 @@ import (
 type Config struct {
 	Environment     string
 	HTTPAddr        string
+	MetricsAddr     string
 	DatabaseURL     string
 	LogLevel        slog.Level
 	DBTimeout       time.Duration
@@ -43,6 +44,15 @@ func load(get func(string) string) (Config, error) {
 	p, err := strconv.Atoi(port)
 	if err != nil || p < 1 || p > 65535 {
 		return c, errors.New("porta HTTP_ADDR inválida")
+	}
+	c.MetricsAddr = get("METRICS_ADDR")
+	if c.MetricsAddr != "" {
+		host, metricsPort, err := net.SplitHostPort(c.MetricsAddr)
+		metricsNumber, numberErr := strconv.Atoi(metricsPort)
+		ip := net.ParseIP(host)
+		if err != nil || numberErr != nil || ip == nil || (!ip.IsLoopback() && !ip.IsPrivate() && !ip.IsUnspecified()) || metricsNumber < 1 || metricsNumber > 65535 || metricsNumber == p {
+			return c, errors.New("METRICS_ADDR deve usar IP local/privado explícito e porta distinta válida")
+		}
 	}
 	u, err := url.Parse(c.DatabaseURL)
 	if err != nil || u.Hostname() == "" || (u.Scheme != "postgres" && u.Scheme != "postgresql") || u.User == nil || u.User.Username() == "" || u.Path == "" || u.Path == "/" {

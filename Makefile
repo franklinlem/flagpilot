@@ -53,3 +53,7 @@ reset-password: admin
 .PHONY: create-user
 create-user: admin
 	python3 scripts/run-local.py .tools/bin/flagpilot-admin create-user $(ARGS)
+
+.PHONY: recovery-rehearsal
+recovery-rehearsal:
+	python3 scripts/recovery.py $(ARGS)

@@ -1,8 +1,8 @@
 # FlagPilot — Plano de Engenharia de Software
 
-**Versão:** 1.8 · **Data:** 25/10/2026 · **Estado:** implementação incremental
+**Versão:** 1.9 · **Data:** 25/10/2026 · **Estado:** implementação incremental
 
-**Revisão 1.8:** incorpora as direções do [plano aprovado](IMPLEMENTATION_PLAN.md) e das [ADRs](adr/README.md). Fundação, identidade, organizações/membros, criação/consulta de projetos/ambientes e gestão de flags booleanas, tokens por ambiente e avaliação booleana/percentual single/batch estão implementados localmente. Ver [estado de avaliação](EVALUATION_STATUS.md). Rollout determinístico v1 está implementado com vetores Go/JS; o SDK HTTP privado para backend está implementado com cache/timeout/fallback (ver SDK_STATUS.md); `api/openapi.yaml` identifica a disponibilidade de cada endpoint. Filtros de catálogo e consulta de auditoria estão implementados em 6A; navegação/recuperação e testes Chromium/Firefox em 6B (DASHBOARD_STATUS.md). Critérios locais/pendentes em MVP_READINESS.md. Licença, publicação e alterações externas continuam pendentes.
+**Revisão 1.9:** incorpora as direções do [plano aprovado](IMPLEMENTATION_PLAN.md) e das [ADRs](adr/README.md). Fundação, identidade, organizações/membros, criação/consulta de projetos/ambientes e gestão de flags booleanas, tokens por ambiente e avaliação booleana/percentual single/batch estão implementados localmente. Ver [estado de avaliação](EVALUATION_STATUS.md). Rollout determinístico v1 está implementado com vetores Go/JS; o SDK HTTP privado para backend está implementado com cache/timeout/fallback (ver SDK_STATUS.md); `api/openapi.yaml` identifica a disponibilidade de cada endpoint. Filtros de catálogo e consulta de auditoria estão implementados em 6A; navegação/recuperação e testes Chromium/Firefox em 6B (DASHBOARD_STATUS.md). Ensaio sintético de recuperação e métricas Prometheus em listener separado entregues em 6C (OPERATIONS_STATUS.md). Critérios locais/pendentes em MVP_READINESS.md. Licença, publicação e alterações externas continuam pendentes.
 
 ## 1. Visão e limites
 

@@ -51,6 +51,8 @@ jobs:
           npm audit --audit-level=high
       - name: Smoke dos containers sem publicação
         run: python3 scripts/smoke.py
+      - name: Ensaio sintético de backup e restauração
+        run: python3 scripts/recovery.py
       - name: Browsers Chromium/Firefox e fluxos reais isolados
         run: |
           npx playwright install --with-deps chromium firefox

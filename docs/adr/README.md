@@ -19,3 +19,5 @@ O plano foi aprovado por Franklin em 24/10/2026 ("ok. pode continuar."). ADRs re
 - [ADR-011 — Tokens e avaliação booleana](011-evaluation-tokens.md)
 
 - [ADR-012 — Filtros e consulta de auditoria](012-dashboard-audit-query.md)
+
+- [ADR-013 — Recuperação e métricas locais](013-recovery-observability.md)

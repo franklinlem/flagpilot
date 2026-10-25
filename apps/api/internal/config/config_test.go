@@ -35,3 +35,33 @@ func TestConfigValidationAndRedaction(t *testing.T) {
 		})
 	}
 }
+func TestMetricsOptInAndAddress(t *testing.T) {
+	for _, value := range []string{"", "127.0.0.1:9090", "0.0.0.0:9090", "[::1]:9090", "10.0.0.2:9090"} {
+		cfg, err := load(func(key string) string {
+			if key == "DATABASE_URL" {
+				return "postgres://user:secret@localhost/db"
+			}
+			if key == "METRICS_ADDR" {
+				return value
+			}
+			return ""
+		})
+		if err != nil || cfg.MetricsAddr != value {
+			t.Fatal("configuração de métricas válida rejeitada")
+		}
+	}
+	for _, value := range []string{":9090", "localhost:9090", "8.8.8.8:9090", "127.0.0.1:8080", "127.0.0.1:0", "bad"} {
+		_, err := load(func(key string) string {
+			if key == "DATABASE_URL" {
+				return "postgres://user:secret@localhost/db"
+			}
+			if key == "METRICS_ADDR" {
+				return value
+			}
+			return ""
+		})
+		if err == nil {
+			t.Fatal("endereço de métricas inseguro/inválido aceito")
+		}
+	}
+}

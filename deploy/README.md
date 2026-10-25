@@ -13,3 +13,7 @@ Dockerfiles têm stages de build e runtime. API é estática, imagem scratch, UI
 Não há compose de produção executável neste incremento. Antes da VPS: confirmar capacidade, versões/digests, banco e segredos separados, TLS banco (verify-full ou decisão de ameaça registrada para rede privada), DNS, regras de proxy que impeçam acesso público a readiness/métricas, backups/restore e autorização externa. A porta da API não deve ser publicada diretamente no destino. Nenhum serviço de Coolify/Traefik ou monitor externo é alterado por estes arquivos.
 
 Desde 2A, a API também contém `/admin` para bootstrap/recuperação em terminal local (`docker compose ... exec api /admin bootstrap`). A atualização preserva volume e aplica migrations até 000005; a API nova exige schema 5. PUBLIC_BASE_URL/ALLOWED_ORIGINS precisam corresponder à origem real do painel. `scripts/auth-e2e.py` usa profile browser de compose.smoke.yml com projeto, volume, portas e conta próprios; não opera no banco de desenvolvimento.
+
+## Incremento 6C
+
+Compose full publica métricas somente em 127.0.0.1:${METRICS_PORT:-9090}, listener interno separado da API (METRICS_ADDR). Não criar ingress público. Ensaio sintético usa compose.smoke.yml + compose.recovery.yml, com projeto aleatório gerido por scripts/recovery.py; não executar down --volumes em flagpilot-dev. Runbooks em docs/runbooks/recovery.md e observability.md. Monitor/backup recorrente produtivo não foram configurados.

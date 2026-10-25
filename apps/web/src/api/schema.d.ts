@@ -469,7 +469,7 @@ export interface paths {
         };
         /**
          * Consultar métricas Prometheus
-         * @description Planejado; rede interna, listener separado. Não expor na borda.
+         * @description Disponível em 6C, somente no listener separado METRICS_ADDR (desativado por padrão). Nunca montado na API pública. Formato Prometheus, rotas agregadas sem contexto/identidades.
          */
         get: operations["metrics"];
         put?: never;

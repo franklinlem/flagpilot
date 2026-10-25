@@ -1456,10 +1456,10 @@ paths:
     get:
       operationId: metrics
       summary: Consultar métricas Prometheus
-      description: Planejado; rede interna, listener separado. Não expor na borda.
+      description: Disponível em 6C, somente no listener separado METRICS_ADDR (desativado por padrão). Nunca montado na API pública. Formato Prometheus, rotas agregadas sem contexto/identidades.
       tags:
       - Operação
-      x-implementation: planned
+      x-implementation: available
       security: []
       responses:
         '200':
@@ -1468,8 +1468,8 @@ paths:
             text/plain:
               schema: *id002
       servers:
-      - url: /
-        description: Listener interno futuro
+      - url: http://127.0.0.1:9090
+        description: Exemplo local do listener interno; não expor na borda
   /organizations/{orgId}:
     get:
       operationId: getOrganization

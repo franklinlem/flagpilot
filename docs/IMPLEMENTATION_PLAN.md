@@ -425,3 +425,7 @@ Continuidade autorizada em 25/10/2026 após entrega do SDK. Filtros de chave/est
 ## Fechamento de UX e recuperação — 6B
 
 Franklin confirmou filtros/histórico e autorizou continuidade em 25/10/2026. Navegação por teclado, orientação/foco por tela, retorno ao topo e timeout comum de 8 s com sinais de cancelamento implementados. Matriz de seis fluxos por navegador validada em Chromium/Firefox, sem flexibilizar limites de login; smoke de falhas/reinício aprovado em stack sintética. Evidências em DASHBOARD_STATUS.md e MVP_READINESS.md. Não houve migration, dependência do produto, deploy ou modificação externa. Próxima entrega operacional deve priorizar backup/restore local e observabilidade, mantendo homologação/produção separadas e dependentes de autorização específica.
+
+## Ensaio local de recuperação e observabilidade — 6C
+
+Continuidade autorizada após 6B. Script sintético de backup/restore destrói origem própria, compara todas as tabelas no destino e aplica invalidação auditada de sessões/tokens antes de iniciar API restaurada. Listener Prometheus separado, opt-in, registry próprio e labels agregados; Compose local publica somente em loopback. ADR-013, runbooks/recovery.md e observability.md descrevem uso/limites. Schema 5, sem backup recorrente, alertas externos ou deploy; nenhum dado real de Franklin é usado pelo ensaio. Próxima entrega deve medir capacidade local e preparar observabilidade/coleta e plano operacional antes de qualquer autorização de homologação externa.
