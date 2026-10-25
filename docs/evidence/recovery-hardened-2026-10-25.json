@@ -1,0 +1,38 @@
+{
+  "timestampUtc": "2026-10-25T15:28:20.396059+00:00",
+  "syntheticOnly": true,
+  "postgresImage": "postgres:16.15-alpine@sha256:f4610795587492cd4fb887c2dc3de301b813278bb6f616992061141b5f15ac36",
+  "minorUpgrade": {
+    "fromServerVersionNum": "160013",
+    "toServerVersionNum": "160015",
+    "sameVolumeAllTablesPreserved": true,
+    "evaluationStable": true,
+    "specialExtensionsOrLogicalSlots": false
+  },
+  "schemaVersion": 5,
+  "backupBytes": 33770,
+  "dumpSeconds": 1.368,
+  "restoreSqlSeconds": 1.997,
+  "functionalRecoveryDrillSeconds": 42.134,
+  "tableRows": {
+    "schema_migrations": 1,
+    "users": 1,
+    "organizations": 1,
+    "memberships": 1,
+    "projects": 1,
+    "environments": 3,
+    "flags": 2,
+    "flag_configs": 6,
+    "api_tokens": 2,
+    "audit_events": 13,
+    "sessions": 1
+  },
+  "allTableContentsPreserved": true,
+  "sourceVolumeDestroyedBeforeRestore": true,
+  "sessionsAndTokensInvalidatedBeforeStartup": true,
+  "postSnapshotRevocationProtected": true,
+  "evaluationStableAfterReissue": true,
+  "runtimeDDLForbidden": true,
+  "recurringBackupConfigured": false,
+  "productionRpoRtoValidated": false
+}

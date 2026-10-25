@@ -1,4 +1,10 @@
-# Incremento 6E — imagens, SBOM e rollback local
+# Estado de release — atualização 6F
+
+**Gate de imagens agora aprovado:** zero HIGH/CRITICAL nos quatro runtimes corrigidos. Web/DB/migrator sem achados; API com dois UNKNOWN de OpenPGP não importado. Correções, evidências e limites em [SECURITY_REMEDIATION_STATUS.md](SECURITY_REMEDIATION_STATUS.md). Release/produção continuam pendentes dos demais critérios.
+
+O registro abaixo é o snapshot histórico bloqueado de 6E, preservado para comparação.
+
+## Incremento 6E — imagens, SBOM e rollback local
 
 Data: 25/10/2026. **Gate de imagens bloqueado. Não é release aprovada.** Continuidade autorizada após 6D; nenhuma publicação, deploy ou alteração de servidores/dados de desenvolvimento.
 

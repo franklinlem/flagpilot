@@ -20,3 +20,7 @@ Testes automatizados cobrem banco vazio/up, up sem mudanças, down/up descartáv
 O papel `flagpilot_app` é preexistente, criado pelo provisionamento local/init. Migrations concedem apenas permissões necessárias ao runtime. `schema_migrations.sql` dentro de storage é somente entrada de tipos para sqlc; a tabela operacional é criada exclusivamente por golang-migrate, não por esse arquivo.
 
 Prontidão do container PostgreSQL usa `pg_isready -h 127.0.0.1` para esperar o servidor final TCP, não o servidor temporário socket-only usado pelo entrypoint durante init. Em falha de smoke, diagnóstico sanitizado é coletado antes de remover o banco efêmero.
+
+## Runtime corrigido em 6F
+
+Compose constrói deploy/migrate/Dockerfile (scratch/nonroot), que lê MIGRATION_DATABASE_URL e MIGRATION_PATH (padrão /migrations) e aplica somente up com golang-migrate 4.20.1/postgres/file. Não há shell nem comando -database no container. Make migrate continua aplicando migrations; o CLI .tools/bin/migrate mantém a interface de manutenção e é recompilado pelo instalador com Go fixado e somente postgres/file. Não usar force/down automaticamente para corrigir estado dirty.

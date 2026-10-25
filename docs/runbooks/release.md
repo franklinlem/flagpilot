@@ -1,6 +1,6 @@
 # Evidências de imagens e rollback local
 
-Incremento 6E. Preparação local, sem release pública, registry, npm, deploy, DNS ou alteração de servidor externo. Gate de segurança atual **bloqueado**: ver [RELEASE_STATUS.md](../RELEASE_STATUS.md). Um scan sem HIGH/CRITICAL também não aprova sozinho uma release.
+Incremento 6E. Preparação local, sem release pública, registry, npm, deploy, DNS ou alteração de servidor externo. Gate HIGH/CRITICAL atual **aprovado em 6F** (dois UNKNOWN não importados na API): ver [RELEASE_STATUS.md](../RELEASE_STATUS.md) e [correções 6F](../SECURITY_REMEDIATION_STATUS.md). Um scan sem HIGH/CRITICAL também não aprova sozinho uma release.
 
 ## SBOM e scan
 
@@ -12,7 +12,7 @@ make release-artifacts ARGS='--output .tools/releases/nova-execucao'
 make release-artifacts ARGS='--output .tools/releases/outra-execucao --report docs/evidence/images-nova-execucao.json'
 ```
 
-Exige Python 3.12+, Docker/Compose local por socket Unix e internet para imagens/base de vulnerabilidades. Não recebe imagem arbitrária nem credenciais de registry de publicação. Constrói os runtimes API e web do checkout; baixa DB e migrator pelos digests de `deploy/images.lock.json`. Dockerfiles/Compose também fixam essas referências. Não inicia banco/serviço da aplicação para escanear e não altera os containers de desenvolvimento.
+Exige Python 3.12+, Docker/Compose local por socket Unix e internet para imagens/base de vulnerabilidades. Não recebe imagem arbitrária nem credenciais de registry de publicação. Constrói os quatro runtimes API/web/DB/migrator do checkout. `deploy/images.lock.json` fixa as bases upstream; DB recompila gosu com dependências fixadas, web atualiza APKs com versões explícitas e migrator inclui somente postgres/file. Dockerfiles/Compose também fixam essas referências. Não inicia banco/serviço da aplicação para escanear e não altera os containers de desenvolvimento.
 
 O Trivy 0.69.3 está fixado por digest. Essa versão foi escolhida após consultar o [advisory do fornecedor sobre o comprometimento do ecossistema](https://github.com/aquasecurity/trivy/security/advisories/GHSA-69fq-xp46-6x23): não usar tags flutuantes, versão 0.69.4 nem imagens 0.69.5/0.69.6 daquele incidente. Não foi adicionado trivy-action/setup-trivy. Isso não substitui verificação de proveniência/assinaturas das ferramentas em uma política completa de release.
 
@@ -24,7 +24,7 @@ Por imagem gera:
 - `api|web|db|migrate.scan.json`: relatório nativo Trivy com severidade, versões detectadas/correções conhecidas e metadados de imagem.
 - `manifest.json`: image IDs, referência upstream quando aplicável, versão/data da DB, contagens, achados e SHA-256 dos oito artefatos.
 
-Artefatos completos ficam em `.tools/releases/<execucao>` (ignorados pelo Git). A evidência versionada em `docs/evidence/images-2026-10-25.json` é o resumo do snapshot; não inclui imagens, credenciais ou dados de banco. Para aquela execução, os SBOMs estão em `.tools/releases/6e-scanned`. Guarda os arquivos se precisar auditoria durável; repetir com DB mais nova pode produzir resultados diferentes. Imagens locais são removidas após análise; upstream/cache permanecem para evitar downloads repetidos. Não usar `docker system prune` como rotina do harness.
+Artefatos completos ficam em `.tools/releases/<execucao>` (ignorados pelo Git). A evidência versionada em `docs/evidence/images-2026-10-25.json` é o resumo do snapshot; não inclui imagens, credenciais ou dados de banco. Para 6E, os SBOMs estão em `.tools/releases/6e-scanned`; para a correção 6F, `.tools/releases/6f-hardened` e resumo `docs/evidence/images-hardened-2026-10-25.json`. Guarda os arquivos se precisar auditoria durável; repetir com DB mais nova pode produzir resultados diferentes. Imagens locais são removidas após análise; upstream/cache permanecem para evitar downloads repetidos. Não usar `docker system prune` como rotina do harness.
 
 Gate: zero HIGH/CRITICAL nos quatro runtimes, incluindo achados sem correção disponível. Sem `--ignore-unfixed`, suppressions ou VEX implícito. UNKNOWN/MEDIUM/LOW ficam registrados para triagem; passar esse gate não significa ausência de vulnerabilidades. Inventário ausente ou ferramenta/JSON inválidos falham de forma fechada. Retorno 0: gate aprovado; 2: artefatos completos, gate bloqueado por achados; 1: falha de ferramenta/dados; 130: interrupção. A saída/relatório nunca é sobrescrita.
 

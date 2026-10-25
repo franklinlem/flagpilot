@@ -1,0 +1,18 @@
+{
+  "timestampUtc": "2026-10-25T15:28:36.617598+00:00",
+  "environment": "local-development",
+  "postgresVersionNum": "160015",
+  "allTableContentsPreserved": true,
+  "privatePreUpdateDumpCreated": true,
+  "dumpMode": "0600",
+  "backupDirectoryMode": "0700",
+  "realBackupRestoreTested": false,
+  "recurringBackupConfigured": false,
+  "schemaVersion": 5,
+  "httpChecks": {
+    "ready": true,
+    "web": true,
+    "metrics": true
+  },
+  "externalServersChanged": false
+}

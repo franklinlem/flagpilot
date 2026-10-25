@@ -119,6 +119,7 @@ def main():
                     image_ids[tag] = docker.run(['image', 'inspect', '--format', '{{.Id}}', tag]).stdout.decode().strip()
                 check(image_ids[tags[0]] != image_ids[tags[1]], 'As imagens do ensaio precisam ser distintas.')
                 override.write_text(json.dumps({'services': {'api': {'image': tags[0]}}}))
+                compose(['build', 'migrate', 'db'])
                 compose(['up', '-d', '--no-build', '--wait', 'api'])
                 switch(tags[0])
                 password = secrets.token_urlsafe(32)

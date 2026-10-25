@@ -8,7 +8,15 @@ make recovery-rehearsal
 python3 scripts/recovery.py --report /tmp/flagpilot-recovery-report.json
 ```
 
-Requer Docker/Compose local por socket Unix; recusa host/contexto Docker remoto e ignora overrides de credenciais/projeto do shell para usar somente o .env sintético. Usa PostgreSQL 16.13-alpine e a API construída do checkout. O projeto aleatório flagpilot-recovery-* é impresso ao iniciar. Cada execução cria suas próprias senhas em .env temporário 0600 e diretório 0700. O arquivo de dump é custom (-Fc), comprimido, sem criptografia, de fixtures sintéticas, 0600; é eliminado no fim. Não usar esse tratamento temporário como política de proteção de backups reais.
+Requer Docker/Compose local por socket Unix; recusa host/contexto Docker remoto e ignora overrides de credenciais/projeto do shell para usar somente o .env sintético. Usa a imagem local corrigida baseada em PostgreSQL 16.15, com gosu recompilado, e a API construída do checkout. O projeto aleatório flagpilot-recovery-* é impresso ao iniciar. Cada execução cria suas próprias senhas em .env temporário 0600 e diretório 0700. O arquivo de dump é custom (-Fc), comprimido, sem criptografia, de fixtures sintéticas, 0600; é eliminado no fim. Não usar esse tratamento temporário como política de proteção de backups reais.
+
+## Upgrade sintético opcional (6F)
+
+```bash
+python3 scripts/recovery.py --upgrade-from-16-13 --report docs/evidence/recuperacao-upgrade-novo.json
+```
+
+A origem usa a imagem histórica 16.13 fixada apenas em recursos descartáveis. Após criar fixture, para API, troca DB para o build local 16.15 no mesmo volume e compara todas as tabelas/avaliação antes de seguir com dump/restore. Não usa dados reais. Ver recovery-hardened-2026-10-25.json; as referências 6C abaixo são evidência histórica anterior. Extensões especiais/replicação não estão na fixture; revisar notas de release antes de bancos reais.
 
 ## O que o ensaio comprova
 

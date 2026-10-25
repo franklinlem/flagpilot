@@ -116,7 +116,7 @@ def main():
                     'dockerVersion': docker(['version', '--format', '{{.Server.Version}}']).stdout.decode().strip(),
                     'k6Image': K6, 'k6Version': docker(['run', '--rm', '--network', 'none', K6, 'version']).stdout.decode().strip(),
                     'apiImageId': docker(['inspect', '--format', '{{.Image}}', ids['api']]).stdout.decode().strip(),
-                    'postgresImage': 'postgres:16.13-alpine', 'schemaVersion': 5,
+                    'postgresBaseImage': json.loads((ROOT/'deploy/images.lock.json').read_text())['db'], 'postgresImageId': docker(['inspect','--format','{{.Image}}',ids['db']]).stdout.decode().strip(), 'schemaVersion': 5,
                     'limits': {'apiCpus': 1, 'apiMemoryMiB': 256, 'dbCpus': 1, 'dbMemoryMiB': 512, 'generatorCpus': 1,
                                'generatorMemoryMiB': 256, 'dbPoolMax': 5, 'credentialRps': 100, 'peerRps': 120, 'globalRps': 600},
                     'workload': {'endpoint': 'POST /api/v1/evaluate', 'flags': 1, 'activeTokens': 1, 'rolloutBps': 10000,

@@ -1,7 +1,9 @@
 name: flagpilot-dev
 services:
   db:
-    image: postgres:16.13-alpine@sha256:4e6e670bb069649261c9c18031f0aded7bb249a5b6664ddec29c013a89310d50
+    build:
+      context: ..
+      dockerfile: deploy/postgres/Dockerfile
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-flagpilot}
       POSTGRES_USER: ${POSTGRES_USER:-flagpilot_migrator}
@@ -21,11 +23,10 @@ services:
       driver: json-file
       options: {max-size: 10m, max-file: "3"}
   migrate:
-    image: migrate/migrate:v4.20.1@sha256:76cc2074cb6642631f34a898ced71e6aeaa6b1a4d78c4daa743275a22e0c5be7
+    build:
+      context: ..
+      dockerfile: deploy/migrate/Dockerfile
     profiles: [tools, full]
-    entrypoint: [/bin/sh, -ec]
-    command:
-      - 'exec migrate -path /migrations -database "$$MIGRATION_DATABASE_URL" up'
     environment:
       MIGRATION_DATABASE_URL: postgres://${POSTGRES_USER:-flagpilot_migrator}:${POSTGRES_PASSWORD:?Execute make setup}@db:5432/${POSTGRES_DB:-flagpilot}?sslmode=disable
     volumes:

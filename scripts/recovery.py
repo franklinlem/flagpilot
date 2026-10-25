@@ -26,6 +26,7 @@ def check(value, message):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--report', type=Path, help='JSON sem dados/segredos; arquivo novo, sem sobrescrever')
+    parser.add_argument('--upgrade-from-16-13', action='store_true', help='Ensaiar upgrade sintético do volume 16.13 para a imagem fixada atual antes do backup')
     args = parser.parse_args()
     if args.report and args.report.exists():
         parser.error('O relatório já existe; escolha um arquivo novo.')
@@ -46,6 +47,11 @@ def main():
             envfile.write_text(''.join(f'{key}={secrets.token_hex(24)}\n' for key in ['POSTGRES_PASSWORD','APP_DB_PASSWORD','RESTORE_POSTGRES_PASSWORD','RESTORE_APP_DB_PASSWORD']))
             envfile.chmod(0o600)
             base = ['docker','compose','--project-name',project,'--env-file',str(envfile),'-f',str(ROOT/'deploy/compose.smoke.yml'),'-f',str(ROOT/'deploy/compose.recovery.yml'),'--profile','recovery']
+            db_image = json.loads((ROOT/'deploy/images.lock.json').read_text())['db']
+            upgrade_overlay = temp/'upgrade.json'
+            if args.upgrade_from_16_13:
+                upgrade_overlay.write_text(json.dumps({'services':{'db':{'image':'postgres:16.13-alpine@sha256:4e6e670bb069649261c9c18031f0aded7bb249a5b6664ddec29c013a89310d50'}}}))
+                base.extend(['-f',str(upgrade_overlay)])
             def command(parts, *, data=None, output=None, fail=True):
                 result = subprocess.run(base+parts, cwd=ROOT, env=docker_env, input=data, stdout=output or subprocess.PIPE, stderr=subprocess.PIPE, timeout=600)
                 if fail and result.returncode:
@@ -84,7 +90,12 @@ def main():
                 return result
             try:
                 print(f'Criando origem sintética isolada ({project})...',flush=True)
-                command(['up','--build','-d','--wait','api'])
+                if args.upgrade_from_16_13:
+                    command(['pull','db'])
+                    command(['build','api','migrate'])
+                    command(['up','-d','--no-build','--wait','api'])
+                else:
+                    command(['up','--build','-d','--wait','api'])
                 url=endpoint('api')
                 password=secrets.token_urlsafe(32)
                 command(['exec','-T','api','/admin','bootstrap','--email','recovery@example.invalid','--org','Recovery fixture','--slug','recovery-fixture','--password-stdin'],data=(password+'\n').encode())
@@ -114,6 +125,26 @@ def main():
                 before,_=api(client(),url,'/evaluate',method='POST',bearer=issued[0]['secret'],data=evaluation)
                 snapshot=manifest('db')
                 check(all(item['rows']>0 for item in snapshot.values()),'Fixture não cobriu todas as tabelas.')
+                upgrade_evidence = None
+                if args.upgrade_from_16_13:
+                    print('Ensaiando upgrade 16.13 para imagem atual no MESMO volume sintético...',flush=True)
+                    previous_version=sql('db','SHOW server_version_num;')
+                    check(previous_version=='160013','Origem do upgrade deve ser 16.13.')
+                    command(['stop','api'])
+                    # Remove override legado; DB agora vem do Dockerfile local corrigido.
+                    upgrade_overlay.write_text('{}')
+                    command(['build','db'])
+                    command(['up','-d','--wait','--no-deps','--force-recreate','db'])
+                    new_version=sql('db','SHOW server_version_num;')
+                    check(new_version=='160015','Destino do upgrade deve ser 16.15.')
+                    check(manifest('db')==snapshot,'Upgrade alterou dados do volume sintético.')
+                    check(sql('db',"SELECT count(*) FROM pg_extension WHERE extname IN ('pgcrypto','btree_gist','ltree');")=='0','Extensões com requisitos especiais exigem plano próprio.')
+                    check(sql('db','SELECT count(*) FROM pg_replication_slots;')=='0','Replicação exige plano próprio.')
+                    command(['up','-d','--wait','--no-deps','api'])
+                    url=endpoint('api')
+                    after_upgrade,_=api(client(),url,'/evaluate',method='POST',bearer=issued[0]['secret'],data=evaluation)
+                    check(after_upgrade==before,'Upgrade alterou avaliação/revisão.')
+                    upgrade_evidence={'fromServerVersionNum':previous_version,'toServerVersionNum':new_version,'sameVolumeAllTablesPreserved':True,'evaluationStable':True,'specialExtensionsOrLogicalSlots':False}
                 dump=temp/'synthetic.dump'
                 started=time.monotonic()
                 with dump.open('xb') as output:
@@ -153,7 +184,7 @@ def main():
                 check(len(audit_page['items'])==1,'Invalidação de recuperação não auditada.')
                 denied=command(['exec','-T','restore-db','sh','-ec','export PGPASSWORD="$APP_DB_PASSWORD"; exec psql -X -h 127.0.0.1 -U flagpilot_app -d flagpilot -v ON_ERROR_STOP=1 -v VERBOSITY=sqlstate -c "CREATE TABLE forbidden_recovery(id integer)"'],fail=False)
                 check(denied.returncode!=0 and b'42501' in denied.stderr,'Runtime recebeu DDL após restauração.')
-                report={'timestampUtc':datetime.now(timezone.utc).isoformat(),'syntheticOnly':True,'postgresImage':'postgres:16.13-alpine','schemaVersion':5,'backupBytes':dump.stat().st_size,'dumpSeconds':round(dump_seconds,3),'restoreSqlSeconds':round(restore_seconds,3),'functionalRecoveryDrillSeconds':round(time.monotonic()-recovery_started,3),'tableRows':{name:item['rows'] for name,item in snapshot.items()},'allTableContentsPreserved':True,'sourceVolumeDestroyedBeforeRestore':True,'sessionsAndTokensInvalidatedBeforeStartup':True,'postSnapshotRevocationProtected':True,'evaluationStableAfterReissue':True,'runtimeDDLForbidden':True,'recurringBackupConfigured':False,'productionRpoRtoValidated':False}
+                report={'timestampUtc':datetime.now(timezone.utc).isoformat(),'syntheticOnly':True,'postgresImage':db_image,'minorUpgrade':upgrade_evidence,'schemaVersion':5,'backupBytes':dump.stat().st_size,'dumpSeconds':round(dump_seconds,3),'restoreSqlSeconds':round(restore_seconds,3),'functionalRecoveryDrillSeconds':round(time.monotonic()-recovery_started,3),'tableRows':{name:item['rows'] for name,item in snapshot.items()},'allTableContentsPreserved':True,'sourceVolumeDestroyedBeforeRestore':True,'sessionsAndTokensInvalidatedBeforeStartup':True,'postSnapshotRevocationProtected':True,'evaluationStableAfterReissue':True,'runtimeDDLForbidden':True,'recurringBackupConfigured':False,'productionRpoRtoValidated':False}
                 if args.report:
                     args.report.parent.mkdir(parents=True,exist_ok=True)
                     with args.report.open('x') as output: json.dump(report,output,indent=2);output.write('\n')

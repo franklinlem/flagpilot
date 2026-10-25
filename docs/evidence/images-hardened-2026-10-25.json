@@ -1,0 +1,121 @@
+{
+  "timestampUtc": "2026-10-25T15:24:08.662838+00:00",
+  "sourceCommit": "808905f32b9fadfc6803113774c38778d3ed7396",
+  "workingTreeDirty": true,
+  "scannerImage": "aquasec/trivy:0.69.3@sha256:bcc376de8d77cfe086a917230e818dc9f8528e3c852f7b1aff648949b6258d1c",
+  "threshold": [
+    "HIGH",
+    "CRITICAL"
+  ],
+  "ignoreUnfixed": false,
+  "published": false,
+  "images": {
+    "api": {
+      "severityCounts": {
+        "UNKNOWN": 2
+      },
+      "findings": [
+        {
+          "VulnerabilityID": "GO-2026-5932",
+          "PkgName": "golang.org/x/crypto",
+          "InstalledVersion": "v0.58.0",
+          "FixedVersion": "",
+          "Severity": "UNKNOWN",
+          "Status": "affected",
+          "PrimaryURL": ""
+        },
+        {
+          "VulnerabilityID": "GO-2026-5932",
+          "PkgName": "golang.org/x/crypto",
+          "InstalledVersion": "v0.58.0",
+          "FixedVersion": "",
+          "Severity": "UNKNOWN",
+          "Status": "affected",
+          "PrimaryURL": ""
+        }
+      ],
+      "sbomFormat": "CycloneDX",
+      "sbomComponents": 35,
+      "gatePassed": true,
+      "imageId": "sha256:1455ef5a41dacec3821b5d54338b3ca358d47ad5bba2cce57ee18306f0cc8b43",
+      "upstreamReference": null,
+      "artifacts": [
+        {
+          "file": "api.scan.json",
+          "sha256": "80bfeecd3801058f144fa51fc1e1b7273d6f62377d61ff628f3d3213869293a1"
+        },
+        {
+          "file": "api.cdx.json",
+          "sha256": "4fa657ce45f994f68e37b25deb421d28000a5d923577b33116626471b9b594bf"
+        }
+      ]
+    },
+    "web": {
+      "severityCounts": {},
+      "findings": [],
+      "sbomFormat": "CycloneDX",
+      "sbomComponents": 71,
+      "gatePassed": true,
+      "imageId": "sha256:10b8b8a485219b69e2a60eb6b951df1151d7aae2ebb97ea0a75494abd18dc19c",
+      "upstreamReference": null,
+      "artifacts": [
+        {
+          "file": "web.scan.json",
+          "sha256": "71729501095de5867faabc8824eae77606e2d65d3c7bfe01a53bc236a114a036"
+        },
+        {
+          "file": "web.cdx.json",
+          "sha256": "2db9740a1c4796cea017f84fffdb0477184318421f70dbc0f015960717fdf5bc"
+        }
+      ]
+    },
+    "migrate": {
+      "severityCounts": {},
+      "findings": [],
+      "sbomFormat": "CycloneDX",
+      "sbomComponents": 5,
+      "gatePassed": true,
+      "imageId": "sha256:ff3b6965cf14dbf6eaacdaf956ae17cc268086da08edd4822765996628abb14f",
+      "upstreamReference": null,
+      "artifacts": [
+        {
+          "file": "migrate.scan.json",
+          "sha256": "f0334f8cb231d2b1aa534c95c9c8dab1fd6034b991e75537954b2fb4a03dffbb"
+        },
+        {
+          "file": "migrate.cdx.json",
+          "sha256": "cd2acfe9a9a67492a4437ffc967cfc2ff6a35c5e8b130c63b1a242ed192a4596"
+        }
+      ]
+    },
+    "db": {
+      "severityCounts": {},
+      "findings": [],
+      "sbomFormat": "CycloneDX",
+      "sbomComponents": 51,
+      "gatePassed": true,
+      "imageId": "sha256:ace744358ded81bfd9337d333087dc540c84fb51a670f89de3b5b12c7ad2d4ec",
+      "upstreamReference": "postgres:16.15-alpine@sha256:f4610795587492cd4fb887c2dc3de301b813278bb6f616992061141b5f15ac36",
+      "artifacts": [
+        {
+          "file": "db.scan.json",
+          "sha256": "773bde6c98fbf645d00e77d3906954f97f188a3fef4c59be60f124ffdb4a08ba"
+        },
+        {
+          "file": "db.cdx.json",
+          "sha256": "62e4acbecc7fe6909c966e62c0dcf0082fa64a820121290e99df1a968247d8e1"
+        }
+      ]
+    }
+  },
+  "scannerVersionAndDatabase": {
+    "Version": "0.69.3",
+    "VulnerabilityDB": {
+      "Version": 2,
+      "NextUpdate": "2026-10-26T12:57:48.463990841Z",
+      "UpdatedAt": "2026-10-25T12:57:48.463991102Z",
+      "DownloadedAt": "2026-10-25T15:02:07.279840045Z"
+    }
+  },
+  "gatePassed": true
+}

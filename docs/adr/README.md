@@ -25,3 +25,5 @@ O plano foi aprovado por Franklin em 24/10/2026 ("ok. pode continuar."). ADRs re
 - [ADR-014 — Benchmark local com limites ativos](014-local-capacity.md)
 
 - [ADR-015 — Evidências de imagens e reversão compatível](015-release-evidence.md)
+
+- [ADR-016 — Correção dos runtimes sem supressões](016-runtime-remediation.md)

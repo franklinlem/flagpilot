@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os/exec"
 	"path/filepath"
 	"testing"
 	"time"
@@ -27,14 +28,20 @@ import (
 )
 
 func TestFoundation(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 	root, err := filepath.Abs("../../../..")
 	if err != nil {
 		t.Fatal(err)
 	}
+	// BuildKit via CLI mantém o mesmo Dockerfile corrigido usado em desenvolvimento/release.
+	image := fmt.Sprintf("flagpilot-integration-%d:local", time.Now().UnixNano())
+	if output, err := exec.CommandContext(ctx, "docker", "build", "--quiet", "-f", filepath.Join(root, "deploy/postgres/Dockerfile"), "-t", image, root).CombinedOutput(); err != nil {
+		t.Fatalf("build da imagem PostgreSQL: %v: %s", err, output)
+	}
+	t.Cleanup(func() { _ = exec.Command("docker", "image", "rm", image).Run() })
 	req := testcontainers.ContainerRequest{
-		Image: "postgres:16.13-alpine", ExposedPorts: []string{"5432/tcp"},
+		Image: image, ExposedPorts: []string{"5432/tcp"},
 		Env:        map[string]string{"POSTGRES_USER": "migrator", "POSTGRES_PASSWORD": "integration-only-owner", "POSTGRES_DB": "flagpilot_test", "APP_DB_PASSWORD": "integration-only-runtime"},
 		Files:      []testcontainers.ContainerFile{{HostFilePath: filepath.Join(root, "deploy/postgres/init-runtime.sh"), ContainerFilePath: "/docker-entrypoint-initdb.d/10-runtime.sh", FileMode: 0755}},
 		WaitingFor: wait.ForLog("database system is ready to accept connections").WithOccurrence(2).WithStartupTimeout(time.Minute),

@@ -1,12 +1,12 @@
 # FlagPilot
 
-Plataforma self-hosted de feature flags em desenvolvimento. Incremento atual: SBOM/scans e ensaio local de rollback de API, com gate de imagens bloqueado por achados de segurança, sobre a fundação Go/Chi, PostgreSQL/migrations e React/Vite. **Login/logout, bootstrap, organizações, membros, projetos, ambientes e gestão de flags, tokens auditados e avaliação booleana/percentual e SDK com cache/timeout/fallback já funcionam localmente.** Filtros/auditoria disponíveis em 6A; navegação/recuperação e Chromium/Firefox em 6B.
+Plataforma self-hosted de feature flags em desenvolvimento. Incremento atual: SBOM/scans e ensaio local de rollback de API, com correções de segurança e gate HIGH/CRITICAL aprovado, sobre a fundação Go/Chi, PostgreSQL/migrations e React/Vite. **Login/logout, bootstrap, organizações, membros, projetos, ambientes e gestão de flags, tokens auditados e avaliação booleana/percentual e SDK com cache/timeout/fallback já funcionam localmente.** Filtros/auditoria disponíveis em 6A; navegação/recuperação e Chromium/Firefox em 6B.
 
 ## Requisitos e versões
 
-Debian Linux, Docker Engine com Compose v2+ acessível pelo usuário, Python 3.12+ e GNU Make. Node **24.22.1** (também em `.nvmrc`), Go **1.27.3**, PostgreSQL **16.13**, sqlc **1.31.1**, golang-migrate **4.20.1**. TypeScript **5.9.3** foi escolhido por compatibilidade com o gerador OpenAPI; React **19.3.1** e Vite **8.3.5**. Dependências npm e Go fixadas em lockfiles.
+Debian Linux, Docker Engine com Compose v2+ acessível pelo usuário, Python 3.12+ e GNU Make. Node **24.22.1** (também em `.nvmrc`), Go **1.27.3**, PostgreSQL **16.15**, sqlc **1.31.1**, golang-migrate **4.20.1**. TypeScript **5.9.3** foi escolhido por compatibilidade com o gerador OpenAPI; React **19.3.1** e Vite **8.3.5**. Dependências npm e Go fixadas em lockfiles.
 
-Não é necessário instalar Go globalmente. O instalador abaixo baixa Go/sqlc/migrate/gitleaks para `.tools`, verifica SHA-256 e não usa sudo; suporta Linux amd64. Se já usar Go global, mantenha a versão indicada. Node pode ser selecionado com seu gerenciador habitual (`nvm use`, se instalado). Não instalamos nem reconfiguramos o Docker do sistema.
+Não é necessário instalar Go globalmente. O instalador abaixo baixa Go/sqlc/gitleaks para `.tools` com SHA-256 e compila o CLI migrate com o Go fixado e as dependências de go.mod/go.sum; não usa sudo e suporta Linux amd64. Se já usar Go global, mantenha a versão indicada. Node pode ser selecionado com seu gerenciador habitual (`nvm use`, se instalado). Não instalamos nem reconfiguramos o Docker do sistema.
 
 ## Iniciar no notebook
 
@@ -94,6 +94,7 @@ Testes de integração usam somente credenciais sintéticas em banco efêmero. N
 - [Estado de flags booleanas](docs/FLAGS_STATUS.md)
 - [Estado de tokens/avaliação](docs/EVALUATION_STATUS.md)
 - [Operação local](docs/OPERATIONS_STATUS.md), [ensaio de restauração](docs/runbooks/recovery.md) e [métricas](docs/runbooks/observability.md)
+- [Correções de segurança](docs/SECURITY_REMEDIATION_STATUS.md)
 - [Imagens e gate de release](docs/RELEASE_STATUS.md) e [SBOM/rollback](docs/runbooks/release.md)
 - [Capacidade local](docs/CAPACITY_STATUS.md) e [reprodução com k6](docs/runbooks/capacity.md)
 - [Critérios locais e pendências do MVP](docs/MVP_READINESS.md)
@@ -105,4 +106,4 @@ Testes de integração usam somente credenciais sintéticas em banco efêmero. N
 - [Cadastrar usuários e gerenciar membros](docs/runbooks/organizations.md)
 - [Bootstrap e recuperação](docs/runbooks/identity.md)
 
-SDK HTTP privado TypeScript/JavaScript disponível para backend (5). Filtros e consulta de auditoria disponíveis (6A); navegação/recuperação verificadas em Chromium/Firefox (6B). Backup/restore sintético e métricas locais entregues em 6C; capacidade local medida em 6D. Artefatos e rollback compatível entregues em 6E, com gate bloqueado; próximo incremento: remediar/triagem das imagens antes de homologação. Rollout percentual determinístico (4B) disponível, com edição de porcentagem e vetores Go/JS compartilhados. Avaliação HTTP de servidor disponível com tokens por ambiente; o SDK implementa cache limitado, timeout total e fallback, com builds ESM/CJS. Flags possuem revisão otimista e confirmação de produção. Projetos/ambientes oferecem criação e consulta; edição/exclusão continuam pendentes de política. Organizações/membros já possuem isolamento e proteção do último Owner. Bootstrap, login e recuperação já são auditados. Nenhum DNS, VPS, Coolify ou servidor externo foi alterado. Licença Apache-2.0 e publicação do pacote/remoto continuam pendentes; não há licença atribuída automaticamente.
+SDK HTTP privado TypeScript/JavaScript disponível para backend (5). Filtros e consulta de auditoria disponíveis (6A); navegação/recuperação verificadas em Chromium/Firefox (6B). Backup/restore sintético e métricas locais entregues em 6C; capacidade local medida em 6D. Correções 6F entregues com gate HIGH/CRITICAL aprovado; dois UNKNOWN de OpenPGP não importado seguem documentados. Próximo incremento: preparação operacional/release antes de homologação. Rollout percentual determinístico (4B) disponível, com edição de porcentagem e vetores Go/JS compartilhados. Avaliação HTTP de servidor disponível com tokens por ambiente; o SDK implementa cache limitado, timeout total e fallback, com builds ESM/CJS. Flags possuem revisão otimista e confirmação de produção. Projetos/ambientes oferecem criação e consulta; edição/exclusão continuam pendentes de política. Organizações/membros já possuem isolamento e proteção do último Owner. Bootstrap, login e recuperação já são auditados. Nenhum DNS, VPS, Coolify ou servidor externo foi alterado. Licença Apache-2.0 e publicação do pacote/remoto continuam pendentes; não há licença atribuída automaticamente.

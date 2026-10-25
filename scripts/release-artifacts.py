@@ -56,15 +56,13 @@ def main():
         version = docker.run(scanner + ['--network', 'none', lock['scanner'], '--cache-dir', '/cache', '--version', '--format', 'json'])
         report['scannerVersionAndDatabase'] = json.loads(version.stdout)
         targets = {}
-        for service in ['api', 'web']:
+        for service in ['api', 'web', 'migrate', 'db']:
             print(f'Construindo runtime {service}...', flush=True)
             tag = f'{run_id}-{service}:local'
             built.append(tag)
-            docker.run(['build', '--target', 'runtime', '-f', f'apps/{service}/Dockerfile', '-t', tag, '.'])
+            dockerfile = {'migrate':'deploy/migrate/Dockerfile','db':'deploy/postgres/Dockerfile'}.get(service, f'apps/{service}/Dockerfile')
+            docker.run(['build', '--target', 'runtime', '-f', dockerfile, '-t', tag, '.'])
             targets[service] = tag
-        for service in ['db', 'migrate']:
-            docker.run(['pull', lock[service]])
-            targets[service] = lock[service]
         for service, target in targets.items():
             print(f'Gerando SBOM e scan de {service}...', flush=True)
             image_id = docker.run(['image', 'inspect', '--format', '{{.Id}}', target]).stdout.decode().strip()
@@ -82,7 +80,7 @@ def main():
             scan = json.loads((args.output / f'{service}.scan.json').read_text())
             sbom = json.loads((args.output / f'{service}.cdx.json').read_text())
             entry = summarize(scan, sbom)
-            entry.update({'imageId': image_id, 'upstreamReference': lock.get(service) if service in ['db', 'migrate'] else None,
+            entry.update({'imageId': image_id, 'upstreamReference': lock.get(service) if service == 'db' else None,
                           'artifacts': [{'file': f'{service}.{suffix}', 'sha256': digest(args.output / f'{service}.{suffix}')} for suffix in ['scan.json', 'cdx.json']]})
             report['images'][service] = entry
             print(f"  {service}: {entry['sbomComponents']} componentes; severidades {entry['severityCounts']}; gate={entry['gatePassed']}", flush=True)

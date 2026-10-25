@@ -53,7 +53,7 @@ jobs:
       - name: Smoke dos containers sem publicação
         run: python3 scripts/smoke.py
       - name: Ensaio sintético de backup e restauração
-        run: python3 scripts/recovery.py
+        run: python3 scripts/recovery.py --upgrade-from-16-13
       - name: Browsers Chromium/Firefox e fluxos reais isolados
         run: |
           npx playwright install --with-deps chromium firefox

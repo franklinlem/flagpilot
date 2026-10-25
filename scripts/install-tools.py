@@ -5,6 +5,7 @@ import io
 import json
 from pathlib import Path
 import platform
+import subprocess
 import sys
 import tarfile
 import urllib.request
@@ -55,6 +56,10 @@ if not flags or '--go' in flags:
 if not flags or '--sqlc' in flags:
     release('sqlc-dev/sqlc', 'v1.31.1', 'sqlc_1.31.1_linux_amd64.tar.gz', 'sqlc')
 if not flags or '--migrate' in flags:
-    release('golang-migrate/migrate', 'v4.20.1', 'migrate.linux-amd64.tar.gz', 'migrate')
+    go_binary = DEST / 'go/bin/go'
+    if not go_binary.exists():
+        raise RuntimeError('Instale primeiro o Go fixado com --go para compilar migrate.')
+    subprocess.run([str(go_binary), 'build', '-tags', 'postgres', '-trimpath', '-ldflags=-s -w -X main.Version=v4.20.1', '-o', str(DEST/'bin/migrate'), 'github.com/golang-migrate/migrate/v4/cmd/migrate'], cwd=ROOT/'apps/api', check=True)
+    print('migrate v4.20.1 recompilado com Go fixado; somente postgres/file')
 if not flags or '--gitleaks' in flags:
     release('gitleaks/gitleaks', 'v8.30.1', 'gitleaks_8.30.1_linux_x64.tar.gz', 'gitleaks')
