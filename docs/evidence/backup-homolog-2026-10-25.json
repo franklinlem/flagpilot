@@ -1,0 +1,11 @@
+{
+  "verifiedAt": "2026-10-25T17:11:11Z",
+  "source": "contabo homologacao",
+  "destination": "frank-note2",
+  "ciphertext": "flagpilot-homolog-20261025T171010Z.dump.gpg",
+  "ciphertextBytes": 8601,
+  "sha256": "a8a53defb0b65af715e06936e3d4bf60279015ce399ae737b37ea790cf1ac6fe",
+  "restoreLocalNetworkNone": true,
+  "allTablesEqual": 11,
+  "plaintextOnDisk": false
+}

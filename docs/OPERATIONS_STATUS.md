@@ -1,5 +1,7 @@
 # Incremento 6C — recuperação sintética e métricas
 
+Atualização 7A: GitHub privado e homologação externa autorizados, com backup recorrente e monitoramento no host físico. Estado atual em [HOMOLOGATION_STATUS.md](HOMOLOGATION_STATUS.md); pendências abaixo são snapshots das respectivas etapas.
+
 Data: 25/10/2026. Continuidade autorizada após 6B. Escopo local: nenhuma operação sobre dados reais, servidor externo, monitor ou backup produtivo.
 
 ## Entregas

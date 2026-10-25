@@ -1,5 +1,7 @@
 # FlagPilot — critérios locais do MVP
 
+Atualização 7A: GitHub privado e homologação externa autorizados, com backup recorrente e monitoramento no host físico. Estado atual em [HOMOLOGATION_STATUS.md](HOMOLOGATION_STATUS.md); pendências abaixo são snapshots das respectivas etapas.
+
 Atualizado em 25/10/2026, incremento 6F. Este documento registra o que foi verificado localmente e o que ainda falta; não declara release 1.0, homologação ou aptidão para produção. Franklin confirmou manualmente os filtros e a visualização do histórico em 6A e autorizou a continuidade.
 
 ## Evidências atuais

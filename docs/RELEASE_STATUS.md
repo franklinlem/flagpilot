@@ -1,5 +1,7 @@
 # Estado de release — atualização 6F
 
+Atualização 7A: GitHub privado e homologação externa autorizados, com backup recorrente e monitoramento no host físico. Estado atual em [HOMOLOGATION_STATUS.md](HOMOLOGATION_STATUS.md); pendências abaixo são snapshots das respectivas etapas.
+
 **Gate de imagens agora aprovado:** zero HIGH/CRITICAL nos quatro runtimes corrigidos. Web/DB/migrator sem achados; API com dois UNKNOWN de OpenPGP não importado. Correções, evidências e limites em [SECURITY_REMEDIATION_STATUS.md](SECURITY_REMEDIATION_STATUS.md). Release/produção continuam pendentes dos demais critérios.
 
 O registro abaixo é o snapshot histórico bloqueado de 6E, preservado para comparação.

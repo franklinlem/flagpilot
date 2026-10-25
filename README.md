@@ -1,6 +1,6 @@
 # FlagPilot
 
-Plataforma self-hosted de feature flags em desenvolvimento. Incremento atual: SBOM/scans e ensaio local de rollback de API, com correções de segurança e gate HIGH/CRITICAL aprovado, sobre a fundação Go/Chi, PostgreSQL/migrations e React/Vite. **Login/logout, bootstrap, organizações, membros, projetos, ambientes e gestão de flags, tokens auditados e avaliação booleana/percentual e SDK com cache/timeout/fallback já funcionam localmente.** Filtros/auditoria disponíveis em 6A; navegação/recuperação e Chromium/Firefox em 6B.
+Plataforma self-hosted de feature flags com Go/Chi, PostgreSQL e React/TypeScript. MVP com organizações, projetos/ambientes, flags booleanas e rollout percentual, tokens, avaliação, SDK e auditoria. **Homologação disponível em https://flagpilot.franklem.uk**, com banco independente, backups criptografados no frank-note2 e Uptime Kuma. [Estado, evidências e limites](docs/HOMOLOGATION_STATUS.md). Repositório privado; produção e publicação pública ainda pendentes.
 
 ## Requisitos e versões
 

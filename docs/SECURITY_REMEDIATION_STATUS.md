@@ -1,5 +1,7 @@
 # Incremento 6F — correção das imagens
 
+Atualização 7A: GitHub privado e homologação externa autorizados, com backup recorrente e monitoramento no host físico. Estado atual em [HOMOLOGATION_STATUS.md](HOMOLOGATION_STATUS.md); pendências abaixo são snapshots das respectivas etapas.
+
 Data: 25/10/2026. Correções autorizadas após o gate bloqueado de 6E. **Gate HIGH/CRITICAL aprovado nos quatro runtimes**, sem suppressions, VEX ou `--ignore-unfixed`. Não é aprovação completa de release/produção.
 
 ## Correções

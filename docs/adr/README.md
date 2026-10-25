@@ -27,3 +27,5 @@ O plano foi aprovado por Franklin em 24/10/2026 ("ok. pode continuar."). ADRs re
 - [ADR-015 — Evidências de imagens e reversão compatível](015-release-evidence.md)
 
 - [ADR-016 — Correção dos runtimes sem supressões](016-runtime-remediation.md)
+
+- [ADR-017 — Homologação isolada e backup pull criptografado](017-isolated-homologation.md)

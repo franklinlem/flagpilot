@@ -1,0 +1,102 @@
+# Imagens locais previamente escaneadas/carregadas. Sem build/push/deploy automático.
+x-logging: &logging
+  driver: json-file
+  options: {max-size: 10m, max-file: '3'}
+services:
+  db:
+    image: ${FLAGPILOT_DB_IMAGE:?}
+    pull_policy: never
+    restart: unless-stopped
+    cpus: 1.0
+    mem_limit: 512m
+    environment:
+      POSTGRES_DB: flagpilot
+      POSTGRES_USER: flagpilot_owner
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?}
+      MIGRATOR_DB_PASSWORD: ${MIGRATOR_DB_PASSWORD:?}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    command: [postgres, -c, ssl=on, -c, ssl_cert_file=/tls/server.crt, -c, ssl_key_file=/tls/server.key, -c, hba_file=/etc/postgresql/pg_hba.conf]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ${FLAGPILOT_DEPLOY_ROOT:?}/release/deploy/postgres/init-runtime.sh:/docker-entrypoint-initdb.d/10-runtime.sh:ro
+      - ${FLAGPILOT_DEPLOY_ROOT:?}/release/deploy/homolog/init-migrator.sh:/docker-entrypoint-initdb.d/20-migrator.sh:ro
+      - ${FLAGPILOT_DEPLOY_ROOT:?}/release/deploy/homolog/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - ${FLAGPILOT_DEPLOY_ROOT:?}/tls/ca.crt:/tls/ca.crt:ro
+      - ${FLAGPILOT_DEPLOY_ROOT:?}/tls/server.crt:/tls/server.crt:ro
+      - ${FLAGPILOT_DEPLOY_ROOT:?}/tls/server.key:/tls/server.key:ro
+    networks: [database]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -h 127.0.0.1 -U flagpilot_owner -d flagpilot']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    logging: *logging
+  migrate:
+    image: ${FLAGPILOT_MIGRATE_IMAGE:?}
+    pull_policy: never
+    restart: 'no'
+    cpus: 0.5
+    mem_limit: 128m
+    environment:
+      MIGRATION_DATABASE_URL: postgres://flagpilot_migrator:${MIGRATOR_DB_PASSWORD:?}@db:5432/flagpilot?sslmode=verify-full&sslrootcert=/tls/ca.crt
+    volumes:
+      - ${FLAGPILOT_DEPLOY_ROOT:?}/release/db/migrations:/migrations:ro
+      - ${FLAGPILOT_DEPLOY_ROOT:?}/tls/ca.crt:/tls/ca.crt:ro
+    networks: [database]
+    depends_on:
+      db: {condition: service_healthy}
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    logging: *logging
+  api:
+    image: ${FLAGPILOT_API_IMAGE:?}
+    pull_policy: never
+    restart: unless-stopped
+    cpus: 1.0
+    mem_limit: 256m
+    environment:
+      APP_ENV: production
+      PUBLIC_BASE_URL: https://flagpilot.franklem.uk
+      ALLOWED_ORIGINS: https://flagpilot.franklem.uk
+      HTTP_ADDR: 0.0.0.0:8080
+      METRICS_ADDR: 0.0.0.0:9090
+      DATABASE_URL: postgres://flagpilot_app:${APP_DB_PASSWORD:?}@db:5432/flagpilot?sslmode=verify-full&sslrootcert=/tls/ca.crt
+    volumes:
+      - ${FLAGPILOT_DEPLOY_ROOT:?}/tls/ca.crt:/tls/ca.crt:ro
+    networks: [application, database]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: [CMD, /healthcheck]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    logging: *logging
+  web:
+    image: ${FLAGPILOT_WEB_IMAGE:?}
+    pull_policy: never
+    restart: unless-stopped
+    cpus: 0.25
+    mem_limit: 128m
+    networks: [application, ingress]
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck:
+      test: [CMD-SHELL, 'wget -q -O /dev/null http://127.0.0.1:8080/']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    logging: *logging
+networks:
+  database: {internal: true}
+  application: {internal: true}
+  ingress:
+    external: true
+    name: ${FLAGPILOT_INGRESS_NETWORK:-coolify}
+volumes:
+  pgdata:

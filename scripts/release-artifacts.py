@@ -25,6 +25,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, default=ROOT / '.tools/releases/current', help='Diretório NOVO para SBOMs/relatórios (não é registry)')
     parser.add_argument('--report', type=Path, help='Resumo agregado em arquivo NOVO')
+    parser.add_argument('--keep-images', action='store_true', help='Preservar tags locais analisadas para transporte privado; sem push')
     args = parser.parse_args()
     if args.output.exists() or (args.report and args.report.exists()):
         parser.error('Saída/relatório já existe; escolha caminho novo.')
@@ -80,7 +81,7 @@ def main():
             scan = json.loads((args.output / f'{service}.scan.json').read_text())
             sbom = json.loads((args.output / f'{service}.cdx.json').read_text())
             entry = summarize(scan, sbom)
-            entry.update({'imageId': image_id, 'upstreamReference': lock.get(service) if service == 'db' else None,
+            entry.update({'localTag': target, 'imageId': image_id, 'upstreamReference': lock.get(service) if service == 'db' else None,
                           'artifacts': [{'file': f'{service}.{suffix}', 'sha256': digest(args.output / f'{service}.{suffix}')} for suffix in ['scan.json', 'cdx.json']]})
             report['images'][service] = entry
             print(f"  {service}: {entry['sbomComponents']} componentes; severidades {entry['severityCounts']}; gate={entry['gatePassed']}", flush=True)
@@ -97,8 +98,9 @@ def main():
         return 0 if report['gatePassed'] else 2
     finally:
         docker.run(['rm', '-f', scanner_name], fail=False, timeout=30)
-        for tag in built:
-            docker.run(['image', 'rm', tag], fail=False, timeout=30)
+        if not args.keep_images:
+            for tag in built:
+                docker.run(['image', 'rm', tag], fail=False, timeout=30)
         scratch.cleanup()
 
 
