@@ -13,7 +13,7 @@ export class ApiError extends Error {
 export async function request(path: string, options: RequestInit = {}, signal?: AbortSignal): Promise<Response> {
   let response: Response;
   try {
-    response = await fetch(`/api/v1${path}`, { ...options, credentials: 'same-origin', signal: signal ?? AbortSignal.timeout(8000) });
+    response = await fetch(`/api/v1${path}`, { ...options, credentials: 'same-origin', signal: AbortSignal.any([AbortSignal.timeout(8000), ...[signal, options.signal].filter((value): value is AbortSignal => value != null)]) });
   } catch { throw new ApiError(0, 'Não foi possível conectar ao serviço. Tente novamente.'); }
   if (!response.ok) {
     const body: unknown = await response.json().catch(() => null);

@@ -10,5 +10,5 @@ async function parsed<T>(response: Response, schema: z.ZodType<T>): Promise<T> {
 const path = (env: string) => `/environments/${encodeURIComponent(env)}/tokens`;
 export async function listTokens(env: string, cursor = '', signal?: AbortSignal) { return parsed(await request(`${path(env)}?limit=25${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`, {}, signal), pageSchema); }
 // O chamador mantém o segredo apenas em estado local; não usar em Query/Mutation cache.
-export async function issueToken(env: string, body: components['schemas']['TokenRequest'], csrf: string, signal: AbortSignal) { return parsed(await request(path(env), { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf }, body: JSON.stringify(body) }, AbortSignal.any([signal, AbortSignal.timeout(8000)])), issuedSchema); }
+export async function issueToken(env: string, body: components['schemas']['TokenRequest'], csrf: string, signal: AbortSignal) { return parsed(await request(path(env), { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf }, body: JSON.stringify(body) }, signal), issuedSchema); }
 export async function revokeToken(env: string, id: string, csrf: string) { await request(`${path(env)}/${encodeURIComponent(id)}`, { method: 'DELETE', headers: { 'X-CSRF-Token': csrf } }); }

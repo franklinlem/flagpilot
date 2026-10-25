@@ -11,13 +11,13 @@ const resources = ['flag','flag_config','api_token','project','environment','org
 export function Audit({ identity, onExpired }: { identity: Identity; onExpired: () => void }) {
   const { orgId = '' } = useParams();
   const heading = useRef<HTMLHeadingElement>(null);
-  useEffect(() => { heading.current?.focus(); }, []);
   const [params, setParams] = useSearchParams();
   const filter = { action: params.get('action') ?? '', resourceType: params.get('resourceType') ?? '' };
+  useEffect(() => { heading.current?.focus(); }, [filter.action, filter.resourceType]);
   const org = useQuery({ queryKey: ['organization',identity.user.id,orgId], queryFn: ({ signal }) => getOrganization(orgId,signal) });
   const query = useInfiniteQuery({ queryKey: ['audit',identity.user.id,orgId,filter], initialPageParam: '', queryFn: ({ signal, pageParam }) => listAudit(orgId,filter,pageParam,signal), getNextPageParam: page => page.nextCursor ?? undefined, refetchOnWindowFocus: false });
   const error = org.error ?? query.error;
-  return <section className="account"><Link to="/">Conta e organizações</Link><h2 ref={heading} tabIndex={-1}>Histórico de auditoria</h2>
+  return <section className="account"><Link to="/">Conta e organizações</Link><h2 id="audit-title" ref={heading} tabIndex={-1}>Histórico de auditoria</h2>
     {org.isPending || query.isPending ? <p role="status">Carregando histórico…</p> : null}
     {error ? <QueryFailure error={error} onExpired={onExpired} retry={() => { void Promise.all([org.refetch(),query.refetch()]); }} /> : null}
     {org.data && !org.error ? <><h3>{org.data.name}</h3><Link to={`/organizations/${orgId}/projects`}>Ver projetos</Link><p className="hint">Eventos mais recentes primeiro. Detalhes exibem somente campos conhecidos; não permitem restaurar versões.</p>
@@ -31,6 +31,7 @@ export function Audit({ identity, onExpired }: { identity: Identity; onExpired: 
       <ul className="organizations">{!query.error && query.data?.pages.flatMap(page => page.items).map(event => <li className="card member audit-event" key={event.id}><strong>{event.action}</strong><p><time dateTime={event.createdAt}>{new Date(event.createdAt).toLocaleString('pt-BR')}</time></p><p>Recurso: {event.resourceType} · <code>{event.resourceId}</code></p><p>Ator: {event.actorLabel === 'local-operator' ? 'Operador local' : event.actorLabel === 'user' ? 'Usuário' : 'Não identificado'} {event.actorId ? <code>{event.actorId}</code> : null}</p><EventDetails event={event} /></li>)}</ul>
       {!query.error && query.data?.pages[0].items.length === 0 ? <p>Nenhum evento encontrado para os filtros atuais.</p> : null}
       {!query.error && query.hasNextPage ? <button className="secondary" disabled={query.isFetchingNextPage} aria-busy={query.isFetchingNextPage} onClick={() => { void query.fetchNextPage(); }}>Carregar mais eventos</button> : null}
+      <p><a href="#audit-title">Voltar ao topo do histórico</a></p>
     </> : null}
   </section>;
 }

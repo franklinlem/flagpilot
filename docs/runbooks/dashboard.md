@@ -26,3 +26,19 @@ Use **Ação** e **Tipo de recurso**, depois **Aplicar filtros**; os dois filtro
 - Não há restauração de versões, exportação, exclusão/retenção automática ou filtros por descrição/data neste incremento. Auditoria identifica contas por ID, sem prometer email/nome histórico.
 
 `make dev-containers` reconstrói a aplicação sem apagar volumes; não há migration nova (schema 5). `make ci` e `python3 scripts/auth-e2e.py` usam banco/stack de testes descartáveis. Nenhum deploy externo é necessário para usar essas telas localmente.
+
+## Navegação e recuperação — 6B
+
+O título da aba identifica a tela atual. Use **Ir para o conteúdo** (visível ao receber foco por teclado) para pular ao conteúdo principal. Ao entrar em uma tela ou alterar filtros, o foco vai ao título. No fim da auditoria, **Voltar ao topo do histórico** retorna ao título sem apagar os filtros.
+
+Consultas e mutações do painel têm timeout de 8 segundos mesmo quando canceláveis ao navegar. Se aparecer indisponibilidade, **Tentar novamente** permite recuperar a consulta. Uma falha de rede em mutação pode acontecer após a gravação ter sido concluída; confira o estado/histórico antes de repetir. Não há retry automático de escrita nem promessa de desfazer uma operação pelo cancelamento no navegador.
+
+Teste os fluxos separadamente, com credenciais/volume sintéticos em cada execução:
+
+```bash
+PLAYWRIGHT_BROWSERS_PATH="$PWD/.tools/playwright" npx playwright install chromium firefox
+python3 scripts/auth-e2e.py --browser chromium
+python3 scripts/auth-e2e.py --browser firefox
+```
+
+Sem --browser, o padrão continua Chromium. A configuração E2E_BROWSER é interna ao harness de teste, não uma variável do servidor no .env. Veja [MVP_READINESS.md](../MVP_READINESS.md) para evidências atuais e pendências operacionais.

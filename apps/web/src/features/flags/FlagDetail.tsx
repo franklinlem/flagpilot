@@ -1,3 +1,4 @@
+import { PageHeading } from '../../components/PageHeading';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -21,7 +22,7 @@ export function FlagDetail({ identity, onExpired }: { identity: Identity; onExpi
   const flag = useQuery({ queryKey: ['flag', identity.user.id, projectId, flagKey], queryFn: ({ signal }) => getFlag(projectId, flagKey, signal), refetchOnWindowFocus: false });
   async function refresh() { await Promise.all([client.invalidateQueries({ queryKey: ['flag', identity.user.id, projectId, flagKey] }), client.invalidateQueries({ queryKey: ['flags', identity.user.id, projectId] }), client.invalidateQueries({ queryKey: ['configs', identity.user.id] }), client.invalidateQueries({ queryKey: ['environments', identity.user.id, projectId] })]); }
   const error = project.error ?? flag.error;
-  return <section className="account"><Link to={`/projects/${projectId}/flags`}>Voltar às flags</Link><h2>Detalhes da flag</h2>
+  return <section className="account"><Link to={`/projects/${projectId}/flags`}>Voltar às flags</Link><PageHeading>Detalhes da flag</PageHeading>
     {error ? <QueryFailure error={error} onExpired={onExpired} retry={() => { void Promise.all([project.refetch(), flag.refetch()]); }} /> : null}
     {flag.isPending || project.isPending ? <p role="status">Carregando flag…</p> : null}
     {project.data && flag.data && !error ? <><h3>{project.data.name} / {flag.data.data.key}</h3>{flag.data.data.archivedAt ? <><p className="badge">Arquivada</p><p>{flag.data.data.description}</p></> : project.data.role !== 'Viewer' ? <Editor key={flag.data.etag} flag={flag.data.data} etag={flag.data.etag} identity={identity} refresh={refresh} onExpired={onExpired} /> : <p>{flag.data.data.description}</p>}</> : null}

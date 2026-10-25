@@ -1,8 +1,16 @@
 import { expect, test } from '@playwright/test';
 test('login, persistência por cookie, CSRF e logout real', async ({ page, context, baseURL }) => {
   if (!baseURL || !process.env.E2E_EMAIL || !process.env.E2E_PASSWORD) throw new Error('Use python3 scripts/auth-e2e.py para preparar o ambiente isolado.');
+  await page.route('**/api/v1/me', route => route.fulfill({ status: 503, contentType: 'application/problem+json', body: JSON.stringify({ title: 'Serviço indisponível' }) }), { times: 1 });
   await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Serviço indisponível' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Entrar', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Tentar novamente', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Entre na sua conta' })).toBeVisible();
+  await expect(page).toHaveTitle('Entrar · FlagPilot');
+  await page.getByRole('link', { name: 'Ir para o conteúdo', exact: true }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('main')).toBeFocused();
   await page.getByLabel('Email').fill(process.env.E2E_EMAIL);
   await page.getByLabel('Senha').fill('wrong-password');
   await page.getByRole('button', { name: 'Entrar', exact: true }).click();
@@ -11,6 +19,7 @@ test('login, persistência por cookie, CSRF e logout real', async ({ page, conte
   await page.getByRole('button', { name: 'Entrar', exact: true }).click();
   await expect(page.getByText('E2E Organization', { exact: true })).toBeVisible();
   await expect(page.getByText('Proprietário', { exact: true })).toBeVisible();
+  await expect(page).toHaveTitle('Conta e organizações · FlagPilot');
   const cookies = await context.cookies();
   const session = cookies.find(cookie => cookie.name === 'flagpilot_session');
   expect(session?.httpOnly).toBe(true);

@@ -1,6 +1,6 @@
-# Incremento 6A — filtros e auditoria
+# Dashboard — incrementos 6A e 6B
 
-Data: 25/10/2026. Continuidade autorizada por Franklin após entrega do SDK. A autorização para continuar não representa aceitação manual do SDK ou das novas telas; os cenários abaixo foram verificados automaticamente.
+Registro da entrega 6A em 25/10/2026. Continuidade autorizada por Franklin após entrega do SDK. A autorização para continuar não representa aceitação manual do SDK ou das novas telas; os cenários abaixo foram verificados automaticamente.
 
 ## Entregas
 
@@ -22,6 +22,22 @@ Ver [runbooks/dashboard.md](runbooks/dashboard.md) e [ADR-012](adr/012-dashboard
 
 A auditoria identifica o ator por UUID/rótulo e apresenta somente metadados permitidos; não reconstrói nomes históricos nem garante sanitização de segredos que usuários tenham digitado intencionalmente em nomes/descrições. Paginação não promete snapshot congelado entre requests. Busca por descrição/data, exportação, restauração, retenção automática e índices adicionais aguardam escopo/medição.
 
-Acessibilidade verificada nos cenários descritos não é certificação WCAG integral; Firefox e matriz completa de viewports/estados seguem pendentes. Próximo incremento: 6B, fechamento de UX/acessibilidade e critérios operacionais do MVP. Licença, publicação, benchmark/SLO, homologação externa e produção permanecem pendentes; nenhum servidor externo alterado.
+Na entrega 6A, acessibilidade verificada não era certificação WCAG integral e Firefox permanecia pendente. A ampliação em 6B está registrada abaixo; a matriz completa de viewports/estados continua pendente. Licença, publicação, benchmark/SLO, homologação externa e produção permanecem pendentes; nenhum servidor externo alterado.
 
 Verificações finais: containers locais reconstruídos e saudáveis, volume preservado, readiness/frontend HTTP 200 e consulta de auditoria sem sessão HTTP 401. Nova tela servida pelo frontend local. sqlc/OpenAPI regenerados sem diferenças; Gitleaks staged sem vazamentos. Nenhuma credencial real criada pelos testes nem servidor externo modificado.
+
+## Aceitação manual — 6A
+
+Em 25/10/2026, Franklin confirmou o filtro funcionando e a visualização do histórico de auditoria. Aceitação limitada aos cenários exercitados; nenhuma aceitação manual de SDK, restauração ou produção foi inferida.
+
+## Incremento 6B — navegação e recuperação
+
+Continuidade autorizada após a validação acima. Atalho de teclado Ir para o conteúdo, títulos da aba por tela, foco consistente em detalhes/configurações/tokens e após trocar filtros, além de Voltar ao topo do histórico. HTTP do painel mantém o limite de 8 segundos mesmo quando recebe sinal de cancelamento de consulta; também respeita o sinal de RequestInit. Emissão de token reutiliza o mesmo controle comum, sem duplicar prazo.
+
+Regressão reproduzida antes da correção: um sinal do chamador desativava o timeout. Testes verificam ambos os caminhos (deadline e cancelamento) sem alterar o sinal original do chamador. `make ci` passou com 21 testes frontend, 16 SDK, Go/race/PostgreSQL e builds. Seis fluxos em Chromium e seis em Firefox passaram, em stacks descartáveis por execução. Cenários novos: recuperação de 503 na sessão/histórico, ausência de login falso durante indisponibilidade, skip link por Enter, título/foco, navegação por hash e mesmos controles em mobile. O fluxo longo de flags tem orçamento de teste de 60 s; os demais permanecem em 30 s. Nenhum limite de login da aplicação foi alterado.
+
+Smoke isolado aprovado para live/ready, SIGINT com saída zero, reinício e perda real do banco (liveness disponível/readiness 503). GitHub Actions foi atualizada para os dois navegadores em execuções separadas; execução no GitHub permanece não realizada. Firefox foi instalado somente como ferramenta de teste em .tools, sem dependência nova do produto, variável de servidor ou migration; schema 5.
+
+A matriz atual cobre os cenários documentados de desktop/mobile e browsers headless, sem certificação WCAG, leitor de tela, Safari, tablet completo ou avaliação manual de todas as telas. Ver [critérios do MVP](MVP_READINESS.md). Próximo incremento: ensaio local de backup/restore e complementação de observabilidade/critério operacional antes de homologação. Produção e alterações em servidores externos continuam sem autorização.
+
+Verificações finais de 6B: containers de desenvolvimento reconstruídos e saudáveis, volume preservado; readiness/frontend HTTP 200 e novo atalho servido no frontend local. Gitleaks staged sem vazamentos. Não houve mudança de schema, emissão de credencial real pelos testes ou alteração de servidor externo.

@@ -31,17 +31,22 @@ function SessionApp() {
     }).finally(() => clearTimeout(timeout));
     return () => { active = false; controller.abort(); clearTimeout(timeout); };
   }, [attempt]);
+  const routeTitles: [RegExp, string][] = [[/\/audit$/, 'Histórico de auditoria'], [/\/members$/, 'Membros da organização'], [/\/projects$/, 'Projetos da organização'], [/\/environments$/, 'Ambientes do projeto'], [/\/tokens$/, 'Tokens de avaliação'], [/^\/environments\/[^/]+\/flags$/, 'Flags do ambiente'], [/\/flags$/, 'Flags do projeto'], [/\/flags\/[^/]+$/, 'Detalhes da flag']];
+  const title = state.status === 'anonymous' ? 'Entrar' : state.status === 'unavailable' ? 'Serviço indisponível' : state.status === 'checking' ? 'Verificando sessão' : routeTitles.find(([pattern]) => pattern.test(location.pathname))?.[1] ?? 'Conta e organizações';
+  useEffect(() => { document.title = `${title} · FlagPilot`; }, [title]);
   function signedOut() { client.clear(); setState({ status: 'anonymous' }); void navigate('/'); }
   function signedIn(identity: Identity) { client.clear(); setState({ status: 'authenticated', identity }); }
   function retry() { setState({ status: 'checking' }); setAttempt(value => value + 1); }
   return (
-    <main>
+    <>
+    <a className="skip-link" href="#main-content">Ir para o conteúdo</a>
+    <main id="main-content" tabIndex={-1}>
       <header className="brand-heading"><span className="brand" aria-hidden="true">FP</span><div><h1>FlagPilot</h1><p className="muted">Controle suas entregas, uma flag por vez.</p></div></header>
       {state.status === 'checking' ? <p role="status">Verificando sessão…</p> : null}
       {state.status === 'unavailable' ? <section className="card"><h2>Serviço indisponível</h2><p role="alert">Não foi possível verificar sua sessão.</p><button onClick={retry}>Tentar novamente</button></section> : null}
       {state.status === 'anonymous' ? <LoginForm onLogin={signedIn} /> : null}
       {state.status === 'authenticated' ? <Routes><Route path="/organizations/:orgId/audit" element={<Audit key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/" element={<Account identity={state.identity} onLogout={signedOut} />} /><Route path="/organizations/:orgId/members" element={<Members key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/organizations/:orgId/projects" element={<Projects key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/projects/:projectId/environments" element={<Environments key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/projects/:projectId/flags" element={<Flags key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/projects/:projectId/flags/:flagKey" element={<FlagDetail key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/environments/:envId/flags" element={<Configurations key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="/environments/:envId/tokens" element={<Tokens key={location.pathname} identity={state.identity} onExpired={signedOut} />} /><Route path="*" element={<Navigate to="/" replace />} /></Routes> : null}
-    </main>
+    </main></>
   );
 }
 

@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 test('flags booleanas, isolamento de ambientes, confirmação, revisão e arquivamento', async ({ page, browser }) => {
+  test.setTimeout(60000); // Fluxo completo com filtros/auditoria em ambos os browsers.
   await page.goto('/');
   await page.getByLabel('Email', { exact: true }).fill(process.env.E2E_EMAIL!);
   await page.getByLabel('Senha', { exact: true }).fill(process.env.E2E_PASSWORD!);
@@ -20,10 +21,12 @@ test('flags booleanas, isolamento de ambientes, confirmação, revisão e arquiv
   await page.getByLabel('Descrição', { exact: true }).fill('Checkout novo');
   await page.getByRole('button', { name: 'Criar flag', exact: true }).click();
   await page.getByRole('link', { name: 'Ver flag', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Detalhes da flag' })).toBeFocused();
   await page.getByLabel('Descrição da flag').fill('Checkout editado');
   await page.getByRole('button', { name: 'Salvar descrição', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Salvar descrição', exact: true })).toBeDisabled();
   await page.goto(stageLink!);
+  await expect(page.getByRole('heading', { name: 'Flags do ambiente' })).toBeFocused();
   await expect(page.getByText('Desativada', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Ativar flag', exact: true }).click();
   await expect(page.getByText('Ativada', { exact: true })).toBeVisible();
@@ -113,7 +116,17 @@ test('flags booleanas, isolamento de ambientes, confirmação, revisão e arquiv
   const summary = page.getByText('Ver alterações', { exact: true }).first();
   await summary.focus(); await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { name: 'Antes', exact: true }).first()).toBeVisible();
+  await page.route('**/audit-events?*', route => route.fulfill({ status: 503, contentType: 'application/problem+json', body: JSON.stringify({ title: 'Serviço indisponível' }) }), { times: 1 });
+  await page.reload();
+  await expect(page.getByRole('alert')).toHaveText('Serviço indisponível');
+  await expect(page.getByRole('button', { name: 'Limpar filtros', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Tentar novamente', exact: true }).click();
+  await expect(page.getByRole('listitem').first()).toBeVisible();
   await page.setViewportSize({ width: 375, height: 812 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.getByRole('link', { name: 'Voltar ao topo do histórico' }).click();
+  await expect(page.getByRole('heading', { name: 'Histórico de auditoria' })).toBeFocused();
+  await page.goBack();
+  await expect(page.getByLabel('Ação', { exact: true })).toHaveValue('flag.config_updated');
 
 });

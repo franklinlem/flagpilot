@@ -24,6 +24,7 @@ test('emissão única, avaliação single/batch, isolamento e revogação', asyn
   const configuration = await page.request.get(`/api/v1/environments/${devId}/flags/token_flag`);
   expect((await page.request.put(`/api/v1/environments/${devId}/flags/token_flag`, { headers: { ...adminHeaders, 'If-Match': configuration.headers()['etag'] }, data: { enabled: true, rolloutBps: 10000 } })).status()).toBe(200);
   await dev.getByRole('link', { name: 'Gerenciar tokens' }).click();
+  await expect(page.getByRole('heading', { name: 'Tokens de avaliação' })).toBeFocused();
   const tokenPage = page.url();
   await page.getByRole('button', { name: 'Novo token', exact: true }).click();
   await page.getByLabel('Nome do token').fill('Backend E2E');

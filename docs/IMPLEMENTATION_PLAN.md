@@ -421,3 +421,7 @@ Em 25/10/2026, Franklin confirmou visualização e salvamento de porcentagens di
 ## Consolidação do dashboard — 6A
 
 Continuidade autorizada em 25/10/2026 após entrega do SDK. Filtros de chave/estado do catálogo antes da paginação, histórico organizacional somente leitura com projeção de campos conhecidos, filtros de ação/tipo, paginação temporal e controles acessíveis estão implementados conforme ADR-012. Schema 5, sem novas dependências ou alterações externas. Evidências e limites em DASHBOARD_STATUS.md; uso em runbooks/dashboard.md. Próximo incremento: 6B, fechamento da matriz de UX/acessibilidade e critérios operacionais do MVP antes de planejar homologação. Não há aprovação implícita de deploy/servidores externos.
+
+## Fechamento de UX e recuperação — 6B
+
+Franklin confirmou filtros/histórico e autorizou continuidade em 25/10/2026. Navegação por teclado, orientação/foco por tela, retorno ao topo e timeout comum de 8 s com sinais de cancelamento implementados. Matriz de seis fluxos por navegador validada em Chromium/Firefox, sem flexibilizar limites de login; smoke de falhas/reinício aprovado em stack sintética. Evidências em DASHBOARD_STATUS.md e MVP_READINESS.md. Não houve migration, dependência do produto, deploy ou modificação externa. Próxima entrega operacional deve priorizar backup/restore local e observabilidade, mantendo homologação/produção separadas e dependentes de autorização específica.

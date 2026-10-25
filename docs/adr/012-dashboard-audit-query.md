@@ -19,3 +19,9 @@ UI aplica filtros explicitamente, preserva filtros na URL e isola cache por usu�
 Sem nova migration/dependência/variável: schema 5 e privilégios existentes SELECT/INSERT da auditoria permanecem. Consulta de histórico é somente leitura e não gera evento por si. Filtrar um catálogo grande por substring ou histórico por ação/tipo pode exigir índice adicional após medição; não alegamos benchmark/SLO.
 
 A cobertura atual de teclado/mobile/labels no Chromium não certifica WCAG integral nem compatibilidade Firefox. Retenção automática, exportação, snapshots restauráveis, busca por descrição, identidade nominal histórica e métricas operacionais ficam para incrementos específicos. Alterações externas continuam sem autorização.
+
+## Ampliação 6B — navegação e recuperação
+
+Atalhos de conteúdo/topo, foco em títulos e títulos da aba identificam a tela sem colocar conta/segredo no document.title. Mudar filtros reposiciona o foco em elemento persistente, evitando deixá-lo no body quando o formulário é remontado. Consultas do painel combinam cancelamento do chamador/RequestInit e timeout de 8 s; um sinal externo não substitui o prazo. Token issuance usa o mesmo mecanismo comum. Não há retry automático de mutações: falha/cancelamento do transporte não garante que a gravação não aconteceu.
+
+O harness aceita --browser chromium|firefox, padrão Chromium. Cada execução usa sua própria stack e credenciais efêmeras; a CI executa ambos separadamente para não consumir duas vezes a janela de login no mesmo banco. Não há relaxamento de rate limit nem novo segredo de servidor. Testes de navegador verificam casos de recuperação/teclado/foco; não certificam WCAG integral.

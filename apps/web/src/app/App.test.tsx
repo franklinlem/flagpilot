@@ -23,6 +23,7 @@ it('valida formulário, trata credenciais inválidas e permite entrar/sair', asy
   vi.mocked(logout).mockResolvedValue();
   render(<App />);
   await user.click(await screen.findByRole('button', { name: 'Entrar' }));
+  expect(document.title).toBe('Entrar · FlagPilot');
   await screen.findByText('Informe um email válido.');
   expect(login).not.toHaveBeenCalled();
   await user.type(screen.getByLabelText('Email'), identity.user.email);
@@ -33,6 +34,7 @@ it('valida formulário, trata credenciais inválidas e permite entrar/sair', asy
   await user.type(screen.getByLabelText('Senha'), 'test-password-123');
   await user.click(screen.getByRole('button', { name: 'Entrar' }));
   await screen.findByText('Minha equipe');
+  expect(document.title).toBe('Conta e organizações · FlagPilot');
   expect(screen.getByText('Proprietário')).toBeTruthy();
   await user.click(screen.getByRole('button', { name: 'Sair' }));
   await screen.findByRole('button', { name: 'Entrar' });

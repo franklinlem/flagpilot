@@ -1,3 +1,4 @@
+import { PageHeading } from '../../components/PageHeading';
 import { Link, useParams } from 'react-router';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import type { Identity } from '../../api/auth';
@@ -11,7 +12,7 @@ export function Configurations({ identity, onExpired }: { identity: Identity; on
   const query = useInfiniteQuery({ queryKey: key, initialPageParam: '', queryFn: ({ signal, pageParam }) => listConfigs(envId, pageParam, signal), getNextPageParam: page => page.data.nextCursor ?? undefined, refetchOnWindowFocus: false });
   const snapshot = query.data?.pages[0].data;
   async function refresh() { await Promise.all([client.invalidateQueries({ queryKey: key }), client.invalidateQueries({ queryKey: ['environments', identity.user.id, snapshot?.environment.projectId] })]); }
-  return <section className="account"><Link to="/">Conta e organizações</Link><h2>Flags do ambiente</h2>
+  return <section className="account"><Link to="/">Conta e organizações</Link><PageHeading>Flags do ambiente</PageHeading>
     {query.isPending ? <p role="status">Carregando configurações…</p> : null}
     {query.error ? <QueryFailure error={query.error} onExpired={onExpired} retry={() => { void query.refetch(); }} /> : null}
     {snapshot && !query.error ? <><Link to={`/projects/${snapshot.environment.projectId}/environments`}>Voltar aos ambientes</Link><h3>{snapshot.projectName} / {snapshot.environment.name}</h3><p><code>{snapshot.environment.slug}</code> <span className={`badge${snapshot.environment.isProduction ? ' production' : ''}`}>{snapshot.environment.isProduction ? 'Produção' : 'Não produção'}</span></p><Link to={`/projects/${snapshot.environment.projectId}/flags`}>Gerenciar flags do projeto</Link>

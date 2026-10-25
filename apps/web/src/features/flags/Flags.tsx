@@ -11,9 +11,9 @@ export function Flags({ identity, onExpired }: { identity: Identity; onExpired: 
   const { projectId = '' } = useParams();
   const client = useQueryClient();
   const heading = useRef<HTMLHeadingElement>(null);
-  useEffect(() => { heading.current?.focus(); }, []);
   const [params, setParams] = useSearchParams();
   const filter = { q: params.get('q') ?? '', status: params.get('status') ?? 'all' };
+  useEffect(() => { heading.current?.focus(); }, [filter.q, filter.status]);
   const [show, setShow] = useState(false);
   const rootKey = ['flags', identity.user.id, projectId];
   const key = [...rootKey, filter];

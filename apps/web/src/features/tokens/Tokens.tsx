@@ -1,3 +1,4 @@
+import { PageHeading } from '../../components/PageHeading';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -19,7 +20,7 @@ export function Tokens({ identity, onExpired }: { identity: Identity; onExpired:
   const query = useInfiniteQuery({ queryKey: key, initialPageParam: '', queryFn: ({ signal, pageParam }) => listTokens(envId, pageParam, signal), getNextPageParam: page => page.nextCursor ?? undefined });
   const context = query.data?.pages[0];
   async function refresh() { await client.invalidateQueries({ queryKey: key }); }
-  return <section className="account"><Link to="/">Conta e organizações</Link><h2>Tokens de avaliação</h2>{query.isPending ? <p role="status">Carregando tokens…</p> : null}{query.error ? <QueryFailure error={query.error} onExpired={onExpired} retry={() => { void query.refetch(); }} /> : null}
+  return <section className="account"><Link to="/">Conta e organizações</Link><PageHeading>Tokens de avaliação</PageHeading>{query.isPending ? <p role="status">Carregando tokens…</p> : null}{query.error ? <QueryFailure error={query.error} onExpired={onExpired} retry={() => { void query.refetch(); }} /> : null}
     {context && !query.error ? <><Link to={`/projects/${context.environment.projectId}/environments`}>Voltar aos ambientes</Link><h3>{context.projectName} / {context.environment.name}</h3><p><code>{context.environment.slug}</code> <span className={`badge${context.environment.isProduction ? ' production' : ''}`}>{context.environment.isProduction ? 'Produção' : 'Não produção'}</span></p><p>Tokens de servidor com acesso somente à avaliação deste ambiente.</p><div className="section-heading"><button className="secondary" onClick={() => setShow(value => !value)}>{show ? 'Fechar emissão' : 'Novo token'}</button></div>
       {show ? <IssuePanel environment={envId} csrf={identity.csrfToken} refresh={refresh} onExpired={onExpired} /> : null}
       <ul className="organizations">{query.data?.pages.flatMap(page => page.items).map(token => <TokenRow key={`${token.id}:${token.revokedAt}`} token={token} identity={identity} refresh={refresh} onExpired={onExpired} />)}</ul>
