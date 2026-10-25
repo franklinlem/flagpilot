@@ -28,6 +28,6 @@ Govulncheck executado após adicionar o cliente Prometheus: zero vulnerabilidade
 
 Ver [recuperação](runbooks/recovery.md), [observabilidade](runbooks/observability.md), [ADR-013](adr/013-recovery-observability.md) e [critérios do MVP](MVP_READINESS.md). Ensaio pontual não configura backup recorrente, criptografia de backups reais, retenção, cópia externa ou alerta. Não foi instalado/configurado coletor Prometheus/Grafana/Uptime Kuma. Nenhum deploy externo, RPO/RTO produtivo ou benchmark/SLO é reportado como concluído.
 
-Próximo incremento proposto: medição local de capacidade e preparação de coleta/alertas/recuperação operacional antes de planejar homologação. Qualquer mudança em VPS/servidores/domínios continua exigindo autorização específica.
+Continuidade 6D: medição local de capacidade concluída; resultados e limites em [CAPACITY_STATUS.md](CAPACITY_STATUS.md). Próximo incremento proposto: artefatos de release e ensaio local de rollback. Coleta/alertas e recuperação operacional real continuam pendentes antes de homologação. Qualquer mudança em VPS/servidores/domínios continua exigindo autorização específica.
 
 Verificações finais: containers de desenvolvimento reconstruídos e saudáveis, volume preservado; readiness/frontend/métricas HTTP 200, /metrics na API principal HTTP 404. sqlc/OpenAPI regenerados sem diferenças e Gitleaks staged aprovado. Nenhum dado real foi usado pelo ensaio, nenhuma credencial real foi emitida automaticamente e nenhum servidor externo foi modificado.

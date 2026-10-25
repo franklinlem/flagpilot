@@ -57,3 +57,7 @@ create-user: admin
 .PHONY: recovery-rehearsal
 recovery-rehearsal:
 	python3 scripts/recovery.py $(ARGS)
+
+.PHONY: load-rehearsal
+load-rehearsal:
+	python3 scripts/load.py $(ARGS)

@@ -1,6 +1,6 @@
 # FlagPilot — critérios locais do MVP
 
-Atualizado em 25/10/2026, incremento 6C. Este documento registra o que foi verificado localmente e o que ainda falta; não declara release 1.0, homologação ou aptidão para produção. Franklin confirmou manualmente os filtros e a visualização do histórico em 6A e autorizou a continuidade.
+Atualizado em 25/10/2026, incremento 6D. Este documento registra o que foi verificado localmente e o que ainda falta; não declara release 1.0, homologação ou aptidão para produção. Franklin confirmou manualmente os filtros e a visualização do histórico em 6A e autorizou a continuidade.
 
 ## Evidências atuais
 
@@ -21,6 +21,8 @@ Atualizado em 25/10/2026, incremento 6C. Este documento registra o que foi verif
 | Recuperação sintética (6C) | Dump/restore aprovado com origem destruída, comparação das 11 tabelas, roles com novas senhas, invalidação auditada de sessões/tokens antes do startup e avaliação estável após reemissão. Relatório em docs/evidence; não equivale a rotina real de backup. |
 | Métricas (6C) | Listener Prometheus separado, opt-in no binário, somente loopback no Compose local. Volume/status/duração HTTP, runtime/processo e pool; testes de privacidade/isolamento e smoke aprovados. |
 
+| Capacidade local (6D) | k6 com fixture isolada e cotas, 9.301 requests/zero erros internos ou de validação/zero descartes; rejeições esperadas do limitador separadas. Evidência e condições em CAPACITY_STATUS.md. |
+
 ## Critérios ainda abertos
 
 | Critério | Trabalho necessário antes de concluir |
@@ -28,7 +30,7 @@ Atualizado em 25/10/2026, incremento 6C. Este documento registra o que foi verif
 | Backup/restore operacional | Ensaio sintético concluído em 6C; backup recorrente real, criptografia/chaves, retenção, cópia externa e alertas ainda não configurados. Recuperação real segue pendente de inventário/isolamento e autorização. |
 | RPO/RTO | Alvos propostos RPO ≤24 h e RTO ≤4 h continuam sem evidência de recuperação; não são garantias. |
 | Métricas/alertas | Health/readiness e logs JSON existem. Endpoint Prometheus entregue em listener separado; coletor, dashboards, alertas e monitor externo ainda pendentes. Configuração de monitor do FlagPilot no Uptime Kuma não foi executada/verificada nesta etapa. |
-| Performance/capacidade | Ambiente de referência e benchmark p50/p95/p99/erros/saturação não executados. SLO p95 <100 ms não foi demonstrado; rate limit não é prova de capacidade. |
+| Performance/capacidade | Ensaio local 6D de 10/50/100 req/s e 150/s com limites ativos: p50/p95/p99, erros/rejeições/descartes e recursos registrados em CAPACITY_STATUS.md. p95 de sucesso 7–13 ms para fixture pequena; 15 respostas 429 em 100/s. SLO sustentado, saturação máxima e sizing da VPS permanecem sem comprovação. |
 | Acessibilidade completa | Revisão WCAG 2.2 AA, leitor de tela, zoom, matriz completa de viewports/estados e aceitação visual humana em todos os browsers permanecem pendentes. Testes atuais não equivalem a certificação. |
 | Segurança/release | Repetir SCA/scan de imagens e verificar política de vulnerabilidades; gerar SBOM, fixar digests de imagens de release e ensaiar rollback com recuperação. Testes atuais não equivalem a avaliação ASVS integral. |
 | Política de dados | Retenção/limpeza automática de auditoria/sessões, exportação e identidade histórica nominal dos atores ainda sem entrega. Auditoria identifica por ID/rótulo e não restaura snapshots. |
@@ -43,6 +45,7 @@ Na raiz do projeto:
 ```bash
 make ci
 make recovery-rehearsal
+make load-rehearsal
 python3 scripts/smoke.py
 PLAYWRIGHT_BROWSERS_PATH="$PWD/.tools/playwright" npx playwright install chromium firefox
 python3 scripts/auth-e2e.py --browser chromium
@@ -51,4 +54,4 @@ python3 scripts/auth-e2e.py --browser firefox
 
 Executar os harnesses de browser separadamente: cada execução cria sua stack e depois remove apenas os recursos descartáveis próprios. Não substituir pelo volume de desenvolvimento ou credenciais reais. Instalação de dependências de sistema dos browsers deve seguir o ambiente do notebook; CI usa --with-deps no runner Ubuntu próprio.
 
-Próximo incremento proposto: medição de capacidade local e preparação de coleta/alertas/recuperação operacional. Ensaio sintético e listener de métricas foram entregues em 6C; ver OPERATIONS_STATUS.md. Preparar esses artefatos não autoriza deploy nem configurações externas. Ver [DASHBOARD_STATUS.md](DASHBOARD_STATUS.md) e [runbook do painel](runbooks/dashboard.md).
+Próximo incremento proposto: artefatos de release revisáveis, scans/SBOM/digests e ensaio local de rollback. Capacidade local medida em 6D (CAPACITY_STATUS.md); sizing externo, coletor/alertas e backup recorrente permanecem pendentes. Ensaio sintético e listener de métricas foram entregues em 6C; ver OPERATIONS_STATUS.md. Preparar esses artefatos não autoriza deploy nem configurações externas. Ver [DASHBOARD_STATUS.md](DASHBOARD_STATUS.md) e [runbook do painel](runbooks/dashboard.md).

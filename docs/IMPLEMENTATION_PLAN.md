@@ -429,3 +429,7 @@ Franklin confirmou filtros/histórico e autorizou continuidade em 25/10/2026. Na
 ## Ensaio local de recuperação e observabilidade — 6C
 
 Continuidade autorizada após 6B. Script sintético de backup/restore destrói origem própria, compara todas as tabelas no destino e aplica invalidação auditada de sessões/tokens antes de iniciar API restaurada. Listener Prometheus separado, opt-in, registry próprio e labels agregados; Compose local publica somente em loopback. ADR-013, runbooks/recovery.md e observability.md descrevem uso/limites. Schema 5, sem backup recorrente, alertas externos ou deploy; nenhum dado real de Franklin é usado pelo ensaio. Próxima entrega deve medir capacidade local e preparar observabilidade/coleta e plano operacional antes de qualquer autorização de homologação externa.
+
+## Medição local de capacidade — 6D
+
+Continuidade autorizada após 6C. Cenários k6 10/50/100 e sobrecarga 150 req/s executados em stack sintética com cotas, mantendo limites de segurança. Percentis dos sucessos e de todos os resultados, 429/erros/descartes, amostras de recursos e condições registrados em CAPACITY_STATUS.md e evidence/load-2026-10-25.json. Nenhuma alteração de negócio, schema, dependências da aplicação ou infraestrutura externa. Método em runbooks/capacity.md e ADR-014. Não certifica SLO sustentado, saturação máxima ou sizing da VPS. Próximo incremento proposto: artefatos de release (scans/SBOM/digests) e ensaio local de rollback, mantendo licença/publicação/deploy pendentes.

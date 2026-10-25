@@ -21,3 +21,5 @@ O plano foi aprovado por Franklin em 24/10/2026 ("ok. pode continuar."). ADRs re
 - [ADR-012 — Filtros e consulta de auditoria](012-dashboard-audit-query.md)
 
 - [ADR-013 — Recuperação e métricas locais](013-recovery-observability.md)
+
+- [ADR-014 — Benchmark local com limites ativos](014-local-capacity.md)

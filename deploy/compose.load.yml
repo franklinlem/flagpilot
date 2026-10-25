@@ -1,0 +1,8 @@
+# Somente sobre compose.smoke.yml em projeto descartável de scripts/load.py.
+services:
+  api:
+    cpus: 1.0
+    mem_limit: 256m
+  db:
+    cpus: 1.0
+    mem_limit: 512m

@@ -1,0 +1,783 @@
+{
+  "timestampUtc": "2026-10-25T14:36:26.551588+00:00",
+  "syntheticOnly": true,
+  "sourceCommit": "f9d958c2d2654f7ca5321014e66a3f29227bb547",
+  "host": {
+    "architecture": "x86_64",
+    "kernel": "6.12.113+deb13-amd64",
+    "cpuModel": "Intel(R) Core(TM) i3-3110M CPU @ 2.40GHz",
+    "logicalCpus": 4,
+    "memoryTotalKiB": 8037040,
+    "loadAverageBefore": [
+      2.57470703125,
+      2.75927734375,
+      2.77197265625
+    ]
+  },
+  "dockerVersion": "29.9.2",
+  "k6Image": "grafana/k6:1.6.1@sha256:a5ad6bc089a08d77c3ec49f3db8c6fa7a148e4073efcac44c675dbaf3568d8e1",
+  "k6Version": "k6 v1.6.1+dirty (commit/2ac2bb560e-dirty, go1.25.7, linux/amd64)",
+  "apiImageId": "sha256:36733df15fee511ca3793ac467cb956baaa1ad9b24998eb8947266a6f65b876c",
+  "postgresImage": "postgres:16.13-alpine",
+  "schemaVersion": 5,
+  "limits": {
+    "apiCpus": 1,
+    "apiMemoryMiB": 256,
+    "dbCpus": 1,
+    "dbMemoryMiB": 512,
+    "generatorCpus": 1,
+    "generatorMemoryMiB": 256,
+    "dbPoolMax": 5,
+    "credentialRps": 100,
+    "peerRps": 120,
+    "globalRps": 600
+  },
+  "workload": {
+    "endpoint": "POST /api/v1/evaluate",
+    "flags": 1,
+    "activeTokens": 1,
+    "rolloutBps": 10000,
+    "cache": false,
+    "durationPerScenarioSeconds": 30,
+    "preAllocatedVUs": 20,
+    "maxVUs": 20,
+    "network": "same Linux host, loopback TCP; no external network",
+    "sharedHost": true
+  },
+  "scenarios": [
+    {
+      "offeredRps": 10,
+      "offeredIterations": 300,
+      "wallSecondsIncludingK6Startup": 30.926,
+      "k6ExitCode": 0,
+      "metrics": {
+        "http_reqs": {
+          "rate": 9.99980372651907,
+          "count": 300
+        },
+        "http_req_duration": {
+          "min": 3.470643,
+          "med": 8.2766815,
+          "p(95)": 12.094486400000003,
+          "p(99)": 18.558859349999974,
+          "max": 34.759235
+        },
+        "http_req_failed": {
+          "rate": 0,
+          "passes": 0,
+          "fails": 300
+        },
+        "iterations": {
+          "count": 300,
+          "rate": 9.99980372651907
+        },
+        "dropped_iterations": {
+          "count": 0,
+          "rate": 0
+        },
+        "evaluation_successes": {
+          "count": 300,
+          "rate": 9.99980372651907
+        },
+        "evaluation_throttled": {
+          "count": 0,
+          "rate": 0
+        },
+        "evaluation_errors": {
+          "count": 0,
+          "rate": 0
+        },
+        "evaluation_wall_ms": {
+          "p(99)": 19.019999999999982,
+          "max": 35,
+          "min": 4,
+          "med": 9,
+          "p(95)": 13
+        },
+        "evaluation_success_wall_ms": {
+          "p(95)": 13,
+          "p(99)": 19.019999999999982,
+          "max": 35,
+          "min": 4,
+          "med": 9
+        }
+      },
+      "resourceSamples": [
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "7.70%",
+              "MemUsage": "54.64MiB / 256MiB",
+              "MemPerc": "21.34%"
+            },
+            "db": {
+              "CPUPerc": "0.86%",
+              "MemUsage": "44.41MiB / 512MiB",
+              "MemPerc": "8.67%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "2.59%",
+              "MemUsage": "54.7MiB / 256MiB",
+              "MemPerc": "21.37%"
+            },
+            "db": {
+              "CPUPerc": "7.92%",
+              "MemUsage": "44.5MiB / 512MiB",
+              "MemPerc": "8.69%"
+            }
+          },
+          "poolAcquired": 1.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "1.74%",
+              "MemUsage": "54.75MiB / 256MiB",
+              "MemPerc": "21.39%"
+            },
+            "db": {
+              "CPUPerc": "1.33%",
+              "MemUsage": "44.54MiB / 512MiB",
+              "MemPerc": "8.70%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "7.05%",
+              "MemUsage": "55.04MiB / 256MiB",
+              "MemPerc": "21.50%"
+            },
+            "db": {
+              "CPUPerc": "7.70%",
+              "MemUsage": "45.98MiB / 512MiB",
+              "MemPerc": "8.98%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "8.41%",
+              "MemUsage": "54.82MiB / 256MiB",
+              "MemPerc": "21.41%"
+            },
+            "db": {
+              "CPUPerc": "8.02%",
+              "MemUsage": "45.98MiB / 512MiB",
+              "MemPerc": "8.98%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "1.76%",
+              "MemUsage": "54.88MiB / 256MiB",
+              "MemPerc": "21.44%"
+            },
+            "db": {
+              "CPUPerc": "1.51%",
+              "MemUsage": "45.99MiB / 512MiB",
+              "MemPerc": "8.98%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "1.57%",
+              "MemUsage": "54.9MiB / 256MiB",
+              "MemPerc": "21.44%"
+            },
+            "db": {
+              "CPUPerc": "1.41%",
+              "MemUsage": "45.99MiB / 512MiB",
+              "MemPerc": "8.98%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "1.50%",
+              "MemUsage": "54.91MiB / 256MiB",
+              "MemPerc": "21.45%"
+            },
+            "db": {
+              "CPUPerc": "4.40%",
+              "MemUsage": "45.98MiB / 512MiB",
+              "MemPerc": "8.98%"
+            }
+          },
+          "poolAcquired": 0.0
+        }
+      ],
+      "samplingErrors": 0,
+      "achievedRequestsPerScheduledSecond": 10.0,
+      "checksPassed": true
+    },
+    {
+      "offeredRps": 50,
+      "offeredIterations": 1500,
+      "wallSecondsIncludingK6Startup": 30.855,
+      "k6ExitCode": 0,
+      "metrics": {
+        "http_reqs": {
+          "count": 1500,
+          "rate": 49.9987498929228
+        },
+        "http_req_duration": {
+          "max": 20.842853,
+          "min": 3.296285,
+          "med": 4.594453,
+          "p(95)": 8.651185699999997,
+          "p(99)": 11.88925297
+        },
+        "http_req_failed": {
+          "fails": 1500,
+          "rate": 0,
+          "passes": 0
+        },
+        "iterations": {
+          "count": 1500,
+          "rate": 49.9987498929228
+        },
+        "dropped_iterations": {
+          "rate": 0,
+          "count": 0
+        },
+        "evaluation_successes": {
+          "count": 1500,
+          "rate": 49.9987498929228
+        },
+        "evaluation_throttled": {
+          "count": 0,
+          "rate": 0
+        },
+        "evaluation_errors": {
+          "count": 0,
+          "rate": 0
+        },
+        "evaluation_wall_ms": {
+          "min": 3,
+          "med": 5,
+          "p(95)": 9,
+          "p(99)": 12,
+          "max": 22
+        },
+        "evaluation_success_wall_ms": {
+          "p(99)": 12,
+          "max": 22,
+          "min": 3,
+          "med": 5,
+          "p(95)": 9
+        }
+      },
+      "resourceSamples": [
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "5.14%",
+              "MemUsage": "54.94MiB / 256MiB",
+              "MemPerc": "21.46%"
+            },
+            "db": {
+              "CPUPerc": "11.96%",
+              "MemUsage": "46.03MiB / 512MiB",
+              "MemPerc": "8.99%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "8.26%",
+              "MemUsage": "55.05MiB / 256MiB",
+              "MemPerc": "21.51%"
+            },
+            "db": {
+              "CPUPerc": "6.80%",
+              "MemUsage": "48.11MiB / 512MiB",
+              "MemPerc": "9.40%"
+            }
+          },
+          "poolAcquired": 1.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "7.87%",
+              "MemUsage": "55.13MiB / 256MiB",
+              "MemPerc": "21.53%"
+            },
+            "db": {
+              "CPUPerc": "6.44%",
+              "MemUsage": "48.07MiB / 512MiB",
+              "MemPerc": "9.39%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "14.29%",
+              "MemUsage": "55.17MiB / 256MiB",
+              "MemPerc": "21.55%"
+            },
+            "db": {
+              "CPUPerc": "9.89%",
+              "MemUsage": "52.46MiB / 512MiB",
+              "MemPerc": "10.25%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "7.51%",
+              "MemUsage": "55.26MiB / 256MiB",
+              "MemPerc": "21.59%"
+            },
+            "db": {
+              "CPUPerc": "10.74%",
+              "MemUsage": "48.64MiB / 512MiB",
+              "MemPerc": "9.50%"
+            }
+          },
+          "poolAcquired": 1.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "10.93%",
+              "MemUsage": "53.59MiB / 256MiB",
+              "MemPerc": "20.94%"
+            },
+            "db": {
+              "CPUPerc": "11.81%",
+              "MemUsage": "49.16MiB / 512MiB",
+              "MemPerc": "9.60%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "7.09%",
+              "MemUsage": "21.11MiB / 256MiB",
+              "MemPerc": "8.24%"
+            },
+            "db": {
+              "CPUPerc": "6.26%",
+              "MemUsage": "49.18MiB / 512MiB",
+              "MemPerc": "9.60%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "14.23%",
+              "MemUsage": "21.28MiB / 256MiB",
+              "MemPerc": "8.31%"
+            },
+            "db": {
+              "CPUPerc": "14.30%",
+              "MemUsage": "49.17MiB / 512MiB",
+              "MemPerc": "9.60%"
+            }
+          },
+          "poolAcquired": 0.0
+        }
+      ],
+      "samplingErrors": 0,
+      "achievedRequestsPerScheduledSecond": 50.0,
+      "checksPassed": true
+    },
+    {
+      "offeredRps": 100,
+      "offeredIterations": 3000,
+      "wallSecondsIncludingK6Startup": 30.855,
+      "k6ExitCode": 0,
+      "metrics": {
+        "http_reqs": {
+          "count": 3000,
+          "rate": 99.99832909458638
+        },
+        "http_req_duration": {
+          "max": 20.685376,
+          "min": 0.550314,
+          "med": 4.3313655,
+          "p(95)": 6.348103799999998,
+          "p(99)": 9.073476969999998
+        },
+        "http_req_failed": {
+          "rate": 0.005,
+          "passes": 15,
+          "fails": 2985
+        },
+        "iterations": {
+          "count": 3000,
+          "rate": 99.99832909458638
+        },
+        "dropped_iterations": {
+          "count": 0,
+          "rate": 0
+        },
+        "evaluation_successes": {
+          "count": 2985,
+          "rate": 99.49833744911345
+        },
+        "evaluation_throttled": {
+          "rate": 0.4999916454729319,
+          "count": 15
+        },
+        "evaluation_errors": {
+          "count": 0,
+          "rate": 0
+        },
+        "evaluation_wall_ms": {
+          "min": 0,
+          "med": 5,
+          "p(95)": 7,
+          "p(99)": 10,
+          "max": 22
+        },
+        "evaluation_success_wall_ms": {
+          "min": 3,
+          "med": 5,
+          "p(95)": 7,
+          "p(99)": 10,
+          "max": 22
+        }
+      },
+      "resourceSamples": [
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "14.70%",
+              "MemUsage": "20.57MiB / 256MiB",
+              "MemPerc": "8.04%"
+            },
+            "db": {
+              "CPUPerc": "11.74%",
+              "MemUsage": "49.2MiB / 512MiB",
+              "MemPerc": "9.61%"
+            }
+          },
+          "poolAcquired": 1.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "13.12%",
+              "MemUsage": "20.58MiB / 256MiB",
+              "MemPerc": "8.04%"
+            },
+            "db": {
+              "CPUPerc": "12.36%",
+              "MemUsage": "49.18MiB / 512MiB",
+              "MemPerc": "9.61%"
+            }
+          },
+          "poolAcquired": 1.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "19.61%",
+              "MemUsage": "20.3MiB / 256MiB",
+              "MemPerc": "7.93%"
+            },
+            "db": {
+              "CPUPerc": "20.65%",
+              "MemUsage": "49.19MiB / 512MiB",
+              "MemPerc": "9.61%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "18.77%",
+              "MemUsage": "20.44MiB / 256MiB",
+              "MemPerc": "7.98%"
+            },
+            "db": {
+              "CPUPerc": "20.45%",
+              "MemUsage": "49.2MiB / 512MiB",
+              "MemPerc": "9.61%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "20.52%",
+              "MemUsage": "21.23MiB / 256MiB",
+              "MemPerc": "8.29%"
+            },
+            "db": {
+              "CPUPerc": "18.55%",
+              "MemUsage": "49.2MiB / 512MiB",
+              "MemPerc": "9.61%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "13.47%",
+              "MemUsage": "20.85MiB / 256MiB",
+              "MemPerc": "8.15%"
+            },
+            "db": {
+              "CPUPerc": "11.52%",
+              "MemUsage": "49.21MiB / 512MiB",
+              "MemPerc": "9.61%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "13.84%",
+              "MemUsage": "21.16MiB / 256MiB",
+              "MemPerc": "8.27%"
+            },
+            "db": {
+              "CPUPerc": "12.33%",
+              "MemUsage": "49.22MiB / 512MiB",
+              "MemPerc": "9.61%"
+            }
+          },
+          "poolAcquired": 1.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "14.16%",
+              "MemUsage": "21.12MiB / 256MiB",
+              "MemPerc": "8.25%"
+            },
+            "db": {
+              "CPUPerc": "19.14%",
+              "MemUsage": "49.2MiB / 512MiB",
+              "MemPerc": "9.61%"
+            }
+          },
+          "poolAcquired": 0.0
+        }
+      ],
+      "samplingErrors": 0,
+      "achievedRequestsPerScheduledSecond": 100.0,
+      "checksPassed": true
+    },
+    {
+      "offeredRps": 150,
+      "offeredIterations": 4500,
+      "wallSecondsIncludingK6Startup": 30.868,
+      "k6ExitCode": 0,
+      "metrics": {
+        "http_reqs": {
+          "count": 4501,
+          "rate": 150.02480151788671
+        },
+        "http_req_duration": {
+          "min": 0.448336,
+          "med": 3.754169,
+          "p(95)": 7.661249,
+          "p(99)": 13.370905,
+          "max": 71.171462
+        },
+        "http_req_failed": {
+          "fails": 3000,
+          "rate": 0.33348144856698514,
+          "passes": 1501
+        },
+        "iterations": {
+          "rate": 150.02480151788671,
+          "count": 4501
+        },
+        "dropped_iterations": {
+          "count": 0,
+          "rate": 0
+        },
+        "evaluation_successes": {
+          "count": 3000,
+          "rate": 99.99431338672744
+        },
+        "evaluation_throttled": {
+          "count": 1501,
+          "rate": 50.030488131159295
+        },
+        "evaluation_errors": {
+          "count": 0,
+          "rate": 0
+        },
+        "evaluation_wall_ms": {
+          "min": 0,
+          "med": 4,
+          "p(95)": 8,
+          "p(99)": 14,
+          "max": 72
+        },
+        "evaluation_success_wall_ms": {
+          "max": 72,
+          "min": 3,
+          "med": 5,
+          "p(95)": 9,
+          "p(99)": 16
+        }
+      },
+      "resourceSamples": [
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "15.94%",
+              "MemUsage": "20.91MiB / 256MiB",
+              "MemPerc": "8.17%"
+            },
+            "db": {
+              "CPUPerc": "10.43%",
+              "MemUsage": "49.44MiB / 512MiB",
+              "MemPerc": "9.66%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "21.27%",
+              "MemUsage": "20.93MiB / 256MiB",
+              "MemPerc": "8.18%"
+            },
+            "db": {
+              "CPUPerc": "11.71%",
+              "MemUsage": "49.23MiB / 512MiB",
+              "MemPerc": "9.61%"
+            }
+          },
+          "poolAcquired": 1.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "23.32%",
+              "MemUsage": "21.04MiB / 256MiB",
+              "MemPerc": "8.22%"
+            },
+            "db": {
+              "CPUPerc": "25.96%",
+              "MemUsage": "55.09MiB / 512MiB",
+              "MemPerc": "10.76%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "22.15%",
+              "MemUsage": "21.36MiB / 256MiB",
+              "MemPerc": "8.34%"
+            },
+            "db": {
+              "CPUPerc": "17.66%",
+              "MemUsage": "55.25MiB / 512MiB",
+              "MemPerc": "10.79%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "19.01%",
+              "MemUsage": "24.86MiB / 256MiB",
+              "MemPerc": "9.71%"
+            },
+            "db": {
+              "CPUPerc": "18.52%",
+              "MemUsage": "55.25MiB / 512MiB",
+              "MemPerc": "10.79%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "15.90%",
+              "MemUsage": "21.21MiB / 256MiB",
+              "MemPerc": "8.29%"
+            },
+            "db": {
+              "CPUPerc": "19.17%",
+              "MemUsage": "55.27MiB / 512MiB",
+              "MemPerc": "10.79%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "24.20%",
+              "MemUsage": "21.36MiB / 256MiB",
+              "MemPerc": "8.34%"
+            },
+            "db": {
+              "CPUPerc": "11.10%",
+              "MemUsage": "55.29MiB / 512MiB",
+              "MemPerc": "10.80%"
+            }
+          },
+          "poolAcquired": 0.0
+        },
+        {
+          "containers": {
+            "api": {
+              "CPUPerc": "15.60%",
+              "MemUsage": "21.16MiB / 256MiB",
+              "MemPerc": "8.27%"
+            },
+            "db": {
+              "CPUPerc": "16.30%",
+              "MemUsage": "55.85MiB / 512MiB",
+              "MemPerc": "10.91%"
+            }
+          },
+          "poolAcquired": 0.0
+        }
+      ],
+      "samplingErrors": 0,
+      "achievedRequestsPerScheduledSecond": 150.03333333333333,
+      "checksPassed": true
+    }
+  ],
+  "productionSloValidated": false,
+  "checksPassed": true
+}
