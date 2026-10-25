@@ -109,7 +109,7 @@ func (s *Service) PutConfig(ctx context.Context, actor, environment, key, match 
 	if err != nil {
 		return out, etag, err
 	}
-	if !keyPattern.MatchString(key) || (rollout != 0 && rollout != 10000) {
+	if !keyPattern.MatchString(key) || (rollout < 0 || rollout > 10000) {
 		return out, etag, ErrValidation
 	}
 	err = s.transaction(ctx, func(ctx context.Context, qt *q.Queries) error {

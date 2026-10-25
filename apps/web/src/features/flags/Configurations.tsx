@@ -1,18 +1,9 @@
-import { useState } from 'react';
 import { Link, useParams } from 'react-router';
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import type { Identity } from '../../api/auth';
-import { listConfigs, putConfig, type Config, type Snapshot } from '../../api/flags';
+import { listConfigs } from '../../api/flags';
+import { ConfigRow } from './ConfigRow';
 import { QueryFailure } from '../organizations/QueryFailure';
-function ConfigRow({ config, snapshot, etag, identity, refresh, onExpired }: { config: Config; snapshot: Snapshot; etag: string; identity: Identity; refresh: () => Promise<void>; onExpired: () => void }) {
-  const [confirm, setConfirm] = useState(false);
-  const save = useMutation({ mutationFn: (confirmed: boolean) => putConfig(snapshot.environment.id, config.flagKey, { enabled: !(config.enabled && config.rolloutBps > 0), rolloutBps: 10000, confirmProduction: confirmed }, identity.csrfToken, etag), onSuccess: refresh });
-  const action = config.enabled && config.rolloutBps > 0 ? 'Desativar' : 'Ativar';
-  return <li className="card member"><strong>{config.flagKey}</strong><p>Estado: <span className="badge">{config.enabled && config.rolloutBps > 0 ? 'Ativada' : 'Desativada'}</span></p>
-    {snapshot.role !== 'Viewer' ? <>{confirm ? <div className="confirmation" role="group" aria-label="Confirmar alteração em produção"><p>{action} <strong>{config.flagKey}</strong> em <strong>{snapshot.projectName} / {snapshot.environment.name}</strong> ({snapshot.environment.slug}), ambiente de produção?</p><button disabled={save.isPending} aria-busy={save.isPending} onClick={() => save.mutate(true)}>{save.isPending ? 'Salvando…' : 'Confirmar alteração em produção'}</button><button className="secondary" disabled={save.isPending} onClick={() => setConfirm(false)}>Cancelar</button></div> : <button className="secondary" disabled={save.isPending} aria-busy={save.isPending} onClick={() => { if (snapshot.environment.isProduction) setConfirm(true); else save.mutate(false); }}>{save.isPending ? 'Salvando…' : `${action} flag`}</button>}</> : null}
-    {save.error ? <QueryFailure error={save.error} onExpired={onExpired} buttonLabel="Recarregar configurações" retry={() => { save.reset(); void refresh(); }} /> : null}
-  </li>;
-}
 export function Configurations({ identity, onExpired }: { identity: Identity; onExpired: () => void }) {
   const { envId = '' } = useParams();
   const client = useQueryClient();

@@ -2,6 +2,9 @@ package evaluation
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/binary"
+	"github.com/franklinlem/flagpilot/apps/api/internal/identifiers"
 	"github.com/franklinlem/flagpilot/apps/api/internal/pagination"
 	"github.com/franklinlem/flagpilot/apps/api/internal/projects"
 	q "github.com/franklinlem/flagpilot/apps/api/internal/storage/postgres/sqlc"
@@ -17,7 +20,7 @@ var ErrValidation = pagination.ErrValidation
 var ErrUnavailable = projects.ErrUnavailable
 var ErrUnauthorized = tokens.ErrUnauthorized
 
-// Context é usado somente em memória. Bucketing será implementado em 4B.
+// Context é usado somente em memória, sem persistência ou logs.
 type Context struct {
 	BucketingKey *string `json:"bucketingKey"`
 }
@@ -58,10 +61,23 @@ func valid(request Request) bool {
 	return true
 }
 
-// Decide é determinístico e falha fechado para percentuais ainda não suportados.
-func Decide(found, enabled bool, rollout int32) (bool, string, error) {
+// BucketInput contém apenas valores canônicos do banco e a chave já validada.
+type BucketInput struct {
+	ProjectID, EnvironmentID, FlagKey, Salt, BucketingKey string
+}
+
+// BucketV1 é o contrato estável da ADR-003: UTF-8, uint64 big-endian, módulo 10000.
+func BucketV1(input BucketInput) int32 {
+	digest := sha256.Sum256([]byte(input.ProjectID + ":" + input.EnvironmentID + ":" + input.FlagKey + ":" + input.Salt + ":" + input.BucketingKey))
+	return int32(binary.BigEndian.Uint64(digest[:8]) % 10000)
+}
+
+func Decide(found, enabled bool, rollout int32, input *BucketInput) (bool, string, error) {
 	if !found {
 		return false, "NOT_FOUND", nil
+	}
+	if rollout < 0 || rollout > 10000 {
+		return false, "", ErrUnavailable
 	}
 	if !enabled || rollout == 0 {
 		return false, "DISABLED", nil
@@ -69,7 +85,10 @@ func Decide(found, enabled bool, rollout int32) (bool, string, error) {
 	if rollout == 10000 {
 		return true, "ENABLED", nil
 	}
-	return false, "", ErrUnavailable
+	if input == nil {
+		return false, "MISSING_CONTEXT", nil
+	}
+	return BucketV1(*input) < rollout, "PERCENTAGE_ROLLOUT", nil
 }
 func (s *Service) Evaluate(ctx context.Context, secret string, requests []Request) (Batch, error) {
 	out := Batch{Results: []Result{}}
@@ -109,7 +128,11 @@ func (s *Service) Evaluate(ctx context.Context, secret string, requests []Reques
 	}
 	for _, request := range requests {
 		row, found := configs[request.FlagKey]
-		value, reason, err := Decide(found, row.Enabled, row.RolloutBps)
+		var input *BucketInput
+		if request.Context != nil && request.Context.BucketingKey != nil {
+			input = &BucketInput{ProjectID: identifiers.String(env.ProjectID), EnvironmentID: identifiers.String(env.ID), FlagKey: request.FlagKey, Salt: row.Salt, BucketingKey: *request.Context.BucketingKey}
+		}
+		value, reason, err := Decide(found, row.Enabled, row.RolloutBps, input)
 		if err != nil {
 			return Batch{}, err
 		}

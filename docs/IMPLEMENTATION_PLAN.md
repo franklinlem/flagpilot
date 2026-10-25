@@ -409,3 +409,7 @@ Franklin confirmou criação de projetos e ambientes automáticos e autorizou a 
 ## Continuidade após validação de flags
 
 Franklin confirmou criação, ativação e arquivamento de flags e autorizou 4A. Tokens por ambiente, emissão única, expiração/revogação auditadas e avaliação booleana single/batch foram implementados conforme ADR-011. Prazo UI inicial de 90 dias, obrigatório e limitado a 365; rate limit local e contexto somente em memória. Evidências em EVALUATION_STATUS.md. Próximas etapas: 4B (rollout) e 5 (SDK).
+
+## Continuidade após validação de tokens
+
+Franklin confirmou manualmente emissão com validades diferentes, cópia, ocultação e revogação no painel e autorizou 4B. Essa aceitação cobre os cenários exercitados de gestão, sem presumir testes manuais da API. Rollout percentual determinístico, edição decimal por ambiente, confirmação de produção e vetores Go/TS compartilhados estão implementados conforme ADR-003. Sem migration, dependências ou variáveis novas; schema 5 preservado. Próxima etapa: 5, cliente SDK HTTP com cache/timeout/fallback. Evidências e limites em EVALUATION_STATUS.md.

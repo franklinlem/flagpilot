@@ -45,6 +45,17 @@ test('emissão única, avaliação single/batch, isolamento e revogação', asyn
     const snapshot = await batch.json();
     expect(snapshot.results[0].revision).toBe(snapshot.results[1].revision);
     expect(snapshot.results[1].reason).toBe('NOT_FOUND');
+    const current = await page.request.get(`/api/v1/environments/${devId}/flags/token_flag`);
+    expect((await page.request.put(`/api/v1/environments/${devId}/flags/token_flag`, { headers: { ...adminHeaders, 'If-Match': current.headers()['etag'] }, data: { enabled: true, rolloutBps: 3725 } })).status()).toBe(200);
+    const missingContext = await caller.request.post(new URL('/api/v1/evaluate', tokenPage).toString(), { headers, data: { flagKey: 'token_flag' } });
+    expect(missingContext.status()).toBe(200);
+    expect(await missingContext.json()).toMatchObject({ value: false, reason: 'MISSING_CONTEXT' });
+    const partialRequest = { flagKey: 'token_flag', context: { bucketingKey: 'contexto:á:🚀' } };
+    const partial = await caller.request.post(new URL('/api/v1/evaluate/batch', tokenPage).toString(), { headers, data: { evaluations: [partialRequest, partialRequest] } });
+    expect(partial.status()).toBe(200);
+    const partialSnapshot = await partial.json();
+    expect(partialSnapshot.results[0].reason).toBe('PERCENTAGE_ROLLOUT');
+    expect(partialSnapshot.results[0]).toEqual(partialSnapshot.results[1]);
     expect((await caller.request.post(new URL(`/api/v1/projects/${projectId}/flags`, tokenPage).toString(), { headers, data: { key: 'intrusion' } })).status()).toBe(401);
     const prodIssued = await page.request.post(`/api/v1/environments/${prodId}/tokens`, { headers: adminHeaders, data: { name: 'Production E2E', expiresAt: new Date(Date.now() + 86400000).toISOString() } });
     expect(prodIssued.status()).toBe(201);

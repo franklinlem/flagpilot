@@ -431,7 +431,7 @@ export interface paths {
         put?: never;
         /**
          * Avaliar flag
-         * @description Disponível no incremento 4A. Somente Bearer de avaliação, sem cookie ou acesso direto de browser. Ambiente inferido do token; contexto não é persistido. Body até 64 KiB; lote até 100, na ordem recebida, mesma revisão. Ausente/arquivada retorna false/NOT_FOUND; desativada ou 0 retorna false/DISABLED; habilitada 10000 retorna true/ENABLED. Parcial ainda não suportado retorna 503. Limites por segundo: global 600, peer 120 e credencial 100; uma réplica, memória limitada.
+         * @description Disponível nos incrementos 4A/4B. Somente Bearer de avaliação, sem cookie ou acesso direto de browser. Ambiente inferido do token; contexto não é persistido. Body até 64 KiB; lote até 100, na ordem recebida, mesma revisão. Ausente/arquivada retorna false/NOT_FOUND; desativada ou 0 retorna false/DISABLED; habilitada 10000 retorna true/ENABLED. Parcial habilitado usa bucketing v1 (ADR-003), retornando PERCENTAGE_ROLLOUT; sem bucketingKey retorna false/MISSING_CONTEXT. Limites por segundo: global 600, peer 120 e credencial 100; uma réplica, memória limitada.
          */
         post: operations["evaluate"];
         delete?: never;
@@ -451,7 +451,7 @@ export interface paths {
         put?: never;
         /**
          * Avaliar lote no mesmo snapshot
-         * @description Disponível no incremento 4A. Somente Bearer de avaliação, sem cookie ou acesso direto de browser. Ambiente inferido do token; contexto não é persistido. Body até 64 KiB; lote até 100, na ordem recebida, mesma revisão. Ausente/arquivada retorna false/NOT_FOUND; desativada ou 0 retorna false/DISABLED; habilitada 10000 retorna true/ENABLED. Parcial ainda não suportado retorna 503. Limites por segundo: global 600, peer 120 e credencial 100; uma réplica, memória limitada.
+         * @description Disponível nos incrementos 4A/4B. Somente Bearer de avaliação, sem cookie ou acesso direto de browser. Ambiente inferido do token; contexto não é persistido. Body até 64 KiB; lote até 100, na ordem recebida, mesma revisão. Ausente/arquivada retorna false/NOT_FOUND; desativada ou 0 retorna false/DISABLED; habilitada 10000 retorna true/ENABLED. Parcial habilitado usa bucketing v1 (ADR-003), retornando PERCENTAGE_ROLLOUT; sem bucketingKey retorna false/MISSING_CONTEXT. Limites por segundo: global 600, peer 120 e credencial 100; uma réplica, memória limitada.
          */
         post: operations["evaluateBatch"];
         delete?: never;
@@ -645,8 +645,8 @@ export interface components {
          */
         UpdateFlagConfig: {
             enabled: boolean;
-            /** @enum {integer} */
-            rolloutBps: 0 | 10000;
+            /** @description Pontos-base inteiros de 0 a 10000 (1% = 100); salt preservado nas alterações. */
+            rolloutBps: number;
             /** @default false */
             confirmProduction: boolean;
         };

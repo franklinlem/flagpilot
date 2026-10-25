@@ -27,6 +27,14 @@ test('flags booleanas, isolamento de ambientes, confirmação, revisão e arquiv
   await expect(page.getByText('Desativada', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Ativar flag', exact: true }).click();
   await expect(page.getByText('Ativada', { exact: true })).toBeVisible();
+  await page.getByLabel('Porcentagem de new_checkout').fill('37,25');
+  await page.getByRole('button', { name: 'Salvar porcentagem', exact: true }).click();
+  await expect(page.getByText('Rollout: 37.25%', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Desativar flag', exact: true }).click();
+  await expect(page.getByText('Desativada', { exact: true })).toBeVisible();
+  await expect(page.getByText('Rollout: 37.25%', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Ativar flag', exact: true }).click();
+  await expect(page.getByText('Ativada', { exact: true })).toBeVisible();
   await page.goto(productionLink!);
   await expect(page.getByText('Desativada', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Ativar flag', exact: true }).click();
@@ -36,6 +44,14 @@ test('flags booleanas, isolamento de ambientes, confirmação, revisão e arquiv
   await page.getByRole('button', { name: 'Ativar flag', exact: true }).click();
   await page.getByRole('button', { name: 'Confirmar alteração em produção', exact: true }).click();
   await expect(page.getByText('Ativada', { exact: true })).toBeVisible();
+  await page.getByLabel('Porcentagem de new_checkout').fill('12.5');
+  await page.getByRole('button', { name: 'Salvar porcentagem', exact: true }).click();
+  await expect(page.getByRole('group')).toContainText('100% → 12.5%');
+  await page.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  await expect(page.getByText('Rollout: 100%', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Salvar porcentagem', exact: true }).click();
+  await page.getByRole('button', { name: 'Confirmar alteração em produção', exact: true }).click();
+  await expect(page.getByText('Rollout: 12.5%', { exact: true })).toBeVisible();
   // Dois leitores com a mesma revisão: a escrita da segunda aba deve conflitar.
   await page.goto(stageLink!);
   const stale = await page.context().newPage();

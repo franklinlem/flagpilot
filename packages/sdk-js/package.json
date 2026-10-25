@@ -21,6 +21,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json && node scripts/cjs.mjs",
     "typecheck": "tsc --noEmit",
-    "check:package": "node --input-type=module -e \"await import('@flagpilot/sdk-js')\" && node -e \"require('@flagpilot/sdk-js')\""
+    "check:package": "node --input-type=module -e \"await import('@flagpilot/sdk-js')\" && node -e \"require('@flagpilot/sdk-js')\"",
+    "test": "npm run build && node --test tests/bucketing.test.mjs"
   }
 }

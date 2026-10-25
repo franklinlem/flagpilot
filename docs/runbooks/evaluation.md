@@ -23,6 +23,20 @@ unset FLAGPILOT_EVALUATION_TOKEN
 
 Substitua `chave01` pela chave desejada. A resposta informa `flagKey`, `value`, `reason`, `environment` (slug) e `revision`. Flag habilitada com 10000 retorna true/ENABLED; desativada ou 0 retorna false/DISABLED; ausente/arquivada retorna false/NOT_FOUND. Uma flag em outro ambiente não é consultada por trocar dados do corpo.
 
+## Configurar rollout percentual
+
+Abra **Ver ambientes → Configurar flags**. O campo **Porcentagem de <chave>** aceita 0 a 100, com até duas casas decimais (por exemplo, `37,25` ou `37.25`). **Salvar porcentagem** preserva o estado de ativação; **Ativar/Desativar flag** preserva o percentual. Flag desativada ou percentual zero não libera nenhum contexto. 100% habilitado dispensa contexto. Em produção, revise o resumo de estado/porcentagem antes de confirmar. Em conflito de revisão, recarregue e reaplique sua intenção.
+
+Para parcial habilitado, troque o corpo do curl acima por:
+
+```json
+{"flagKey":"chave01","context":{"bucketingKey":"contexto-pseudonimo-123"}}
+```
+
+A resposta usa `PERCENTAGE_ROLLOUT`, com `value` true ou false conforme o bucket. Sem bucketingKey, retorna false/`MISSING_CONTEXT`; chave vazia é inválida. Use uma chave estável e pseudônima definida pelo backend consumidor, até 256 bytes UTF-8. Não use email nem dados sensíveis. A mesma chave continua no mesmo bucket naquela configuração, mesmo após reinício ou mudança de percentual. Projetos, ambientes, flags e salts diferentes produzem distribuições independentes. Não há normalização Unicode: preserve exatamente a codificação da chave.
+
+A distribuição é aproximada, não uma contagem exata de usuários. Salt é gerado para cada configuração e preservado nas edições; aumentar a porcentagem mantém os contextos já incluídos. Alterar a bucketingKey também altera o grupo. Flags continuam sem substituir a autorização da aplicação consumidora.
+
 ## Avaliar um lote
 
 Leia o segredo novamente com `read -rsp` e envie o header por stdin como acima, trocando o corpo/endpoint por:
@@ -31,7 +45,7 @@ Leia o segredo novamente com `read -rsp` e envie o header por stdin como acima, 
 {"evaluations":[{"flagKey":"chave01"},{"flagKey":"outra_flag"}]}
 ```
 
-Endpoint: POST `/api/v1/evaluate/batch`. O retorno contém `results` na mesma ordem, incluindo duplicatas, e `revision`; todos os itens usam o mesmo snapshot e revisão. Máximo 100 solicitações, JSON até 64 KiB. Contexto opcional aceita somente bucketingKey de até 256 bytes UTF-8, sem persistência; ainda não há rollout parcial.
+Endpoint: POST `/api/v1/evaluate/batch`. O retorno contém `results` na mesma ordem, incluindo duplicatas, e `revision`; todos os itens usam o mesmo snapshot e revisão. Máximo 100 solicitações, JSON até 64 KiB. Contexto opcional aceita somente bucketingKey de até 256 bytes UTF-8, sem persistência. Em parcial habilitado, informe essa chave em cada item que precisar do bucketing.
 
 ## Erros e integração
 
@@ -52,4 +66,4 @@ Limites por segundo nesta etapa: 600 globais, 120 por peer real e 100 por creden
 
 `make dev-containers` aplica migration 000005 e atualiza a stack local, sem apagar volumes ou dados existentes. Readiness exige schema 5. Atualize http://127.0.0.1:5173 com Ctrl+Shift+R. Nenhum token real é criado automaticamente pelo desenvolvimento; cada emissão pelo painel é explícita e auditada.
 
-O SDK JavaScript ainda não está funcional. Integração HTTP de servidor já está disponível; 4B implementará rollout percentual e a etapa 5 entregará SDK/cache/fallback. Não armazenar token consumidor no `.env` do servidor FlagPilot; configure-o no ambiente secreto do backend que fará as consultas.
+O SDK JavaScript ainda não está funcional. Integração HTTP de servidor já está disponível; Rollout percentual está disponível; a etapa 5 entregará SDK/cache/fallback. Não armazenar token consumidor no `.env` do servidor FlagPilot; configure-o no ambiente secreto do backend que fará as consultas.

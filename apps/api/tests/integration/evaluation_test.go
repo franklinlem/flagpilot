@@ -112,6 +112,58 @@ func exerciseEvaluation(t *testing.T, ctx context.Context, store *postgres.Store
 	if prodResult.Results[0].Value {
 		t.Fatal("token de dev atravessou ambiente")
 	}
+	// Rollout parcial usa o salt persistido; editar percentual e alternar estado não redistribui.
+	var salt, afterSalt string
+	check(owner.QueryRow(ctx, "SELECT salt FROM flag_configs WHERE environment_id=$1 AND flag_id=$2", dev, main.ID).Scan(&salt), nil)
+	contextKey := "usuário:🚀:contexto-pseudonimo"
+	input := evaluation.BucketInput{ProjectID: project.ID, EnvironmentID: dev, FlagKey: main.Key, Salt: salt, BucketingKey: contextKey}
+	bucket := evaluation.BucketV1(input)
+	for _, bps := range []int32{1, 2500, 5000, 9999, 10000, 0} {
+		before, tag, err := fs.GetConfig(ctx, actor, dev, main.Key)
+		check(err, nil)
+		changed, _, err := fs.PutConfig(ctx, actor, dev, main.Key, tag, true, bps, false)
+		check(err, nil)
+		if changed.Revision != before.Revision+1 || changed.Version != before.Version+1 {
+			t.Fatal("rollout não avançou revisão/versão")
+		}
+		batch, err := ev.Evaluate(ctx, issued.Secret, []evaluation.Request{{FlagKey: main.Key, Context: &evaluation.Context{BucketingKey: &contextKey}}, {FlagKey: main.Key}, {FlagKey: main.Key, Context: &evaluation.Context{BucketingKey: &contextKey}}})
+		check(err, nil)
+		if batch.Results[0].Value != (bucket < bps) || batch.Results[0] != batch.Results[2] || batch.Revision != changed.Revision {
+			t.Fatal("percentual/duplicata/revisão incorretos")
+		}
+		if bps > 0 && bps < 10000 && (batch.Results[0].Reason != "PERCENTAGE_ROLLOUT" || batch.Results[1].Reason != "MISSING_CONTEXT" || batch.Results[1].Value) {
+			t.Fatal("contexto parcial incorreto")
+		}
+		repeat, err := ev.Evaluate(ctx, issued.Secret, []evaluation.Request{{FlagKey: main.Key, Context: &evaluation.Context{BucketingKey: &contextKey}}})
+		check(err, nil)
+		if repeat.Results[0] != batch.Results[0] {
+			t.Fatal("bucket instável entre chamadas")
+		}
+	}
+	_, tag, err := fs.GetConfig(ctx, actor, dev, main.Key)
+	check(err, nil)
+	_, tag, err = fs.PutConfig(ctx, actor, dev, main.Key, tag, false, 3725, false)
+	check(err, nil)
+	disabled, err := ev.Evaluate(ctx, issued.Secret, []evaluation.Request{{FlagKey: main.Key, Context: &evaluation.Context{BucketingKey: &contextKey}}})
+	check(err, nil)
+	if disabled.Results[0].Value || disabled.Results[0].Reason != "DISABLED" {
+		t.Fatal("parcial desativado avaliou true")
+	}
+	_, _, err = fs.PutConfig(ctx, actor, dev, main.Key, tag, true, 3725, false)
+	check(err, nil)
+	check(owner.QueryRow(ctx, "SELECT salt FROM flag_configs WHERE environment_id=$1 AND flag_id=$2", dev, main.ID).Scan(&afterSalt), nil)
+	if afterSalt != salt {
+		t.Fatal("edição regenerou salt")
+	}
+	protected, prodTag, err := fs.GetConfig(ctx, actor, prod, main.Key)
+	check(err, nil)
+	_, _, err = fs.PutConfig(ctx, actor, prod, main.Key, prodTag, true, 3725, false)
+	check(err, flags.ErrProduction)
+	prodAfter, _, err := fs.GetConfig(ctx, actor, prod, main.Key)
+	check(err, nil)
+	if protected != prodAfter {
+		t.Fatal("edição de rollout atravessou ambiente/produção sem confirmação")
+	}
 	listed, err := ts.List(ctx, actor, dev, pagination.PageRequest{Limit: 25})
 	check(err, nil)
 	metadata, _ := json.Marshal(listed)
@@ -191,6 +243,14 @@ func exerciseEvaluation(t *testing.T, ctx context.Context, store *postgres.Store
 	check(err, nil)
 	_, err = fs.Create(ctx, actor, project.ID, "pair_two", "")
 	check(err, nil)
+	initialPair, _, err := fs.GetConfig(ctx, actor, dev, "pair_one")
+	check(err, nil)
+	pairBuckets := make([]int32, 2)
+	for i, key := range []string{"pair_one", "pair_two"} {
+		var pairSalt string
+		check(owner.QueryRow(ctx, "SELECT c.salt FROM flag_configs c JOIN flags f ON f.id=c.flag_id WHERE c.environment_id=$1 AND f.key=$2", dev, key).Scan(&pairSalt), nil)
+		pairBuckets[i] = evaluation.BucketV1(evaluation.BucketInput{ProjectID: project.ID, EnvironmentID: dev, FlagKey: key, Salt: pairSalt, BucketingKey: contextKey})
+	}
 	writer := make(chan error, 1)
 	go func() {
 		for i := range 20 {
@@ -200,7 +260,7 @@ func exerciseEvaluation(t *testing.T, ctx context.Context, store *postgres.Store
 				return
 			}
 			if _, err = tx.Exec(ctx, "SELECT id FROM environments WHERE id=$1 FOR NO KEY UPDATE", dev); err == nil {
-				_, err = tx.Exec(ctx, "UPDATE flag_configs SET enabled=$2,version=flag_configs.version+1 FROM flags f WHERE flag_configs.flag_id=f.id AND flag_configs.environment_id=$1 AND f.key IN ('pair_one','pair_two')", dev, i%2 == 0)
+				_, err = tx.Exec(ctx, "UPDATE flag_configs SET enabled=true,rollout_bps=$2,version=flag_configs.version+1 FROM flags f WHERE flag_configs.flag_id=f.id AND flag_configs.environment_id=$1 AND f.key IN ('pair_one','pair_two')", dev, 1+(i%2)*9998)
 			}
 			if err == nil {
 				_, err = tx.Exec(ctx, "UPDATE environments SET revision=revision+1 WHERE id=$1", dev)
@@ -218,10 +278,20 @@ func exerciseEvaluation(t *testing.T, ctx context.Context, store *postgres.Store
 		writer <- nil
 	}()
 	for range 20 {
-		snapshot, err := ev.Evaluate(ctx, issued.Secret, []evaluation.Request{{FlagKey: "pair_one"}, {FlagKey: "pair_two"}})
+		snapshot, err := ev.Evaluate(ctx, issued.Secret, []evaluation.Request{{FlagKey: "pair_one", Context: &evaluation.Context{BucketingKey: &contextKey}}, {FlagKey: "pair_two", Context: &evaluation.Context{BucketingKey: &contextKey}}})
 		check(err, nil)
-		if snapshot.Results[0].Value != snapshot.Results[1].Value || snapshot.Results[0].Revision != snapshot.Results[1].Revision {
-			t.Fatal("batch misturou snapshot")
+		for i, item := range snapshot.Results {
+			delta := snapshot.Revision - initialPair.Revision
+			expected := false
+			reason := "DISABLED"
+			if delta > 0 {
+				bps := int32(1 + ((delta-1)%2)*9998)
+				expected = pairBuckets[i] < bps
+				reason = "PERCENTAGE_ROLLOUT"
+			}
+			if item.Value != expected || item.Reason != reason || item.Revision != snapshot.Revision {
+				t.Fatal("batch misturou snapshot parcial")
+			}
 		}
 	}
 	check(<-writer, nil)
@@ -260,6 +330,21 @@ func exerciseEvaluation(t *testing.T, ctx context.Context, store *postgres.Store
 			t.Fatalf("%s expected %d got %d", path, want, w.Code)
 		}
 		return w
+	}
+	_, partialTag, err := fs.GetConfig(ctx, actor, dev, "pair_one")
+	check(err, nil)
+	_, _, err = fs.PutConfig(ctx, actor, dev, "pair_one", partialTag, true, 5000, false)
+	check(err, nil)
+	partial := call("POST", "/api/v1/evaluate", `{"flagKey":"pair_one","context":{"bucketingKey":"context:unicode-á"}}`, issued.Secret, "", "", "", 200)
+	var partialResult evaluation.Result
+	check(json.Unmarshal(partial.Body.Bytes(), &partialResult), nil)
+	if partialResult.Reason != "PERCENTAGE_ROLLOUT" {
+		t.Fatal("HTTP não suporta parcial")
+	}
+	missing := call("POST", "/api/v1/evaluate", `{"flagKey":"pair_one"}`, issued.Secret, "", "", "", 200)
+	check(json.Unmarshal(missing.Body.Bytes(), &partialResult), nil)
+	if partialResult.Value || partialResult.Reason != "MISSING_CONTEXT" {
+		t.Fatal("HTTP sem contexto parcial incorreto")
 	}
 	call("POST", "/api/v1/evaluate", `{"flagKey":"disabled_flag"}`, "", login.Token, "", "", 401)
 	call("POST", "/api/v1/evaluate", `{"flagKey":"disabled_flag"}`, login.Token, "", "", "", 401)

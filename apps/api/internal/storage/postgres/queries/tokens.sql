@@ -21,5 +21,5 @@ AND revoked_at IS NULL AND expires_at>clock_timestamp() FOR SHARE;
 SELECT id FROM api_tokens WHERE id=$1 AND scope='evaluation' AND revoked_at IS NULL AND expires_at>clock_timestamp();
 
 -- name: EvaluationConfigs :many
-SELECT f.key, c.enabled, c.rollout_bps FROM flag_configs c JOIN flags f ON f.id=c.flag_id
+SELECT f.key, c.enabled, c.rollout_bps, c.salt FROM flag_configs c JOIN flags f ON f.id=c.flag_id
 WHERE c.environment_id=$1 AND f.archived_at IS NULL AND f.key=ANY($2::text[]);

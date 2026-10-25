@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "vectors": [
+    {
+      "projectId": "11111111-1111-4111-8111-111111111111",
+      "environmentId": "22222222-2222-4222-8222-222222222222",
+      "flagKey": "new_checkout",
+      "salt": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bucketingKey": "user-123",
+      "name": "v1-1",
+      "digest": "079789614bdadd9890d49e88589d473dfc5a6e699e06e3c5882bb363c2bf3576",
+      "bucket": 2408
+    },
+    {
+      "projectId": "11111111-1111-4111-8111-111111111111",
+      "environmentId": "22222222-2222-4222-8222-222222222222",
+      "flagKey": "new_checkout",
+      "salt": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bucketingKey": "usuário:🚀",
+      "name": "v1-2",
+      "digest": "bd5bd64d89c1b4209e8aa9f1a931385d6abdc44181d344060914efcd18fd935f",
+      "bucket": 8608
+    },
+    {
+      "projectId": "11111111-1111-4111-8111-111111111111",
+      "environmentId": "22222222-2222-4222-8222-222222222222",
+      "flagKey": "new_checkout",
+      "salt": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bucketingKey": "é",
+      "name": "v1-3",
+      "digest": "7bf0eac831ee17ac574b848946eeb4535b6b4eb7f07b191560fac5c837cd145b",
+      "bucket": 9564
+    },
+    {
+      "projectId": "11111111-1111-4111-8111-111111111111",
+      "environmentId": "22222222-2222-4222-8222-222222222222",
+      "flagKey": "new_checkout",
+      "salt": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bucketingKey": "é",
+      "name": "v1-4",
+      "digest": "3d860b0ffd96c1232d4abc43aa51aebd384ab36ea0027776479927bc4e984da5",
+      "bucket": 2467
+    },
+    {
+      "projectId": "11111111-1111-4111-8111-111111111111",
+      "environmentId": "22222222-2222-4222-8222-222222222222",
+      "flagKey": "new_checkout",
+      "salt": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bucketingKey": "áááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááááá",
+      "name": "v1-5",
+      "digest": "dfac2cefdc6889660dcdc337e679faca9125f4e1d657d3d30ece85dd92794a5c",
+      "bucket": 6886
+    },
+    {
+      "projectId": "11111111-1111-4111-8111-111111111111",
+      "environmentId": "33333333-3333-4333-8333-333333333333",
+      "flagKey": "new_checkout",
+      "salt": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bucketingKey": "user-123",
+      "name": "v1-6",
+      "digest": "c496688008fc0e6673cc72f4a19bf58575498942dfdfff87f75c7c3da6d8f150",
+      "bucket": 2934
+    },
+    {
+      "projectId": "44444444-4444-4444-8444-444444444444",
+      "environmentId": "22222222-2222-4222-8222-222222222222",
+      "flagKey": "new_checkout",
+      "salt": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bucketingKey": "user-123",
+      "name": "v1-7",
+      "digest": "b6e9db6c6eb4193a413c4f730c0137406697e0a144df5e1b39c1feb1449cff81",
+      "bucket": 4810
+    },
+    {
+      "projectId": "11111111-1111-4111-8111-111111111111",
+      "environmentId": "22222222-2222-4222-8222-222222222222",
+      "flagKey": "other_flag",
+      "salt": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bucketingKey": "user-123",
+      "name": "v1-8",
+      "digest": "a9c34ceaddb4a7cd05fbb49cdc64821569509fc707609419e14b351773f9b34a",
+      "bucket": 1517
+    },
+    {
+      "projectId": "11111111-1111-4111-8111-111111111111",
+      "environmentId": "22222222-2222-4222-8222-222222222222",
+      "flagKey": "new_checkout",
+      "salt": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "bucketingKey": "user-123",
+      "name": "v1-9",
+      "digest": "8988c875e20cbdb1edccc02c94a1b437841945e2533608a8ebd16482fd548d45",
+      "bucket": 1089
+    },
+    {
+      "projectId": "11111111-1111-4111-8111-111111111111",
+      "environmentId": "22222222-2222-4222-8222-222222222222",
+      "flagKey": "new_checkout",
+      "salt": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bucketingKey": "test-user-00000000000000000000000000000499",
+      "name": "boundary-0",
+      "digest": "52587d61a3fb3ec0e4044c4f775b4a2b13fbb999d819b2bafff3cb65c1a22429",
+      "bucket": 0
+    },
+    {
+      "projectId": "11111111-1111-4111-8111-111111111111",
+      "environmentId": "22222222-2222-4222-8222-222222222222",
+      "flagKey": "new_checkout",
+      "salt": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bucketingKey": "test-user-00000000000000000000000000003146",
+      "name": "boundary-9999",
+      "digest": "9c5949a9d472f24f5c57e5c8b71dc593c6aaf2adc796be64bb12129e0a2ee936",
+      "bucket": 9999
+    }
+  ]
+}

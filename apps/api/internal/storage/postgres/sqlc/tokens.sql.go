@@ -12,7 +12,7 @@ import (
 )
 
 const evaluationConfigs = `-- name: EvaluationConfigs :many
-SELECT f.key, c.enabled, c.rollout_bps FROM flag_configs c JOIN flags f ON f.id=c.flag_id
+SELECT f.key, c.enabled, c.rollout_bps, c.salt FROM flag_configs c JOIN flags f ON f.id=c.flag_id
 WHERE c.environment_id=$1 AND f.archived_at IS NULL AND f.key=ANY($2::text[])
 `
 
@@ -25,6 +25,7 @@ type EvaluationConfigsRow struct {
 	Key        string
 	Enabled    bool
 	RolloutBps int32
+	Salt       string
 }
 
 func (q *Queries) EvaluationConfigs(ctx context.Context, arg EvaluationConfigsParams) ([]EvaluationConfigsRow, error) {
@@ -36,7 +37,12 @@ func (q *Queries) EvaluationConfigs(ctx context.Context, arg EvaluationConfigsPa
 	var items []EvaluationConfigsRow
 	for rows.Next() {
 		var i EvaluationConfigsRow
-		if err := rows.Scan(&i.Key, &i.Enabled, &i.RolloutBps); err != nil {
+		if err := rows.Scan(
+			&i.Key,
+			&i.Enabled,
+			&i.RolloutBps,
+			&i.Salt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

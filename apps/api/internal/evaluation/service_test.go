@@ -16,8 +16,8 @@ func TestBooleanDecision(t *testing.T) {
 		value          bool
 		reason         string
 		err            error
-	}{{false, true, 10000, false, "NOT_FOUND", nil}, {true, false, 10000, false, "DISABLED", nil}, {true, true, 0, false, "DISABLED", nil}, {true, true, 10000, true, "ENABLED", nil}, {true, true, 5000, false, "", ErrUnavailable}} {
-		value, reason, err := Decide(test.found, test.enabled, test.rollout)
+	}{{false, true, 10000, false, "NOT_FOUND", nil}, {true, false, 10000, false, "DISABLED", nil}, {true, true, 0, false, "DISABLED", nil}, {true, true, 10000, true, "ENABLED", nil}, {true, true, 5000, false, "MISSING_CONTEXT", nil}, {true, true, -1, false, "", ErrUnavailable}, {true, true, 10001, false, "", ErrUnavailable}} {
+		value, reason, err := Decide(test.found, test.enabled, test.rollout, nil)
 		if value != test.value || reason != test.reason || !errors.Is(err, test.err) {
 			t.Fatal("decisão booleana incorreta")
 		}

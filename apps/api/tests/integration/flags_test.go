@@ -110,9 +110,9 @@ func exerciseFlags(t *testing.T, ctx context.Context, store *postgres.Store, own
 	}
 	_, _, err = service.PutConfig(ctx, actor, stage, flag.Key, "", true, 10000, false)
 	check(err, flags.ErrRequired)
-	_, _, err = service.PutConfig(ctx, actor, stage, flag.Key, tag, true, 5000, false)
+	_, _, err = service.PutConfig(ctx, actor, stage, flag.Key, tag, true, 10001, false)
 	check(err, flags.ErrValidation)
-	changed, newTag, err := service.PutConfig(ctx, actor, stage, flag.Key, tag, true, 10000, false)
+	changed, newTag, err := service.PutConfig(ctx, actor, stage, flag.Key, tag, true, 3725, false)
 	check(err, nil)
 	if !changed.Enabled || changed.Revision != before.Revision+1 || changed.Version != before.Version+1 || tag == newTag {
 		t.Fatal("revisão não avançou")

@@ -1,8 +1,8 @@
 # FlagPilot — Plano de Engenharia de Software
 
-**Versão:** 1.4 · **Data:** 24/10/2026 · **Estado:** implementação incremental
+**Versão:** 1.5 · **Data:** 24/10/2026 · **Estado:** implementação incremental
 
-**Revisão 1.4:** incorpora as direções do [plano aprovado](IMPLEMENTATION_PLAN.md) e das [ADRs](adr/README.md). Fundação, identidade, organizações/membros, criação/consulta de projetos/ambientes e gestão de flags booleanas, tokens por ambiente e avaliação booleana single/batch estão implementados localmente. Ver [estado de avaliação](EVALUATION_STATUS.md). Rollout percentual e SDK seguem planejados; `api/openapi.yaml` identifica a disponibilidade de cada endpoint. Licença, publicação e alterações externas continuam pendentes.
+**Revisão 1.5:** incorpora as direções do [plano aprovado](IMPLEMENTATION_PLAN.md) e das [ADRs](adr/README.md). Fundação, identidade, organizações/membros, criação/consulta de projetos/ambientes e gestão de flags booleanas, tokens por ambiente e avaliação booleana/percentual single/batch estão implementados localmente. Ver [estado de avaliação](EVALUATION_STATUS.md). Rollout determinístico v1 está implementado com vetores Go/JS; o SDK segue planejado; `api/openapi.yaml` identifica a disponibilidade de cada endpoint. Licença, publicação e alterações externas continuam pendentes.
 
 ## 1. Visão e limites
 
