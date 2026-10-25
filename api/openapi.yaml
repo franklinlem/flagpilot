@@ -776,8 +776,7 @@ paths:
     get:
       operationId: listFlags
       summary: Listar flags
-      description: 'Disponível no incremento 3B. Permissão:
-        Viewer+.'
+      description: 'Disponível em 3B/6A. Viewer+. Busca literal pela chave (normalizada em minúsculas), estado do catálogo e paginação vinculada ao usuário/projeto/filtros. Duplicatas de filtros são inválidas.'
       tags:
       - Flags
       x-implementation: available
@@ -823,6 +822,18 @@ paths:
           minimum: 1
           maximum: 100
           default: 25
+      - name: q
+        in: query
+        description: Substring literal da chave; trim/minúsculas, até 80 caracteres ASCII de chave.
+        schema:
+          type: string
+          maxLength: 80
+      - name: status
+        in: query
+        schema:
+          type: string
+          enum: [all, active, archived]
+          default: all
     post:
       operationId: createFlag
       summary: Criar flag desativada nos ambientes
@@ -1291,11 +1302,10 @@ paths:
     get:
       operationId: listAudit
       summary: Consultar auditoria redigida
-      description: 'Contrato planejado; endpoint ainda não implementado. Permissão:
-        Viewer+.'
+      description: 'Disponível em 6A. Viewer+ da organização, com associação ativa revalidada. Ordem createdAt/id decrescente; cursor vinculado ao ator/organização/filtros. Projeção de campos escalares conhecidos, sem segredo/hash/salt/contexto; somente leitura. Novos eventos aparecem ao atualizar a primeira página.'
       tags:
       - Auditoria
-      x-implementation: planned
+      x-implementation: available
       security:
       - sessionCookie: []
       responses:
@@ -1310,6 +1320,8 @@ paths:
         '422':
           $ref: '#/components/responses/Problem'
         '429':
+          $ref: '#/components/responses/Problem'
+        '503':
           $ref: '#/components/responses/Problem'
         '500':
           $ref: '#/components/responses/Problem'
@@ -1336,6 +1348,20 @@ paths:
           minimum: 1
           maximum: 100
           default: 25
+      - name: action
+        in: query
+        description: Ação exata; vazio corresponde a todas.
+        schema:
+          type: string
+          maxLength: 80
+          pattern: '^$|^[a-z][a-z0-9_.-]{0,79}$'
+      - name: resourceType
+        in: query
+        description: Tipo exato; vazio corresponde a todos.
+        schema:
+          type: string
+          maxLength: 80
+          pattern: '^$|^[a-z][a-z0-9_.-]{0,79}$'
   /evaluate:
     post:
       operationId: evaluate
@@ -1860,6 +1886,9 @@ components:
           - string
           - 'null'
           format: uuid
+        actorLabel:
+          type: string
+          enum: [user, local-operator, unknown]
         action: *id002
         resourceType: *id002
         resourceId: *id001
@@ -1867,17 +1896,20 @@ components:
           type:
           - object
           - 'null'
-          additionalProperties: true
+          additionalProperties:
+            type: [string, number, boolean, 'null']
         after:
           type:
           - object
           - 'null'
-          additionalProperties: true
+          additionalProperties:
+            type: [string, number, boolean, 'null']
         createdAt: *id007
       required:
       - id
       - organizationId
       - actorId
+      - actorLabel
       - action
       - resourceType
       - resourceId

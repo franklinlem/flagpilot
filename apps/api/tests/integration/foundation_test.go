@@ -181,6 +181,7 @@ func TestFoundation(t *testing.T) {
 	t.Run("projects", func(t *testing.T) { exerciseProjects(t, ctx, store, owner) })
 	t.Run("flags", func(t *testing.T) { exerciseFlags(t, ctx, store, owner) })
 	t.Run("evaluation", func(t *testing.T) { exerciseEvaluation(t, ctx, store, owner) })
+	t.Run("dashboard", func(t *testing.T) { exerciseDashboard(t, ctx, store, owner) })
 	if _, err := owner.Exec(ctx, "ALTER ROLE flagpilot_app NOLOGIN"); err != nil {
 		t.Fatal(err)
 	}

@@ -417,3 +417,7 @@ Franklin confirmou manualmente emissão com validades diferentes, cópia, oculta
 ## Continuidade após validação de rollout
 
 Em 25/10/2026, Franklin confirmou visualização e salvamento de porcentagens diferentes e autorizou a etapa 5. O SDK privado HTTP para Node 24.x implementa evaluate/isEnabled/close, cache LRU limitado, timeout total, retry transitório máximo 1, deduplicação/cancelamento e fallback por chamada. ESM/CJS/tipos e integração com API real são verificados. Contrato em ADR-004, evidências em SDK_STATUS.md e exemplo no runbook/sdk.md. Sem novas dependências, migrations ou credenciais reais. A próxima etapa é 6, consolidação do dashboard (filtros, consulta de auditoria e acessibilidade); homologação continua sujeita à autorização externa.
+
+## Consolidação do dashboard — 6A
+
+Continuidade autorizada em 25/10/2026 após entrega do SDK. Filtros de chave/estado do catálogo antes da paginação, histórico organizacional somente leitura com projeção de campos conhecidos, filtros de ação/tipo, paginação temporal e controles acessíveis estão implementados conforme ADR-012. Schema 5, sem novas dependências ou alterações externas. Evidências e limites em DASHBOARD_STATUS.md; uso em runbooks/dashboard.md. Próximo incremento: 6B, fechamento da matriz de UX/acessibilidade e critérios operacionais do MVP antes de planejar homologação. Não há aprovação implícita de deploy/servidores externos.

@@ -22,7 +22,7 @@ async function versioned<T>(response: Response, schema: z.ZodType<T>) {
 }
 const path = (project: string, key?: string) => `/projects/${encodeURIComponent(project)}/flags${key === undefined ? '' : `/${encodeURIComponent(key)}`}`;
 const mutation = (method: string, csrf: string, body: unknown, etag?: string): RequestInit => ({ method, headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf, ...(etag ? { 'If-Match': etag } : {}) }, body: JSON.stringify(body) });
-export async function listFlags(project: string, cursor = '', signal?: AbortSignal) { return parsed(await request(`${path(project)}?limit=25${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`, {}, signal), flagsPage); }
+export async function listFlags(project: string, cursor = '', signal?: AbortSignal, filter: { q: string; status: string } = { q: '', status: 'all' }) { return parsed(await request(`${path(project)}?limit=25&q=${encodeURIComponent(filter.q)}&status=${encodeURIComponent(filter.status)}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`, {}, signal), flagsPage); }
 export async function getFlag(project: string, key: string, signal?: AbortSignal) { return versioned(await request(path(project, key), {}, signal), flagSchema); }
 export async function createFlag(project: string, body: components['schemas']['CreateFlag'], csrf: string) { return versioned(await request(path(project), mutation('POST', csrf, body)), flagSchema); }
 export async function changeFlag(project: string, key: string, body: components['schemas']['UpdateFlag'], csrf: string, etag: string) { return versioned(await request(path(project, key), mutation('PATCH', csrf, body, etag)), flagSchema); }

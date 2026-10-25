@@ -2,6 +2,7 @@ package flags
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -91,6 +92,7 @@ func (s *Service) transaction(ctx context.Context, run func(context.Context, *q.
 	return nil
 }
 
+var searchPattern = regexp.MustCompile(`^[a-z0-9_.-]+$`)
 var keyPattern = regexp.MustCompile(`^[a-z][a-z0-9_.-]{1,79}$`)
 
 func validDescription(value string) bool {
@@ -208,13 +210,25 @@ func (s *Service) Get(ctx context.Context, actor, project, key string) (Flag, er
 	})
 	return out, err
 }
-func (s *Service) List(ctx context.Context, actor, project string, page pagination.PageRequest) (pagination.Page[Flag], error) {
+func (s *Service) List(ctx context.Context, actor, project string, page pagination.PageRequest, filters ...Filter) (pagination.Page[Flag], error) {
 	out := pagination.Page[Flag]{Items: []Flag{}}
 	user, id, err := parse(actor, project)
 	if err != nil {
 		return out, err
 	}
-	scope := identifiers.String(id) + ":" + identifiers.String(user)
+	filter := Filter{Status: "all"}
+	if len(filters) > 1 {
+		return out, ErrValidation
+	}
+	if len(filters) == 1 {
+		filter = filters[0]
+	}
+	filter, err = filter.Normalize()
+	if err != nil {
+		return out, err
+	}
+	fingerprint := sha256.Sum256([]byte(filter.Status + ":" + filter.Query))
+	scope := identifiers.String(id) + ":" + identifiers.String(user) + fmt.Sprintf(":%x", fingerprint)
 	after, err := page.After("flags", scope)
 	if err != nil {
 		return out, err
@@ -223,7 +237,7 @@ func (s *Service) List(ctx context.Context, actor, project string, page paginati
 		if _, _, err := projects.Authorize(ctx, qt, user, id, auth.ReadFlags, false); err != nil {
 			return err
 		}
-		rows, err := qt.ListFlags(ctx, q.ListFlagsParams{ProjectID: id, AfterID: after, PageLimit: int32(page.Limit + 1)})
+		rows, err := qt.ListFlags(ctx, q.ListFlagsParams{ProjectID: id, CatalogStatus: filter.Status, SearchKey: filter.Query, AfterID: after, PageLimit: int32(page.Limit + 1)})
 		if err != nil {
 			return ErrUnavailable
 		}
@@ -299,4 +313,18 @@ func (s *Service) Change(ctx context.Context, actor, project, key, match string,
 		return audit(ctx, qt, p.OrganizationID, user, row.ID, action, "flag", before, out)
 	})
 	return out, err
+}
+
+// Filter aplica busca literal por chave; não interpreta curingas SQL.
+type Filter struct{ Query, Status string }
+
+func (f Filter) Normalize() (Filter, error) {
+	f.Query = strings.ToLower(strings.TrimSpace(f.Query))
+	if f.Status == "" {
+		f.Status = "all"
+	}
+	if len(f.Query) > 80 || (f.Query != "" && !searchPattern.MatchString(f.Query)) || (f.Status != "all" && f.Status != "active" && f.Status != "archived") {
+		return f, ErrValidation
+	}
+	return f, nil
 }

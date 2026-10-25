@@ -3,6 +3,7 @@ package auth
 type Permission string
 
 const (
+	ReadAudit      Permission = "audit.read"
 	ManageTokens   Permission = "tokens.manage"
 	ReadFlags      Permission = "flags.read"
 	ManageFlags    Permission = "flags.manage"
@@ -26,7 +27,7 @@ func Can(role string, permission Permission) bool {
 		return false
 	}
 	switch permission {
-	case ReadMembers, ReadProjects, ReadFlags:
+	case ReadMembers, ReadProjects, ReadFlags, ReadAudit:
 		return true
 	case ManageFlags:
 		return role == "Owner" || role == "Admin" || role == "Editor"

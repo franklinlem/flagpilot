@@ -273,7 +273,7 @@ export interface paths {
         };
         /**
          * Listar flags
-         * @description Disponível no incremento 3B. Permissão: Viewer+.
+         * @description Disponível em 3B/6A. Viewer+. Busca literal pela chave (normalizada em minúsculas), estado do catálogo e paginação vinculada ao usuário/projeto/filtros. Duplicatas de filtros são inválidas.
          */
         get: operations["listFlags"];
         put?: never;
@@ -409,7 +409,7 @@ export interface paths {
         };
         /**
          * Consultar auditoria redigida
-         * @description Contrato planejado; endpoint ainda não implementado. Permissão: Viewer+.
+         * @description Disponível em 6A. Viewer+ da organização, com associação ativa revalidada. Ordem createdAt/id decrescente; cursor vinculado ao ator/organização/filtros. Projeção de campos escalares conhecidos, sem segredo/hash/salt/contexto; somente leitura. Novos eventos aparecem ao atualizar a primeira página.
          */
         get: operations["listAudit"];
         put?: never;
@@ -682,15 +682,17 @@ export interface components {
             organizationId: string;
             /** Format: uuid */
             actorId: string | null;
+            /** @enum {string} */
+            actorLabel: "user" | "local-operator" | "unknown";
             action: string;
             resourceType: string;
             /** Format: uuid */
             resourceId: string;
             before: {
-                [key: string]: unknown;
+                [key: string]: string | number | boolean | null;
             } | null;
             after: {
-                [key: string]: unknown;
+                [key: string]: string | number | boolean | null;
             } | null;
             /** Format: date-time */
             createdAt: string;
@@ -1402,6 +1404,9 @@ export interface operations {
             query?: {
                 cursor?: string;
                 limit?: number;
+                /** @description Substring literal da chave; trim/minúsculas, até 80 caracteres ASCII de chave. */
+                q?: string;
+                status?: "all" | "active" | "archived";
             };
             header?: never;
             path: {
@@ -1770,6 +1775,10 @@ export interface operations {
             query?: {
                 cursor?: string;
                 limit?: number;
+                /** @description Ação exata; vazio corresponde a todas. */
+                action?: string;
+                /** @description Tipo exato; vazio corresponde a todos. */
+                resourceType?: string;
             };
             header?: never;
             path: {
@@ -1795,6 +1804,7 @@ export interface operations {
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
         };
     };
     evaluate: {

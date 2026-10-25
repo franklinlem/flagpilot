@@ -281,18 +281,28 @@ func (q *Queries) ListFlagConfigs(ctx context.Context, arg ListFlagConfigsParams
 
 const listFlags = `-- name: ListFlags :many
 SELECT id, project_id, key, description, archived_at, version, created_at FROM flags WHERE project_id=$1
-AND ($2::uuid IS NULL OR id>$2::uuid)
-ORDER BY id LIMIT $3
+AND ($2::text='all' OR ($2='active' AND archived_at IS NULL) OR ($2='archived' AND archived_at IS NOT NULL))
+AND strpos(key,$3::text)>0
+AND ($4::uuid IS NULL OR id>$4::uuid)
+ORDER BY id LIMIT $5
 `
 
 type ListFlagsParams struct {
-	ProjectID pgtype.UUID
-	AfterID   pgtype.UUID
-	PageLimit int32
+	ProjectID     pgtype.UUID
+	CatalogStatus string
+	SearchKey     string
+	AfterID       pgtype.UUID
+	PageLimit     int32
 }
 
 func (q *Queries) ListFlags(ctx context.Context, arg ListFlagsParams) ([]Flag, error) {
-	rows, err := q.db.Query(ctx, listFlags, arg.ProjectID, arg.AfterID, arg.PageLimit)
+	rows, err := q.db.Query(ctx, listFlags,
+		arg.ProjectID,
+		arg.CatalogStatus,
+		arg.SearchKey,
+		arg.AfterID,
+		arg.PageLimit,
+	)
 	if err != nil {
 		return nil, err
 	}

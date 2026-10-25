@@ -56,12 +56,16 @@ func flagResponse(w http.ResponseWriter, status int, out flags.Flag) {
 	jsonResponse(w, status, out)
 }
 func (h *flagHandlers) list(w http.ResponseWriter, r *http.Request) {
+	if len(r.URL.Query()["q"]) > 1 || len(r.URL.Query()["status"]) > 1 {
+		flagError(w, r, flags.ErrValidation)
+		return
+	}
 	page, err := pageRequest(r)
 	if err != nil {
 		flagError(w, r, err)
 		return
 	}
-	out, err := h.service.List(r.Context(), actor(r), chi.URLParam(r, "projectId"), page)
+	out, err := h.service.List(r.Context(), actor(r), chi.URLParam(r, "projectId"), page, flags.Filter{Query: r.URL.Query().Get("q"), Status: r.URL.Query().Get("status")})
 	if err != nil {
 		flagError(w, r, err)
 		return

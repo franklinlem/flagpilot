@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/franklinlem/flagpilot/apps/api/internal/audit"
 	"github.com/franklinlem/flagpilot/apps/api/internal/auth"
 	"github.com/franklinlem/flagpilot/apps/api/internal/config"
 	"github.com/franklinlem/flagpilot/apps/api/internal/evaluation"
@@ -44,7 +45,7 @@ func run() int {
 		logger.Error("auth_init_failed")
 		return 1
 	}
-	server := &http.Server{Addr: cfg.HTTPAddr, Handler: httpapi.New(logger, store, httpapi.WithAuth(authService, cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithOrganizations(authService, organizations.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithProjects(authService, projects.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithFlags(authService, flags.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithTokens(authService, tokens.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithEvaluation(evaluation.New(store.Pool, cfg.DBTimeout))), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}
+	server := &http.Server{Addr: cfg.HTTPAddr, Handler: httpapi.New(logger, store, httpapi.WithAuth(authService, cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithAudit(authService, audit.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithOrganizations(authService, organizations.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithProjects(authService, projects.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithFlags(authService, flags.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithTokens(authService, tokens.New(store.Pool, cfg.DBTimeout), cfg.AllowedOrigins, cfg.SecureCookies), httpapi.WithEvaluation(evaluation.New(store.Pool, cfg.DBTimeout))), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}
 	done := make(chan error, 1)
 	go func() {
 		logger.Info("server_start", "address", cfg.HTTPAddr, "environment", cfg.Environment)

@@ -56,3 +56,9 @@ button[aria-busy="true"] { cursor: progress; }
 textarea { width: 100%; min-height: 6rem; border: 1px solid #64748b; background: #111827; color: inherit; padding: .7rem; border-radius: .4rem; font: inherit; resize: vertical; }
 textarea:focus-visible { outline: 3px solid #bfdbfe; outline-offset: 3px; }
 .card p, h3 { overflow-wrap: anywhere; }
+
+.filters { margin: 1rem 0; }
+.audit-event dt { font-weight: 650; overflow-wrap: anywhere; }
+.audit-event dd { margin: .25rem 0 1rem; overflow-wrap: anywhere; }
+summary { cursor: pointer; padding: .75rem 0; }
+summary:focus-visible { outline: 3px solid #bfdbfe; outline-offset: 3px; }

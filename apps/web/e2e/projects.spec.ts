@@ -61,5 +61,9 @@ test('projetos e ambientes, produção explícita e Viewer em leitura', async ({
     expect((await viewer.request.post(`/api/v1/organizations/${orgId}/projects`, { headers, data: { name: 'Forbidden', slug: 'forbidden' } })).status()).toBe(403);
     expect((await viewer.request.post(`/api/v1/projects/${projectId}/environments`, { headers, data: { name: 'Forbidden', slug: 'forbidden', isProduction: false } })).status()).toBe(403);
     expect((await viewer.request.get(`/api/v1/projects/${privateProjectId}`)).status()).toBe(404);
+    await viewer.goto(new URL(`/organizations/${orgId}/audit`,page.url()).toString());
+    await expect(viewer.getByRole('heading',{name:'Histórico de auditoria'})).toBeVisible();
+    await expect(viewer.getByRole('listitem').first()).toBeVisible();
+    expect((await viewer.request.get(`/api/v1/organizations/${privateOrgId}/audit-events`)).status()).toBe(404);
   } finally { await viewerContext.close(); }
 });

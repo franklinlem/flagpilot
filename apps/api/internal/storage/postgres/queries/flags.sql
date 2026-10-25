@@ -6,6 +6,8 @@ SELECT * FROM flags WHERE project_id=$1 AND key=$2;
 
 -- name: ListFlags :many
 SELECT * FROM flags WHERE project_id=sqlc.arg(project_id)
+AND (sqlc.arg(catalog_status)::text='all' OR (sqlc.arg(catalog_status)='active' AND archived_at IS NULL) OR (sqlc.arg(catalog_status)='archived' AND archived_at IS NOT NULL))
+AND strpos(key,sqlc.arg(search_key)::text)>0
 AND (sqlc.narg(after_id)::uuid IS NULL OR id>sqlc.narg(after_id)::uuid)
 ORDER BY id LIMIT sqlc.arg(page_limit);
 
