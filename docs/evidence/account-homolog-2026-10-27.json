@@ -1,0 +1,39 @@
+{
+  "verifiedAt": "2026-10-27T16:03:45Z",
+  "serviceUuid": "lsqrajvwfjp3rxb4xsxupnb1",
+  "sourceCommit": "c4ca9a2bc2feed5641051c3edfae41c614e201dd",
+  "deployedImageIds": {
+    "api": "sha256:b2e2d14e932ff748dd2a9c273bb1ac2df71b61f07df7d0a89e928f1ebbbea740",
+    "web": "sha256:a773cc0b11270d18cf5865c9cd2f03f5556c721eb10ceb35aa82a59ea3cdca36"
+  },
+  "onlyApiWebRecreated": true,
+  "retainedContainers": 33,
+  "dbMigrateProxyPreserved": true,
+  "schema": 5,
+  "publicHttps": 200,
+  "publicApiLive": 200,
+  "passwordWithoutSession": 401,
+  "privateEndpoints": 404,
+  "fromFrankNote2": 200,
+  "publicHtmlMatchesDeployedImage": true,
+  "routingNetwork": "coolify",
+  "noDependencyOnProxyServiceNetwork": true,
+  "curlLibcurl": "8.23.0-r0",
+  "realUserPasswordsUsedOrChanged": false,
+  "temporaryAdminCredentialRevoked": true,
+  "coolifyStatus": "running:healthy",
+  "monitors": [
+    {
+      "id": 14,
+      "status": "UP",
+      "lastHeartbeatUTC": "2026-10-27T16:04:07Z",
+      "notificationChannelLinked": true
+    },
+    {
+      "id": 15,
+      "status": "UP",
+      "lastHeartbeatUTC": "2026-10-27T16:03:37Z",
+      "notificationChannelLinked": true
+    }
+  ]
+}

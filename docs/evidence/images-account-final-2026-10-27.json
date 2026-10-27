@@ -1,0 +1,125 @@
+{
+  "timestampUtc": "2026-10-27T15:59:45.449939+00:00",
+  "sourceCommit": "c4ca9a2bc2feed5641051c3edfae41c614e201dd",
+  "workingTreeDirty": true,
+  "scannerImage": "aquasec/trivy:0.69.3@sha256:bcc376de8d77cfe086a917230e818dc9f8528e3c852f7b1aff648949b6258d1c",
+  "threshold": [
+    "HIGH",
+    "CRITICAL"
+  ],
+  "ignoreUnfixed": false,
+  "published": false,
+  "images": {
+    "api": {
+      "severityCounts": {
+        "UNKNOWN": 2
+      },
+      "findings": [
+        {
+          "VulnerabilityID": "GO-2026-5932",
+          "PkgName": "golang.org/x/crypto",
+          "InstalledVersion": "v0.58.0",
+          "FixedVersion": "",
+          "Severity": "UNKNOWN",
+          "Status": "affected",
+          "PrimaryURL": ""
+        },
+        {
+          "VulnerabilityID": "GO-2026-5932",
+          "PkgName": "golang.org/x/crypto",
+          "InstalledVersion": "v0.58.0",
+          "FixedVersion": "",
+          "Severity": "UNKNOWN",
+          "Status": "affected",
+          "PrimaryURL": ""
+        }
+      ],
+      "sbomFormat": "CycloneDX",
+      "sbomComponents": 35,
+      "gatePassed": true,
+      "localTag": "flagpilot-release-62df43da-api:local",
+      "imageId": "sha256:b2e2d14e932ff748dd2a9c273bb1ac2df71b61f07df7d0a89e928f1ebbbea740",
+      "upstreamReference": null,
+      "artifacts": [
+        {
+          "file": "api.scan.json",
+          "sha256": "1a441083309d6b72865e0b12628a3919dc375c007d92ed9da7b1c75b4575b6c5"
+        },
+        {
+          "file": "api.cdx.json",
+          "sha256": "c002321fa40c8b9a8ecd2db683808e4f1ad43707b45f252f3ad94af99e967d62"
+        }
+      ]
+    },
+    "web": {
+      "severityCounts": {},
+      "findings": [],
+      "sbomFormat": "CycloneDX",
+      "sbomComponents": 71,
+      "gatePassed": true,
+      "localTag": "flagpilot-release-62df43da-web:local",
+      "imageId": "sha256:a773cc0b11270d18cf5865c9cd2f03f5556c721eb10ceb35aa82a59ea3cdca36",
+      "upstreamReference": null,
+      "artifacts": [
+        {
+          "file": "web.scan.json",
+          "sha256": "55a102f6eef00a8aa1d3fd78b447e7e0e83621bb7eed7fa7ba1a6ae3d8771a39"
+        },
+        {
+          "file": "web.cdx.json",
+          "sha256": "dabf40164ce367f2b31fac938d49845e4cc268e6701e5358e7017570a0a9e8b5"
+        }
+      ]
+    },
+    "migrate": {
+      "severityCounts": {},
+      "findings": [],
+      "sbomFormat": "CycloneDX",
+      "sbomComponents": 5,
+      "gatePassed": true,
+      "localTag": "flagpilot-release-62df43da-migrate:local",
+      "imageId": "sha256:12e514cbbd5fb5bde76f3f29c7a12a584aafbed2c71e0a9707b86473016011fb",
+      "upstreamReference": null,
+      "artifacts": [
+        {
+          "file": "migrate.scan.json",
+          "sha256": "8acdee2569a779e764ae53adb369fa4031ac2c55eef67cb0431d20fdde6b2b42"
+        },
+        {
+          "file": "migrate.cdx.json",
+          "sha256": "22727cedaca45cdd070c6c0475a99611d8d3794c07c8b64deff5767eb10b2e10"
+        }
+      ]
+    },
+    "db": {
+      "severityCounts": {},
+      "findings": [],
+      "sbomFormat": "CycloneDX",
+      "sbomComponents": 51,
+      "gatePassed": true,
+      "localTag": "flagpilot-release-62df43da-db:local",
+      "imageId": "sha256:6a456fc1e8bd95451e1d8e9411fdefd3dba92eb757a6b3f4ebfa743b17a376d8",
+      "upstreamReference": "postgres:16.15-alpine@sha256:f4610795587492cd4fb887c2dc3de301b813278bb6f616992061141b5f15ac36",
+      "artifacts": [
+        {
+          "file": "db.scan.json",
+          "sha256": "06b0d9455a95cef0f0163d8fb9db6306c113efcee8f95aca70879ee57c53b126"
+        },
+        {
+          "file": "db.cdx.json",
+          "sha256": "ce12446d41974764a51eb62d55336de8d24812765add14eaf15571dc44cedae1"
+        }
+      ]
+    }
+  },
+  "scannerVersionAndDatabase": {
+    "Version": "0.69.3",
+    "VulnerabilityDB": {
+      "Version": 2,
+      "NextUpdate": "2026-10-28T13:12:49.474279763Z",
+      "UpdatedAt": "2026-10-27T13:12:49.474279883Z",
+      "DownloadedAt": "2026-10-27T15:51:32.953992777Z"
+    }
+  },
+  "gatePassed": true
+}

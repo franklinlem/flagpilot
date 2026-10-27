@@ -2,6 +2,8 @@
 
 Plataforma self-hosted de feature flags com Go/Chi, PostgreSQL e React/TypeScript. MVP com organizações, projetos/ambientes, flags booleanas e rollout percentual, tokens, avaliação, SDK e auditoria. **Homologação disponível em https://flagpilot.franklem.uk**, com banco independente, backups criptografados no frank-note2 e Uptime Kuma. [Estado, evidências e limites](docs/HOMOLOGATION_STATUS.md). Repositório privado; produção e publicação pública ainda pendentes.
 
+Segurança da conta: troca da própria senha pelo painel, revogação de todas as sessões e auditoria organizacional. [Estado 8A](docs/ACCOUNT_SECURITY_STATUS.md) e [próximos incrementos](docs/ROADMAP.md).
+
 ## Requisitos e versões
 
 Debian Linux, Docker Engine com Compose v2+ acessível pelo usuário, Python 3.12+ e GNU Make. Node **24.22.1** (também em `.nvmrc`), Go **1.27.3**, PostgreSQL **16.15**, sqlc **1.31.1**, golang-migrate **4.20.1**. TypeScript **5.9.3** foi escolhido por compatibilidade com o gerador OpenAPI; React **19.3.1** e Vite **8.3.5**. Dependências npm e Go fixadas em lockfiles.

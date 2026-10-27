@@ -36,3 +36,7 @@ Operação: [runbook de homologação](runbooks/homologation.md), [backups](runb
 ## Atualização de 27/10/2026 — 7B
 
 Encaminhamento do Traefik fixado explicitamente na rede estável `coolify`, removendo a dependência da reconexão manual à rede exclusiva após recriar o proxy. Correção persistida no Coolify e no Compose, somente web reaplicado; regressão real da conexão perdida aprovada. Backups agendados de 26 e 27/10 observados no host físico. Causa, testes e limites em [INGRESS_STATUS.md](INGRESS_STATUS.md).
+
+## Atualização de 27/10/2026 — 8A
+
+Troca de senha pessoal disponível em Conta → Segurança da conta. Confirma senha atual, encerra todas as sessões e audita a mudança nas organizações atuais. API/web atualizados com DB/schema/proxy preservados e ingresso estável. Nova medição detectou curl/libcurl afetados no web; pacotes corrigidos e gate final aprovado antes de aplicar. Backups/monitores conferidos. Estado, resultados e limites em [ACCOUNT_SECURITY_STATUS.md](ACCOUNT_SECURITY_STATUS.md); próximas frentes em [ROADMAP.md](ROADMAP.md). Nenhuma senha real alterada automaticamente.
