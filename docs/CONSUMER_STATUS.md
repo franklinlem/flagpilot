@@ -8,4 +8,4 @@ BFF Node usa SDK para calcular cotação e frete no servidor. Browser envia apen
 
 Dois testes Node adicionais cobrem cálculo, contexto fixo, entradas extras/inválidas, origem/content-type/payload, assets e SDK real com transporte simulando erro de rede, 401 e timeout. São ensaios automatizados; aceitação visual humana do exemplo ainda não ocorreu. Nenhum ensaio usa conta/token de Franklin ou interrompe a homologação.
 
-Executar: `npm run demo:consumer`, após preparar `.env` privado conforme README do exemplo. Verificar: `npm run test:consumer` e `python3 scripts/consumer-e2e.py`. CI inclui ambos; execução remota é acompanhada separadamente. O servidor só escuta em 127.0.0.1 e não deve ser publicado como loja/BFF produtivo.
+Executar: `npm run demo:consumer`, após preparar `.env` privado conforme README do exemplo. Verificar: `npm run test:consumer` e `python3 scripts/consumer-e2e.py`. CI inclui ambos; [execução remota 40576982060](https://github.com/franklinlem/flagpilot/actions/runs/40576982060), 88dbb04, aprovada com o novo consumidor e suítes centrais Chromium/Firefox. O servidor só escuta em 127.0.0.1 e não deve ser publicado como loja/BFF produtivo.
