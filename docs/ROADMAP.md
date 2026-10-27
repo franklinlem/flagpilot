@@ -11,6 +11,11 @@ Atualizado em 27/10/2026. Franklin autorizou continuar a evolução após corrig
 
 A homologação permanece separada de produção. Publicação npm/registry, licença, produção e alterações no atualizador global do Traefik não são inferidas desta continuidade. Avaliação por SDK continua server-side. Sem A/B testing, segmentação complexa, cobrança ou SDK Go neste ciclo.
 
-**8A entregue e implantado na homologação**, com validações automáticas e aceitação manual do formulário ainda pendente. A próxima implementação proposta é 8B.
+**8A–8D entregues nos seus respectivos escopos.** 8A está na homologação; 8B está no host físico/Kuma; 8C é exemplo local; 8D consolida critérios e decisões, sem aprovar produção.
 
-8A usa os componentes existentes (Go/Argon2id/sessão/CSRF, React Hook Form/Zod), sem migration ou dependência nova. UI em Conta → Segurança da conta, endpoint POST /api/v1/auth/password. Código/testes e decisões em [ACCOUNT_SECURITY_STATUS.md](ACCOUNT_SECURITY_STATUS.md) e [ADR-018](adr/018-self-service-password.md). Os demais incrementos são planejamento, não entregas já configuradas.
+- [8A — Segurança da conta](ACCOUNT_SECURITY_STATUS.md): sem migration/dependência nova; aceitação manual do formulário ainda pendente.
+- [8B — Supervisão de backups](BACKUP_SUPERVISION_STATUS.md): monitor push ativo no canal backup hermes; atraso/falha/recuperação ensaiados com fixtures, backup real preservado.
+- [8C — Aplicação consumidora](CONSUMER_STATUS.md): cotação com BFF/SDK, rollout e fallback aprovados contra API real descartável e Chromium. [Executar exemplo](../examples/consumer/README.md).
+- [8D — Preparação de release](RELEASE_READINESS.md): critérios consolidados; licença/distribuição pública e produção continuam pendentes. [Notas internas](RELEASE_NOTES.md).
+
+Próximo ciclo sugerido, ainda sem implantação produtiva autorizada: aceitação humana de conta/consumidor, confirmar recebimento dos alertas e planejar cópia/monitor independente; depois ensaiar recuperação e capacidade no destino autorizado. Somente após resolver critérios de release, definir versão candidata e promoção. Não antecipar segmentos/A-B testing como substituição destas pendências.

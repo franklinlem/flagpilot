@@ -2,7 +2,7 @@
 
 Plataforma self-hosted de feature flags com Go/Chi, PostgreSQL e React/TypeScript. MVP com organizações, projetos/ambientes, flags booleanas e rollout percentual, tokens, avaliação, SDK e auditoria. **Homologação disponível em https://flagpilot.franklem.uk**, com banco independente, backups criptografados no frank-note2 e Uptime Kuma. [Estado, evidências e limites](docs/HOMOLOGATION_STATUS.md). Repositório privado; produção e publicação pública ainda pendentes.
 
-Segurança da conta: troca da própria senha pelo painel, revogação de todas as sessões e auditoria organizacional. [Estado 8A](docs/ACCOUNT_SECURITY_STATUS.md) e [próximos incrementos](docs/ROADMAP.md).
+Segurança da conta: troca da própria senha pelo painel, revogação de todas as sessões e auditoria organizacional. [Estado 8A](docs/ACCOUNT_SECURITY_STATUS.md) e [roadmap](docs/ROADMAP.md). Backup supervisionado ativo e [exemplo consumidor com SDK/BFF](examples/consumer/README.md) disponíveis; [checklist de release](docs/RELEASE_READINESS.md) distingue entregas e pendências.
 
 ## Requisitos e versões
 
@@ -50,7 +50,7 @@ curl -i http://127.0.0.1:8080/api/v1/health/ready
 
 Live verifica o processo. Ready verifica conectividade, schema versão 5 e estado não-dirty; banco vazio, indisponível ou schema incompatível retorna 503 sem detalhes internos. A API continua viva enquanto o banco está indisponível. Nunca executa migrations sozinha.
 
-[OpenAPI 3.1](api/openapi.yaml) descreve o contrato inicial completo. `x-implementation: available` identifica health, autenticação e organizações/membros; os demais endpoints retornam 404 até seus incrementos. Métricas ainda não implementadas. Nginx de runtime bloqueia readiness e `/metrics` na borda; o painel consulta a sessão em `/me`, sem expor a saúde interna do banco.
+[OpenAPI 3.1](api/openapi.yaml) descreve o contrato implementado. `x-implementation: available` identifica endpoints disponíveis; flags, tokens, avaliação e auditoria já fazem parte do MVP. Métricas Prometheus estão no listener interno separado (9090), sem exposição pública. Nginx de runtime bloqueia readiness e `/metrics` na borda; o painel consulta a sessão em `/me`, sem expor a saúde interna do banco.
 
 ## Verificar
 

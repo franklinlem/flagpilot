@@ -1,4 +1,8 @@
-# Estado de release — atualização 6F
+# Estado de release
+
+Atualização 8D (27/10/2026): [checklist atual e decisões](RELEASE_READINESS.md), [notas internas](RELEASE_NOTES.md), [backup supervisionado](BACKUP_SUPERVISION_STATUS.md) e [consumidor/BFF](CONSUMER_STATUS.md). Produção/licença/distribuição pública continuam pendentes. Os resultados abaixo são registros históricos 6E/6F; scan mais recente em [evidência final 27/10](evidence/images-account-final-2026-10-27.json).
+
+## Atualização 6F
 
 Atualização 7A: GitHub privado e homologação externa autorizados, com backup recorrente e monitoramento no host físico. Estado atual em [HOMOLOGATION_STATUS.md](HOMOLOGATION_STATUS.md); pendências abaixo são snapshots das respectivas etapas.
 

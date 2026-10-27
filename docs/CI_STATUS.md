@@ -13,3 +13,9 @@ A execução 40531365526 (7B) foi cancelada pela concorrência do workflow quand
 A suíte de segurança da conta tem fixture própria para não consumir o orçamento de login da suíte administrativa; CI roda ambas em Chromium/Firefox, sem retries ou relaxamento de limites. Resultado remoto da revisão final será acompanhado; make ci e verificações locais não são apresentados como CI remota concluída.
 
 Fechamento local 8A: make ci aprovado; 24 testes frontend, 16 SDK, Go/race/vet, integração PostgreSQL com concorrência/rollback, tipos/contrato/builds. Fluxo de segurança em Chromium/Firefox aprovado, seis fluxos administrativos Chromium aprovados; Chromium final também cobre o novo filtro de auditoria e runtime corrigido. Scans finais aprovados. A CI remota final é uma verificação adicional em andamento, não declarada aprovada.
+
+## Fechamento 8A e continuidade 8B–8D
+
+A execução final [40538304391](https://github.com/franklinlem/flagpilot/actions/runs/40538304391), ae94310, concluiu com sucesso; o acompanhamento acima era snapshot anterior. As quatro suítes de browser e demais etapas passaram no GitHub.
+
+8B–8D acrescentam sete testes Python de supervisão de backup, dois testes Node do consumidor e ensaio com BFF/API/DB/Chromium reais, sem dependências novas. CI incorpora os novos testes e o exemplo ao ESLint. O ensaio consumidor tem stack própria, não usa credenciais do servidor e não interrompe homologação. Resultado remoto da revisão nova será registrado após execução; não presumir verde da base.

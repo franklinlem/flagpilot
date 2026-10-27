@@ -1,10 +1,12 @@
 # FlagPilot — Plano de Engenharia de Software
 
-**Versão:** 1.12 · **Data:** 25/10/2026 · **Estado:** implementação incremental
+**Versão:** 1.14 · **Data:** 27/10/2026 · **Estado:** implementação incremental
 
 **Revisão 1.13:** incorpora as direções do [plano aprovado](IMPLEMENTATION_PLAN.md) e das [ADRs](adr/README.md). Fundação, identidade, organizações/membros, criação/consulta de projetos/ambientes e gestão de flags booleanas, tokens por ambiente e avaliação booleana/percentual single/batch estão implementados localmente. Ver [estado de avaliação](EVALUATION_STATUS.md). Rollout determinístico v1 está implementado com vetores Go/JS; o SDK HTTP privado para backend está implementado com cache/timeout/fallback (ver SDK_STATUS.md); `api/openapi.yaml` identifica a disponibilidade de cada endpoint. Filtros de catálogo e consulta de auditoria estão implementados em 6A; navegação/recuperação e testes Chromium/Firefox em 6B (DASHBOARD_STATUS.md). Ensaio sintético de recuperação e métricas Prometheus em listener separado entregues em 6C (OPERATIONS_STATUS.md). Benchmark local k6 com limites ativos e fixture sintética entregue em 6D (CAPACITY_STATUS.md); capacidade da VPS e SLO sustentado continuam pendentes. SBOM/scans de runtimes e rollback de API com schema 5 entregues em 6E; gate inicialmente bloqueado em 6E, corrigido em 6F com zero HIGH/CRITICAL (SECURITY_REMEDIATION_STATUS.md). Critérios locais/pendentes em MVP_READINESS.md. Licença/distribuição pública e produção continuam pendentes; a homologação autorizada é registrada abaixo.
 
 Atualização 7A/7B/8A: GitHub privado, homologação isolada, backups criptografados no frank-note2 e Uptime Kuma foram autorizados e entregues; ingresso corrigido na rede estável coolify. A evolução funcional agora inclui troca da própria senha pelo painel (ADR-018), com confirmação da senha atual e revogação de sessões. Estado da entrega/implantação em ACCOUNT_SECURITY_STATUS.md; próximos incrementos em ROADMAP.md. Licença, distribuição pública e produção continuam pendentes.
+
+Atualização 8B–8D: backup supervisionado instalado no frank-note2/Kuma, com atraso/falha/recuperação ensaiados; aplicação consumidora local BFF/SDK e critérios de release consolidados. Ver BACKUP_SUPERVISION_STATUS.md, CONSUMER_STATUS.md e RELEASE_READINESS.md. Os esboços históricos abaixo não significam CRUD completo, publicação ou produção concluídos. O contrato disponível é OpenAPI/ADRs/runbooks atuais; parâmetros de sessão/CSRF de esboços antigos não devem ser adicionados à configuração por inferência.
 
 ## 1. Visão e limites
 

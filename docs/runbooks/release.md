@@ -1,6 +1,6 @@
 # Evidências de imagens e rollback local
 
-Incremento 6E. Preparação local, sem release pública, registry, npm, deploy, DNS ou alteração de servidor externo. Gate HIGH/CRITICAL atual **aprovado em 6F** (dois UNKNOWN não importados na API): ver [RELEASE_STATUS.md](../RELEASE_STATUS.md) e [correções 6F](../SECURITY_REMEDIATION_STATUS.md). Um scan sem HIGH/CRITICAL também não aprova sozinho uma release.
+Runbook de ferramentas do incremento 6E. Critérios atuais em [RELEASE_READINESS.md](../RELEASE_READINESS.md); não interpretar snapshots históricos como estado atual de implantação. Preparação local, sem release pública, registry, npm, deploy, DNS ou alteração de servidor externo. Gate HIGH/CRITICAL atual **aprovado em 6F** (dois UNKNOWN não importados na API): ver [RELEASE_STATUS.md](../RELEASE_STATUS.md) e [correções 6F](../SECURITY_REMEDIATION_STATUS.md). Um scan sem HIGH/CRITICAL também não aprova sozinho uma release.
 
 ## SBOM e scan
 
