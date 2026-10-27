@@ -441,3 +441,7 @@ Continuidade autorizada após 6D. Bases/imagens upstream fixadas por digest; SBO
 ## Remediação dos runtimes — 6F
 
 Correções autorizadas após 6E. PostgreSQL 16.15 com helper gosu recompilado/depêndencias corrigidas, NGINX estável 1.30.6 com APKs fixados e migrator scratch PostgreSQL-only sobre golang-migrate 4.20.1. Novos scans/SBOM aprovam gate sem HIGH/CRITICAL; dois UNKNOWN OpenPGP não importados na API continuam registrados, com análise de binários. Upgrade sintético do mesmo volume, recuperação, rollback, integração, builds e Chromium validados. Desenvolvimento local atualizado com cópia privada prévia e conteúdo preservado; schema 5 e dados mantidos. Sem novos recursos de negócio, alteração externa, publicação ou licença automática. Decisão ADR-016; evidências e limites em SECURITY_REMEDIATION_STATUS.md. Próximo incremento: artefatos operacionais/release ainda pendentes, sem inferir autorização externa.
+
+## Continuidade operacional — 7A/7B
+
+Homologação isolada, GitHub privado, backups criptografados no frank-note2 e Uptime Kuma foram autorizados e implementados em 7A. Franklin confirmou acesso/login. Em 27/10, após incidente descrito na conversa compartilhada, a label de rede do Traefik foi fixada no ingresso estável `coolify`, persistida no serviço, com regressão da perda da conexão manual aprovada. Estado em HOMOLOGATION_STATUS.md e INGRESS_STATUS.md. Produção, publicação pública/licença e alterações globais do atualizador Traefik permanecem fora deste incremento.

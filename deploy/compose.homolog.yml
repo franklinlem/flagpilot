@@ -83,6 +83,9 @@ services:
     restart: unless-stopped
     cpus: 0.25
     mem_limit: 128m
+    # O proxy precisa usar a rede estável, presente após sua recriação.
+    labels:
+      traefik.docker.network: ${FLAGPILOT_INGRESS_NETWORK:-coolify}
     networks: [application, ingress]
     depends_on:
       api: {condition: service_healthy}

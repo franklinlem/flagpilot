@@ -1,0 +1,17 @@
+{
+  "verifiedAt": "2026-10-27T15:27:28Z",
+  "serviceUuid": "lsqrajvwfjp3rxb4xsxupnb1",
+  "routingNetwork": "coolify",
+  "proxyDetachedFromServiceNetwork": true,
+  "publicHttps": 200,
+  "publicApiLive": 200,
+  "fromFrankNote2": 200,
+  "privateEndpointsReturn404": true,
+  "onlyWebRecreated": true,
+  "otherContainersPreserved": 34,
+  "proxyNotRecreated": true,
+  "dbNotRecreated": true,
+  "noApplicationDataChanged": true,
+  "fullProxyRecreationTested": false,
+  "stableNetworkDeclaredInProxyCompose": true
+}

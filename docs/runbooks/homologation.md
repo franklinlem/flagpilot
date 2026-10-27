@@ -24,6 +24,8 @@ curl --fail https://flagpilot.franklem.uk/api/v1/health/live
 ssh contabo 'docker ps -a --filter label=com.docker.compose.project=lsqrajvwfjp3rxb4xsxupnb1 --format "{{.Names}} {{.Status}}"'
 ```
 
+A label `traefik.docker.network` do web deve coincidir com o nome real da rede de ingresso (`coolify` nesta instância), também declarada persistentemente pelo proxy. Coolify pode anexar o proxy à rede exclusiva do serviço em runtime; essa conexão pode desaparecer em uma recriação e não deve ser necessária para o FlagPilot. Conferir Raw Compose, configuração gerada e label do container após alterações. Diagnóstico/regressão em [INGRESS_STATUS.md](../INGRESS_STATUS.md). Não reiniciar o proxy compartilhado para testar um único projeto.
+
 Não disponibilizar readiness/métricas publicamente. O live confirma processo; teste funcional e healthchecks internos cobrem DB/migrations. Uptime Kuma monitores 14/15 no frank-note2, validação TLS, 60 s, timeout 20 s, duas tentativas. Canal autorizado `backup hermes`; não alterar credenciais/destinos do canal compartilhado. Entrega real de alerta não foi ensaiada nesta etapa.
 
 Renovar certificado DB antes de 25/10/2027, preservando CA e SAN, chave restrita e reinício controlado somente deste projeto; testar verify-full e healthchecks. Conferir data real com openssl. Manter CA privada e chave de recuperação em cofre independente. Não promover esta instalação a produção automaticamente.

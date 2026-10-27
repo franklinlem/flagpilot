@@ -9,7 +9,7 @@
 - Quatro imagens construídas e analisadas no notebook, transportadas por SSH; image IDs conferidos na VPS. [Inventário](evidence/images-homolog-2026-10-25.json): zero HIGH/CRITICAL; dois UNKNOWN da API seguem a triagem OpenPGP de 6F, sem supressão. Sem build na VPS ou pull de tags mutáveis.
 - Traefik existente termina HTTPS; certificado público validado. Somente web conectado à rede externa `coolify`. DB/API sem portas publicadas; redes internas adicionais, limites de CPU/memória e rotação de logs. Migrations concluíram com exit 0; DB/API/web saudáveis. O Coolify também conecta os componentes a uma bridge exclusiva do serviço, não marcada internal; portanto não se afirma bloqueio total de egress ou segmentação estrita entre esses quatro componentes. Nenhum DB/API entra na rede compartilhada de ingresso.
 - PostgreSQL 16.15, schema 5, TLS interno obrigatório com `verify-full`. Conta runtime e migrator sem superuser/createdb/createrole; aplicação sem DDL. `APP_ENV=production` ativa as proteções técnicas de HTTPS/cookies, embora o ambiente operacional seja homologação.
-- Banco novo independente do notebook. Administrador `franklinlem@gmail.com`, organização `Franklin`. Senha inicial aleatória em `.tools/credentials/flagpilot-homolog-admin.txt`, permissão 0600, fora do Git. Nenhuma senha em documentação ou chat. Credencial temporária do provisionamento revogada e túnel administrativo encerrado; API HTTP global do Coolify permanece desabilitada.
+- Banco novo independente do notebook. Administrador `franklinlem@gmail.com`, organização `Franklin`. Senha inicial aleatória em `.tools/credentials/flagpilot-homolog-admin.txt`, permissão 0600, fora do Git. Nenhuma senha versionada em documentação. A senha inicial apareceu no contexto de uma mensagem posterior; foi recomendada sua substituição, sem presumir que já tenha sido feita. Credencial temporária do provisionamento revogada e túnel administrativo encerrado; API HTTP global do Coolify permanece desabilitada.
 
 ## Validação observada
 
@@ -17,7 +17,7 @@ HTTPS válido; login/cookie Secure, HttpOnly e SameSite=Lax; projeto com três a
 
 O primeiro início encontrou certificados/configuração pública sem permissão de leitura pelo UID do DB após transporte com umask 077. Permissões públicas corrigidas, chave privada mantida restrita; banco/roles iniciais concluídos sem excluir volume. Não havia dados de aplicação nessa inicialização. Runbook registra os modos necessários.
 
-Seis fluxos Chromium e seis Firefox passaram localmente após corrigir duas corridas no harness de navegação e a preservação da porta efêmera. CI remota de código `481f112` aprovada: [execução 40214673901](https://github.com/franklinlem/flagpilot/actions/runs/40214673901). A configuração operacional 7A recebe uma execução própria após o commit; não confundir com a revisão já aprovada. Aceitação visual do domínio pelo usuário ainda não realizada.
+Seis fluxos Chromium e seis Firefox passaram localmente após corrigir duas corridas no harness de navegação e a preservação da porta efêmera. CI remota de código `481f112` aprovada: [execução 40214673901](https://github.com/franklinlem/flagpilot/actions/runs/40214673901). A CI de `65db966` também foi aprovada: [execução 40215731673](https://github.com/franklinlem/flagpilot/actions/runs/40215731673). Franklin confirmou acesso, login e navegação no domínio em 25/10/2026; essa aceitação cobre os cenários relatados.
 
 ## Backup e monitoramento
 
@@ -32,3 +32,7 @@ Uptime Kuma existente no `frank-note2`: monitores 14 (HTTPS do painel) e 15 (API
 Monitor externo não substitui coletor de métricas nem verifica integridade do backup. Falha do cron fica no log/last-success; alerta automático de atraso de backup permanece pendente. Não há SLO/RPO/RTO de produção demonstrado. Retenção só no host físico, sem segunda cópia remota automática. Certificado TLS interno exige renovação antes de um ano; chave GPG antes de dois anos. Produção, licença, assinatura/provenance e publicação por digest de registry continuam pendentes.
 
 Operação: [runbook de homologação](runbooks/homologation.md), [backups](runbooks/backups.md), [ADR-017](adr/017-isolated-homologation.md).
+
+## Atualização de 27/10/2026 — 7B
+
+Encaminhamento do Traefik fixado explicitamente na rede estável `coolify`, removendo a dependência da reconexão manual à rede exclusiva após recriar o proxy. Correção persistida no Coolify e no Compose, somente web reaplicado; regressão real da conexão perdida aprovada. Backups agendados de 26 e 27/10 observados no host físico. Causa, testes e limites em [INGRESS_STATUS.md](INGRESS_STATUS.md).
