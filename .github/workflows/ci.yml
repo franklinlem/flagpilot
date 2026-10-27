@@ -54,6 +54,14 @@ jobs:
         run: python3 scripts/smoke.py
       - name: Ensaio sintético de backup e restauração
         run: python3 scripts/recovery.py --upgrade-from-16-13
+      - name: Usar repositório Ubuntu oficial para dependências dos browsers
+        run: |
+          # O mirror Azure levou 20m32s para 53.7 MB em 27/10; manter suites/chaves.
+          for source in /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources; do
+            if [ -f "$source" ]; then
+              sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' "$source"
+            fi
+          done
       - name: Browsers Chromium/Firefox e fluxos reais isolados
         run: |
           npx playwright install --with-deps chromium firefox

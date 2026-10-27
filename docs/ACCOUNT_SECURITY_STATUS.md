@@ -25,3 +25,5 @@ Próximas frentes, ainda planejadas: [ROADMAP.md](ROADMAP.md).
 ## Gate de runtime
 
 O primeiro scan de 27/10 bloqueou a candidata: CVE-2026-92392 apareceu como HIGH em curl/libcurl 8.22.0-r0 (duas ocorrências), e CVE-2026-92388 como MEDIUM nesses pacotes; [registro inicial](evidence/images-account-2026-10-27.json). A classificação registrada é a do scanner, sem alterar severidades por inferência de alcance. O fornecedor confirma correção em 8.23.0: [advisory HTTP/2](https://curl.se/docs/CVE-2026-92392.html), [advisory FTP](https://curl.se/docs/CVE-2026-92388.html). O repositório Alpine 3.24 consultado oferece 8.23.0-r0; Dockerfile agora fixa curl/libcurl nessa versão, preservando usuário não root e demais versões. Repetir SBOM/scan e verificar runtime antes de aplicar. Nenhum gate foi relaxado ou aviso suprimido.
+
+Scan corrigido aprovado: [inventário final](evidence/images-account-hardened-2026-10-27.json), zero HIGH/CRITICAL nos quatro runtimes candidatos, web/DB/migrator sem achados e API com os dois UNKNOWN OpenPGP já triados em 6F. Não é garantia de ausência absoluta de vulnerabilidades; nenhuma supressão criada.
