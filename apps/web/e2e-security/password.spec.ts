@@ -47,5 +47,10 @@ test('troca de senha exige confirmação, encerra todas as sessões e permite no
     const history = await (await page.request.get(`/api/v1/organizations/${me.memberships[0].organizationId}/audit-events?action=auth.password_changed`)).text();
     expect(history).toContain('auth.password_changed');
     expect(history).not.toContain(oldPassword); expect(history).not.toContain(newPassword);
+    await page.goto(`/organizations/${me.memberships[0].organizationId}/audit`);
+    await expect(page.getByLabel('Ação', { exact: true }).getByRole('option', { name: 'auth.password_changed', exact: true })).toHaveCount(1);
+    await page.getByLabel('Ação', { exact: true }).selectOption('auth.password_changed');
+    await page.getByRole('button', { name: 'Aplicar filtros', exact: true }).click();
+    await expect(page.getByRole('listitem').filter({ hasText: 'auth.password_changed' })).toHaveCount(1);
   } finally { await other.close(); }
 });

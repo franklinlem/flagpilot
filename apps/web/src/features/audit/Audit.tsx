@@ -6,7 +6,7 @@ import { listAudit } from '../../api/audit';
 import { getOrganization } from '../../api/organizations';
 import { QueryFailure } from '../organizations/QueryFailure';
 import { EventDetails } from './EventDetails';
-const actions = ['flag.created','flag.updated','flag.archived','flag.config_updated','token.issued','token.revoked','project.created','environment.created','organization.created','member.added','member.removed','member.role_changed','user.provisioned','auth.login','auth.logout','auth.password_reset','installation.bootstrap'];
+const actions = ['flag.created','flag.updated','flag.archived','flag.config_updated','token.issued','token.revoked','project.created','environment.created','organization.created','member.added','member.removed','member.role_changed','user.provisioned','auth.login','auth.logout','auth.password_reset','auth.password_changed','installation.bootstrap'];
 const resources = ['flag','flag_config','api_token','project','environment','organization','membership','user'];
 export function Audit({ identity, onExpired }: { identity: Identity; onExpired: () => void }) {
   const { orgId = '' } = useParams();
