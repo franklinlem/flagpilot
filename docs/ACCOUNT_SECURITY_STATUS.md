@@ -21,3 +21,7 @@ Depois de disponibilizar a revisão desejada, entrar no painel, abrir Segurança
 Se perder a senha, usar [recuperação via CLI](runbooks/identity.md); não há recuperação por email nesta etapa. Senha incorreta preserva a sessão, erros limpam os campos. Uma resposta perdida pode ocorrer depois de a senha já ter sido alterada; verificar login com a nova senha antes de repetir. O arquivo privado de senha inicial não é atualizado pelo formulário; após escolher senha própria, guardar no gerenciador de senhas e tratar a cópia inicial como obsoleta.
 
 Próximas frentes, ainda planejadas: [ROADMAP.md](ROADMAP.md).
+
+## Gate de runtime
+
+O primeiro scan de 27/10 bloqueou a candidata: CVE-2026-92392 apareceu como HIGH em curl/libcurl 8.22.0-r0 (duas ocorrências), e CVE-2026-92388 como MEDIUM nesses pacotes; [registro inicial](evidence/images-account-2026-10-27.json). A classificação registrada é a do scanner, sem alterar severidades por inferência de alcance. O fornecedor confirma correção em 8.23.0: [advisory HTTP/2](https://curl.se/docs/CVE-2026-92392.html), [advisory FTP](https://curl.se/docs/CVE-2026-92388.html). O repositório Alpine 3.24 consultado oferece 8.23.0-r0; Dockerfile agora fixa curl/libcurl nessa versão, preservando usuário não root e demais versões. Repetir SBOM/scan e verificar runtime antes de aplicar. Nenhum gate foi relaxado ou aviso suprimido.

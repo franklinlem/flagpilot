@@ -15,7 +15,7 @@ COPY apps/web/ apps/web/
 RUN npm run build --workspace @flagpilot/web
 FROM nginx/nginx-unprivileged:1.30.6-alpine@sha256:517607ae849a46afbd400616a783e4ead0290f52d20ccc0618ccea1a49362474 AS runtime
 USER root
-RUN apk add --no-cache --upgrade brotli-libs=1.2.1-r0 musl=1.2.6-r3 musl-utils=1.2.6-r3 zlib=1.3.2-r1
+RUN apk add --no-cache --upgrade brotli-libs=1.2.1-r0 musl=1.2.6-r3 musl-utils=1.2.6-r3 zlib=1.3.2-r1 curl=8.23.0-r0 libcurl=8.23.0-r0
 USER 101
 COPY deploy/web/default.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html
