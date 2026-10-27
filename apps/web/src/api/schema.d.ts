@@ -84,6 +84,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Alterar a própria senha e revogar todas as sessões
+         * @description Exige sessão, origem permitida, CSRF e senha atual. Nova senha diferente, mínimo de 12 caracteres e máximo de 256 bytes UTF-8. Atualização, revogação e auditoria organizacional são atômicas. Retorna 204 e remove cookie; entre novamente. Não revoga tokens de avaliação compartilhados. Até 10 tentativas por IP/conta em 15 minutos, 120/min global e duas operações Argon2 concorrentes compartilhadas com login, por réplica.
+         */
+        post: operations["changePassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/me": {
         parameters: {
             query?: never;
@@ -539,6 +559,12 @@ export interface components {
             /** @description Até 256 bytes UTF-8; senhas de bootstrap/recuperação têm mínimo de 12 caracteres. */
             password: string;
         };
+        ChangePasswordRequest: {
+            /** @description Senha atual, até 256 bytes UTF-8; espaços são preservados. */
+            currentPassword: string;
+            /** @description Diferente da atual, ao menos 12 caracteres e até 256 bytes UTF-8; somente espaços não são aceitos. */
+            newPassword: string;
+        };
         User: {
             /** Format: uuid */
             id: string;
@@ -945,6 +971,41 @@ export interface operations {
             422: components["responses"]["Problem"];
             429: components["responses"]["Problem"];
             500: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
+        };
+    };
+    changePassword: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Obrigatório em mutações autenticadas por cookie; validar também Origin. */
+                "X-CSRF-Token": components["parameters"]["CSRF"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Senha alterada, todas as sessões revogadas e cookie removido. */
+            204: {
+                headers: {
+                    /** @description Remove cookie de sessão do navegador. */
+                    "Set-Cookie"?: string;
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["Problem"];
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            413: components["responses"]["Problem"];
+            415: components["responses"]["Problem"];
+            422: components["responses"]["Problem"];
+            429: components["responses"]["Problem"];
             503: components["responses"]["Problem"];
         };
     };

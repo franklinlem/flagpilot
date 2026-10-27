@@ -150,6 +150,48 @@ paths:
           $ref: '#/components/responses/Problem'
       parameters:
       - $ref: '#/components/parameters/CSRF'
+  /auth/password:
+    post:
+      operationId: changePassword
+      summary: Alterar a própria senha e revogar todas as sessões
+      description: Exige sessão, origem permitida, CSRF e senha atual. Nova senha diferente, mínimo de 12 caracteres e máximo de 256 bytes UTF-8. Atualização, revogação e auditoria organizacional são atômicas. Retorna 204 e remove cookie; entre novamente. Não revoga tokens de avaliação compartilhados. Até 10 tentativas por IP/conta em 15 minutos, 120/min global e duas operações Argon2 concorrentes compartilhadas com login, por réplica.
+      tags:
+      - Autenticação
+      x-implementation: available
+      security:
+      - sessionCookie: []
+      parameters:
+      - $ref: '#/components/parameters/CSRF'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '204':
+          description: Senha alterada, todas as sessões revogadas e cookie removido.
+          headers:
+            Set-Cookie:
+              description: Remove cookie de sessão do navegador.
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '413':
+          $ref: '#/components/responses/Problem'
+        '415':
+          $ref: '#/components/responses/Problem'
+        '422':
+          $ref: '#/components/responses/Problem'
+        '429':
+          $ref: '#/components/responses/Problem'
+        '503':
+          $ref: '#/components/responses/Problem'
   /me:
     get:
       operationId: me
@@ -1605,6 +1647,25 @@ components:
       required:
       - email
       - password
+    ChangePasswordRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        currentPassword:
+          type: string
+          minLength: 1
+          maxLength: 256
+          writeOnly: true
+          description: Senha atual, até 256 bytes UTF-8; espaços são preservados.
+        newPassword:
+          type: string
+          minLength: 12
+          maxLength: 256
+          writeOnly: true
+          description: Diferente da atual, ao menos 12 caracteres e até 256 bytes UTF-8; somente espaços não são aceitos.
+      required:
+      - currentPassword
+      - newPassword
     User:
       type: object
       additionalProperties: false

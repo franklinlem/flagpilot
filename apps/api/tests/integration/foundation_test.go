@@ -184,6 +184,7 @@ func TestFoundation(t *testing.T) {
 	}
 	check("/api/v1/health/ready", 200)
 	t.Run("authentication", func(t *testing.T) { exerciseAuth(t, ctx, store, owner) })
+	t.Run("password change", func(t *testing.T) { exercisePasswordChange(t, ctx, store, owner) })
 	t.Run("organizations", func(t *testing.T) { exerciseOrganizations(t, ctx, store, owner) })
 	t.Run("projects", func(t *testing.T) { exerciseProjects(t, ctx, store, owner) })
 	t.Run("flags", func(t *testing.T) { exerciseFlags(t, ctx, store, owner) })

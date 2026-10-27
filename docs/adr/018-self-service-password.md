@@ -1,0 +1,15 @@
+# ADR-018 — Troca de senha pelo próprio usuário
+
+27/10/2026. Continuidade funcional do MVP, autorizada por Franklin. Escopo: usuário autenticado altera sua própria senha; recuperação sem sessão continua exclusivamente na CLI.
+
+Exigir origem permitida, cookie válido, CSRF e senha atual em POST /api/v1/auth/password. Não aceitar ID/email de alvo; qualquer papel organizacional pode alterar a própria credencial. Nova senha precisa diferir da atual e seguir a política existente: mínimo de 12 caracteres Unicode, máximo de 256 bytes UTF-8, sem trim/truncamento e rejeitando somente espaços. Confirmação é validação de UX, não autorização, e não vai para o servidor.
+
+Compartilhar as duas vagas de processamento Argon2 com login para limitar memória, sem manter transação enquanto calcula hashes. Limitar tentativas de troca separadamente do login, usando o limitador existente: 10 por IP/conta em 15 min e 120/min global por processo. Senhas/sessões nunca são labels ou logs. Não adicionar dependências, schema ou parâmetros criptográficos novos.
+
+Na transação, adquirir o mesmo lock de usuário de login/recuperação (`FOR NO KEY UPDATE`, serializa alterações sem bloquear KEY SHARE da FK da auditoria de logout concorrente), revalidar hash/estado e bloquear/revalidar a sessão chamadora antes de atualizar. Revogar todas as sessões, inclusive a corrente, e inserir auth.password_changed por associação organizacional atual na mesma transação. Se falhar auditoria, manter senha/sessões anteriores. Duas alterações concorrentes não podem ambas vencer. Conta sem organização pode trocar a senha, mas não gera evento organizacional; o modelo atual não contém auditoria global de identidade. CLI recovery mantém evento auth.password_reset distinto.
+
+Retornar 204 removendo o cookie, limpar cache de consultas/estado autenticado no painel e exibir login com confirmação de sucesso. Senha incorreta retorna 403 sem invalidar a sessão; expiração/revogação retorna 401. 422 para política inválida, 429 para limite e 503 para indisponibilidade. Campos sensíveis ficam somente no formulário/chamada transitória, sem React Query mutation cache, localStorage/sessionStorage ou telemetria; limpar após resposta, abortar observação ao desmontar. Não há garantia de apagar strings já alocadas do runtime. Falha de conexão pode acontecer depois do commit: orientar verificar a nova senha no login, sem repetir automaticamente a mutação.
+
+Não revogar tokens de avaliação da organização ao mudar senha pessoal: isso interromperia aplicações consumidoras compartilhadas. A revogação desses tokens continua sendo uma operação explícita. Sem signup, forgot-password por email, mudança de senha de terceiros, MFA ou deploy de produção.
+
+Browser de segurança usa stack/credenciais próprias, separada da suíte administrativa: o novo fluxo acrescenta tentativas reais de login e não deve consumir o orçamento de outra suíte ou relaxar o rate limit para passar. CI executa ambas em Chromium/Firefox. Aceitação manual do novo formulário ainda exige exercício pelo usuário.

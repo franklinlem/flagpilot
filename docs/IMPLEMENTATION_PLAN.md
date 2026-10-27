@@ -445,3 +445,7 @@ Correções autorizadas após 6E. PostgreSQL 16.15 com helper gosu recompilado/d
 ## Continuidade operacional — 7A/7B
 
 Homologação isolada, GitHub privado, backups criptografados no frank-note2 e Uptime Kuma foram autorizados e implementados em 7A. Franklin confirmou acesso/login. Em 27/10, após incidente descrito na conversa compartilhada, a label de rede do Traefik foi fixada no ingresso estável `coolify`, persistida no serviço, com regressão da perda da conexão manual aprovada. Estado em HOMOLOGATION_STATUS.md e INGRESS_STATUS.md. Produção, publicação pública/licença e alterações globais do atualizador Traefik permanecem fora deste incremento.
+
+## Evolução do MVP — 8A
+
+Franklin autorizou prosseguir e evoluir o FlagPilot após o ingresso 7B. Próximo incremento: segurança da própria conta, com troca de senha autenticada, política existente, revogação de todas as sessões e auditoria organizacional atômica, sem migration/dependência nova. Estados/evidências em ACCOUNT_SECURITY_STATUS.md e ADR-018. Sequência posterior em ROADMAP.md: supervisão do backup, aplicação consumidora do SDK e fechamento de release. Não introduzir funcionalidades pós-MVP ou publicação/produção automaticamente.

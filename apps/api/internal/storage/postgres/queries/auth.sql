@@ -2,7 +2,7 @@
 SELECT * FROM users WHERE lower(email) = lower($1);
 
 -- name: LockLoginUser :one
-SELECT * FROM users WHERE lower(email) = lower($1) FOR UPDATE;
+SELECT * FROM users WHERE lower(email) = lower($1) FOR NO KEY UPDATE;
 
 -- name: ListUserMemberships :many
 SELECT m.organization_id, m.user_id, m.role, o.name AS organization_name
@@ -16,6 +16,11 @@ INSERT INTO sessions (id,user_id,token_hash,expires_at) VALUES ($1,$2,$3,$4);
 SELECT s.id AS session_id, s.expires_at, u.id, u.email, u.created_at
 FROM sessions s JOIN users u ON u.id=s.user_id
 WHERE s.token_hash=$1 AND s.revoked_at IS NULL AND s.expires_at>now() AND u.disabled_at IS NULL;
+
+-- name: LockActiveSession :one
+SELECT s.user_id FROM sessions s
+WHERE s.token_hash=$1 AND s.revoked_at IS NULL AND s.expires_at>now()
+FOR UPDATE;
 
 -- name: RevokeSession :execrows
 UPDATE sessions SET revoked_at=now() WHERE token_hash=$1 AND revoked_at IS NULL;

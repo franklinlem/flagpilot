@@ -225,8 +225,21 @@ func (q *Queries) ListUserMemberships(ctx context.Context, userID pgtype.UUID) (
 	return items, nil
 }
 
+const lockActiveSession = `-- name: LockActiveSession :one
+SELECT s.user_id FROM sessions s
+WHERE s.token_hash=$1 AND s.revoked_at IS NULL AND s.expires_at>now()
+FOR UPDATE
+`
+
+func (q *Queries) LockActiveSession(ctx context.Context, tokenHash []byte) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, lockActiveSession, tokenHash)
+	var user_id pgtype.UUID
+	err := row.Scan(&user_id)
+	return user_id, err
+}
+
 const lockLoginUser = `-- name: LockLoginUser :one
-SELECT id, email, password_hash, disabled_at, created_at FROM users WHERE lower(email) = lower($1) FOR UPDATE
+SELECT id, email, password_hash, disabled_at, created_at FROM users WHERE lower(email) = lower($1) FOR NO KEY UPDATE
 `
 
 func (q *Queries) LockLoginUser(ctx context.Context, lower string) (User, error) {

@@ -38,3 +38,6 @@ export async function login(email: string, password: string): Promise<Identity> 
 export async function logout(csrfToken: string): Promise<void> {
   await request('/auth/logout', { method: 'POST', headers: { 'X-CSRF-Token': csrfToken } });
 }
+export async function changePassword(body: components['schemas']['ChangePasswordRequest'], csrfToken: string, signal?: AbortSignal): Promise<void> {
+  await request('/auth/password', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken }, body: JSON.stringify(body) }, signal);
+}

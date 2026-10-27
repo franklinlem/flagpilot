@@ -55,3 +55,7 @@ Migration 000002 cria audit_events com grants SELECT/INSERT ao runtime, sem UPDA
 Ainda não há gestão de membros, convites, RBAC de recursos, projetos, flags ou auditoria consultável por UI. A tela autenticada lista somente organizações do próprio usuário via `/me`; isso não representa a entrega dos endpoints de domínio. Retenção/limpeza de sessões expiradas e auditoria será um job controlado futuro, sem purga automática nesta etapa.
 
 Referências do desenho: [OWASP Password Storage](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html), [OWASP CSRF](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html), [Go Argon2](https://pkg.go.dev/golang.org/x/crypto/argon2).
+
+## Trocar a própria senha no painel — 8A
+
+Conta → Segurança da conta exige senha atual, nova e confirmação. Ao concluir, todas as sessões são encerradas e é necessário novo login. Não altera tokens de avaliação compartilhados. O endpoint não aceita ID/email de terceiros e exige origem/CSRF; a recuperação local acima permanece disponível. Política e limites em [ACCOUNT_SECURITY_STATUS.md](../ACCOUNT_SECURITY_STATUS.md). A disponibilidade no servidor depende da revisão implantada.

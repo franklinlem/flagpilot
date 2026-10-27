@@ -29,3 +29,5 @@ O plano foi aprovado por Franklin em 24/10/2026 ("ok. pode continuar."). ADRs re
 - [ADR-016 — Correção dos runtimes sem supressões](016-runtime-remediation.md)
 
 - [ADR-017 — Homologação isolada e backup pull criptografado](017-isolated-homologation.md)
+
+- [ADR-018 — Troca de senha pelo próprio usuário](018-self-service-password.md)

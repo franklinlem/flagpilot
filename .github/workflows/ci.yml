@@ -59,3 +59,5 @@ jobs:
           npx playwright install --with-deps chromium firefox
           python3 scripts/auth-e2e.py --browser chromium
           python3 scripts/auth-e2e.py --browser firefox
+          python3 scripts/auth-e2e.py --browser chromium --suite security
+          python3 scripts/auth-e2e.py --browser firefox --suite security

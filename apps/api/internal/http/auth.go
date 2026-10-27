@@ -18,20 +18,22 @@ const sessionCookie = "flagpilot_session"
 
 type Option func(chi.Router)
 type authHandlers struct {
-	service *auth.Service
-	origins map[string]bool
-	secure  bool
-	limiter *auth.Limiter
+	service         *auth.Service
+	origins         map[string]bool
+	secure          bool
+	limiter         *auth.Limiter
+	passwordLimiter *auth.Limiter
 }
 
 func WithAuth(service *auth.Service, origins []string, secure bool) Option {
 	return func(r chi.Router) {
-		h := &authHandlers{service: service, origins: make(map[string]bool), secure: secure, limiter: auth.NewLimiter()}
+		h := &authHandlers{service: service, origins: make(map[string]bool), secure: secure, limiter: auth.NewLimiter(), passwordLimiter: auth.NewLimiter()}
 		for _, origin := range origins {
 			h.origins[origin] = true
 		}
 		r.Post("/api/v1/auth/login", h.login)
 		r.Post("/api/v1/auth/logout", h.logout)
+		r.Post("/api/v1/auth/password", h.changePassword)
 		r.Get("/api/v1/me", h.me)
 	}
 }

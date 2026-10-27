@@ -10,7 +10,7 @@ const schema = z.object({
 });
 type Fields = z.infer<typeof schema>;
 
-export function LoginForm({ onLogin }: { onLogin: (identity: Identity) => void }) {
+export function LoginForm({ onLogin, notice }: { notice?: string; onLogin: (identity: Identity) => void }) {
   const [error, setError] = useState('');
   const { register, handleSubmit, resetField, setFocus, formState: { errors, isSubmitting } } = useForm<Fields>({ resolver: zodResolver(schema) });
   useEffect(() => { setFocus('email'); }, [setFocus]);
@@ -22,6 +22,7 @@ export function LoginForm({ onLogin }: { onLogin: (identity: Identity) => void }
   return (
     <section className="card login-card" aria-labelledby="login-title">
       <h2 id="login-title">Entre na sua conta</h2>
+      {notice ? <p role="status">{notice}</p> : null}
       <p className="muted">Acesse sua organização no FlagPilot.</p>
       <form onSubmit={submit} noValidate>
         <fieldset disabled={isSubmitting}>

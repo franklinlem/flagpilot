@@ -17,7 +17,9 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--browser', choices=['chromium', 'firefox'], default='chromium')
-    browser = parser.parse_args().browser
+    parser.add_argument('--suite', choices=['administrative', 'security'], default='administrative')
+    args = parser.parse_args()
+    browser = args.browser
     project = 'flagpilot-auth-e2e-' + secrets.token_hex(4)
     with tempfile.TemporaryDirectory(prefix='flagpilot-auth-e2e-') as temp:
         envfile = Path(temp) / '.env'
@@ -50,7 +52,7 @@ def main():
                         if response.status == 200: break
                 except OSError: time.sleep(.2)
             else: raise RuntimeError('Frontend E2E indisponível')
-            env = dict(os.environ, E2E_BROWSER=browser, E2E_BASE_URL=origin, E2E_EMAIL='owner@example.invalid', E2E_PASSWORD=password, E2E_VIEWER_EMAIL='viewer@example.invalid', E2E_VIEWER_PASSWORD=viewer_password, E2E_VIEWER_ID=viewer_id)
+            env = dict(os.environ, E2E_BROWSER=browser, E2E_SUITE=args.suite, E2E_BASE_URL=origin, E2E_EMAIL='owner@example.invalid', E2E_PASSWORD=password, E2E_VIEWER_EMAIL='viewer@example.invalid', E2E_VIEWER_PASSWORD=viewer_password, E2E_VIEWER_ID=viewer_id)
             env.setdefault('PLAYWRIGHT_BROWSERS_PATH', str(ROOT / '.tools/playwright'))
             subprocess.run(['npm', 'run', 'build', '--workspace', '@flagpilot/sdk-js'], cwd=ROOT, check=True)
             result = subprocess.run(['npm', 'run', 'test:e2e'], cwd=ROOT, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
@@ -61,7 +63,7 @@ def main():
                     content = artifact.read_text(errors='replace').replace(password, '[REDACTED]').replace(viewer_password, '[REDACTED]')
                     artifact.write_text(re.sub(r'fp_eval_[a-f0-9]{64}', '[REDACTED_EVALUATION_TOKEN]', content))
             result.check_returncode()
-            print(f'E2E administrativo e de avaliação aprovado em stack isolada ({browser}).')
+            print(f'E2E {args.suite} aprovado em stack isolada ({browser}).')
         finally:
             subprocess.run(base + ['down', '--volumes', '--remove-orphans'], check=True)
 

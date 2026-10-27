@@ -1,0 +1,23 @@
+# Segurança da conta — incremento 8A
+
+27/10/2026. Próximo incremento funcional autorizado após 7B. Troca de senha do próprio usuário implementada em backend, OpenAPI e painel; recuperação administrativa continua CLI. Sem migration, dependência nova ou alteração de senha real durante os testes.
+
+Conta → Segurança da conta permite informar senha atual, nova e confirmação. Ao concluir, todas as sessões são revogadas e o painel volta ao login com mensagem de sucesso. Política existente: mínimo de 12 caracteres e máximo de 256 bytes UTF-8, espaços preservados, nova diferente da atual. Papéis Viewer/Admin/Owner não limitam o cuidado com a própria credencial; não há parâmetro para trocar senha de terceiros.
+
+POST /api/v1/auth/password exige origem, cookie e CSRF, corpo estrito de até 4 KiB, limitador próprio e vagas Argon2 compartilhadas com login. Senha/hash/sessão nunca entram no JSON de resposta, logs ou auditoria. Atualização/revogação/auditoria organizacional atômicas; lock do usuário compatível com login/recuperação e revalidação da sessão dentro da transação. Decisões/limites em [ADR-018](adr/018-self-service-password.md).
+
+## Verificação
+
+`make ci` completo aprovado: Go/race/vet, integração PostgreSQL, 24 testes frontend, 16 SDK, tipos/lint/OpenAPI e builds. A integração cobre origem/CSRF/sessão, payload/limites, política Unicode/bytes, senha incorreta, rollback quando auditoria falha, revogação de duas sessões, senha antiga rejeitada, auditoria sem segredos, concorrência entre trocas e logout durante a troca. O lock de usuário usa FOR NO KEY UPDATE para não bloquear a FK de auditoria de logout enquanto aguarda a sessão.
+
+Formulário validado para confirmação, limpeza após falhas, sessão expirada e sucesso. Fluxo real novo passou em Chromium e Firefox, em stacks descartáveis separadas da suíte administrativa, mantendo os limites ativos. Seis fluxos administrativos existentes também passaram no Chromium. O fluxo de senha verifica largura de 390 px, foco/título, duas sessões encerradas, senha antiga recusada, novo login, ausência de storage persistente e auditoria sem senhas. Suíte administrativa Firefox da revisão 8A não foi repetida localmente; CI configurada para ambas as suítes em ambos os browsers.
+
+Nenhuma senha de Franklin foi usada ou alterada nesses testes. Aceitação visual humana do novo formulário ainda pendente. Atualização da homologação depende do gate das imagens e aplicação controlada; registrar o resultado no fechamento.
+
+## Uso
+
+Depois de disponibilizar a revisão desejada, entrar no painel, abrir Segurança da conta, preencher os três campos e escolher Alterar senha e sair. Entrar novamente com a nova senha. As outras sessões deixam de funcionar na próxima consulta; não há logout por push. Tokens de avaliação compartilhados permanecem válidos até sua própria revogação/expiração.
+
+Se perder a senha, usar [recuperação via CLI](runbooks/identity.md); não há recuperação por email nesta etapa. Senha incorreta preserva a sessão, erros limpam os campos. Uma resposta perdida pode ocorrer depois de a senha já ter sido alterada; verificar login com a nova senha antes de repetir. O arquivo privado de senha inicial não é atualizado pelo formulário; após escolher senha própria, guardar no gerenciador de senhas e tratar a cópia inicial como obsoleta.
+
+Próximas frentes, ainda planejadas: [ROADMAP.md](ROADMAP.md).
