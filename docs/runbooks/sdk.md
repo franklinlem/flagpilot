@@ -50,3 +50,7 @@ npm pack --workspace @flagpilot/sdk-js --pack-destination /tmp
 ```
 
 Instale o arquivo `/tmp/flagpilot-sdk-js-0.1.0.tgz` no backend consumidor com npm install. Isso gera/usa um artefato local, sem publicar. Nome público/licença/release continuam pendentes. O cliente fornece avaliação HTTP individual; não inclui APIs administrativas, snapshot offline ou adapter público de browser.
+
+## Aplicação consumidora com browser (8C)
+
+Exemplo local de cotação usando BFF, sem segredo no navegador: [examples/consumer/README.md](../../examples/consumer/README.md). Inclui alternância/rollout e fallback verificados contra API real descartável e Chromium. O servidor demonstra contexto sintético fixo e não deve ser publicado como aplicação autenticada.

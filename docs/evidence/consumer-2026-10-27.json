@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-27",
+  "realDisposableAPI": true,
+  "browser": "chromium",
+  "scenarios": [
+    {
+      "enabled": false,
+      "rolloutBps": 10000,
+      "newExperience": false
+    },
+    {
+      "enabled": true,
+      "rolloutBps": 10000,
+      "newExperience": true
+    },
+    {
+      "enabled": true,
+      "rolloutBps": 0,
+      "newExperience": false
+    },
+    {
+      "enabled": true,
+      "rolloutBps": 3725,
+      "newExperience": false
+    }
+  ],
+  "apiStoppedFallback": true,
+  "browserSecretsAbsent": true,
+  "productionChanged": false
+}

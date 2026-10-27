@@ -42,6 +42,7 @@ jobs:
       - name: Lint, tipos, testes unitários e integração PostgreSQL
         run: |
           make ci
+          npm run test:consumer
           python3 scripts/check-admin-terminal.py
           python3 -m unittest discover -s scripts/tests
       - name: Vulnerabilidades Go e npm
@@ -65,6 +66,7 @@ jobs:
       - name: Browsers Chromium/Firefox e fluxos reais isolados
         run: |
           npx playwright install --with-deps chromium firefox
+          python3 scripts/consumer-e2e.py
           python3 scripts/auth-e2e.py --browser chromium
           python3 scripts/auth-e2e.py --browser firefox
           python3 scripts/auth-e2e.py --browser chromium --suite security
